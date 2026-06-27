@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>5 букв</title>
+    <link rel="stylesheet" href="styles.css?v=93" />
+  </head>
+  <body>
+    <div class="viewport-gate" id="viewport-gate">
+      <p class="viewport-gate__text">В данном случае размер имеет значение...</p>
+    </div>
+
+    <div class="game-frame" id="game-frame">
+      <div class="app">
+        <header class="header">
+          <img
+            class="status-bar-image"
+            src="assets/status-bar-1.png"
+            alt=""
+            width="375"
+            height="68"
+          />
+
+          <button class="close-btn" type="button">Закрыть</button>
+
+          <div class="nav-row">
+            <img class="logo" src="assets/logo 6.0.png" alt="5 букв" height="26" />
+
+            <button class="energy-badge" type="button">
+              <img
+                class="energy-badge__icon"
+                src="assets/Лого энергии для бейджа.png"
+                alt=""
+                width="16"
+                height="16"
+              />
+              <span class="energy-badge__value">17</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="app-content">
+          <div class="app-screen" id="game-screen">
+            <main class="main" id="game-main">
+              <div class="main__fade" aria-hidden="true"></div>
+              <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+              <div class="main__inner">
+                <span class="ad-badge" aria-hidden="true">Реклама</span>
+          <div class="grid-area">
+            <div class="grid" id="grid" role="grid" aria-label="Игровое поле"></div>
+          </div>
+
+          <div class="win-panel" id="win-panel" hidden>
+            <div class="win-hero-slot">
+              <div class="win-hero">
+                <h2 class="win-word" id="win-word">ВКЛАД</h2>
+                <p class="win-message" id="win-message">
+                  Ах вот вы как... В следующий раз<br />
+                  загадаем слово по-сложнее!
+                </p>
+                <button class="win-share" id="win-share" type="button">Похвастаться</button>
+              </div>
+            </div>
+            <div class="win-blocks">
+              <div class="win-block win-block--dark win-block--1">
+                <div class="win-progress-prize-overlay" id="win-progress-prize-overlay"></div>
+                <div class="win-progress-stage" id="win-progress-stage">
+                  <div class="win-progress-panel" id="win-progress-panel">
+                    <div class="win-progress" id="win-progress">
+                  <div class="win-progress__col" data-step="0">
+                    <div class="win-progress__step">
+                      <span class="win-progress__badge">
+                        <span class="win-progress__badge-layer win-progress__badge-layer--outer">
+                          <span
+                            class="win-progress__badge-fill win-progress__badge-fill--white"
+                            aria-hidden="true"
+                          ></span>
+                        </span>
+                        <span class="win-progress__badge-layer win-progress__badge-layer--inner">
+                          <span
+                            class="win-progress__badge-fill win-progress__badge-fill--yellow"
+                            aria-hidden="true"
+                          ></span>
+                        </span>
+                        <span class="win-progress__badge-text">36</span>
+                        <img
+                          class="win-progress__sticker"
+                          src="assets/thematic-sticker.png"
+                          alt=""
+                          width="20"
+                          height="20"
+                          hidden
+                        />
+                      </span>
+                    </div>
+                    <div class="win-progress__label"></div>
+                  </div>
+                  <div class="win-progress__line" data-line="0">
+                    <span class="win-progress__line-fill"></span>
+                  </div>
+                  <div class="win-progress__col" data-step="1">
+                    <div class="win-progress__step">
+                      <span class="win-progress__badge">
+                        <span class="win-progress__badge-layer win-progress__badge-layer--outer">
+                          <span
+                            class="win-progress__badge-fill win-progress__badge-fill--white"
+                            aria-hidden="true"
+                          ></span>
+                        </span>
+                        <span class="win-progress__badge-layer win-progress__badge-layer--inner">
+                          <span
+                            class="win-progress__badge-fill win-progress__badge-fill--yellow"
+                            aria-hidden="true"
+                          ></span>
+                        </span>
+                        <span class="win-progress__badge-text">37</span>
+                        <img
+                          class="win-progress__sticker"
+                          src="assets/thematic-sticker.png"
+                          alt=""
+                          width="20"
+                          height="20"
+                          hidden
+                        />
+                      </span>
+                    </div>
+                    <div class="win-progress__label"></div>
+                  </div>
+                  <div class="win-progress__line" data-line="1">
+                    <span class="win-progress__line-fill"></span>
+                  </div>
+                  <div class="win-progress__col" data-step="2">
+                    <div class="win-progress__step">
+                      <span class="win-progress__badge">
+                        <span class="win-progress__badge-layer win-progress__badge-layer--outer">
+                          <span
+                            class="win-progress__badge-fill win-progress__badge-fill--white"
+                            aria-hidden="true"
+                          ></span>
+                        </span>
+                        <span class="win-progress__badge-layer win-progress__badge-layer--inner">
+                          <span
+                            class="win-progress__badge-fill win-progress__badge-fill--yellow"
+                            aria-hidden="true"
+                          ></span>
+                        </span>
+                        <span class="win-progress__badge-text">38</span>
+                        <img
+                          class="win-progress__sticker"
+                          src="assets/thematic-sticker.png"
+                          alt=""
+                          width="20"
+                          height="20"
+                          hidden
+                        />
+                      </span>
+                    </div>
+                    <div class="win-progress__label"></div>
+                  </div>
+                  <div class="win-progress__line" data-line="2">
+                    <span class="win-progress__line-fill"></span>
+                  </div>
+                  <div class="win-progress__col" data-step="3">
+                    <div class="win-progress__step">
+                      <span class="win-progress__badge">
+                        <span class="win-progress__badge-layer win-progress__badge-layer--outer">
+                          <span
+                            class="win-progress__badge-fill win-progress__badge-fill--white"
+                            aria-hidden="true"
+                          ></span>
+                        </span>
+                        <span class="win-progress__badge-layer win-progress__badge-layer--inner">
+                          <span
+                            class="win-progress__badge-fill win-progress__badge-fill--yellow"
+                            aria-hidden="true"
+                          ></span>
+                        </span>
+                        <span class="win-progress__badge-text">39</span>
+                        <img
+                          class="win-progress__sticker"
+                          src="assets/thematic-sticker.png"
+                          alt=""
+                          width="20"
+                          height="20"
+                          hidden
+                        />
+                      </span>
+                    </div>
+                    <div class="win-progress__label"></div>
+                  </div>
+                  <div class="win-progress__line" data-line="3">
+                    <span class="win-progress__line-fill"></span>
+                  </div>
+                  <div class="win-progress__col win-progress__col--prize">
+                    <div class="win-progress__prize-badge-ref" aria-hidden="true">
+                      <img
+                        class="win-progress__sticker win-progress__sticker--prize"
+                        src="assets/prize-earned-sticker.png?v=1"
+                        alt=""
+                        width="20"
+                        height="20"
+                        hidden
+                      />
+                    </div>
+                    <div class="win-progress__prize-slot">
+                      <div class="win-progress__prize-connector" aria-hidden="true">
+                        <span class="win-progress__prize-connector-fill"></span>
+                      </div>
+                      <span
+                        class="win-progress__prize-anchor"
+                        data-prize-anchor
+                        aria-hidden="true"
+                      >
+                        <span
+                          class="win-progress__prize-anchor-fill"
+                          aria-hidden="true"
+                        ></span>
+                      </span>
+                    </div>
+                    <div class="win-progress__label"></div>
+                  </div>
+                </div>
+                  </div>
+                </div>
+              </div>
+              <button class="win-block win-block--yellow" type="button">
+                <span class="win-block--yellow__text">Играть ещё за 3</span>
+                <img
+                  class="win-block--yellow__energy"
+                  src="assets/Лого энергии для бейджа.png"
+                  alt=""
+                  width="20"
+                  height="20"
+                />
+              </button>
+              <div class="win-block win-block--dark win-block--3">
+                <div class="win-prizes">
+                  <h3 class="win-prizes__title">Ваши призы</h3>
+                  <p class="win-prizes__subtitle">Можно использовать уже сейчас</p>
+                  <div class="win-prizes__carousel">
+                    <div class="win-prizes__track" id="prizes-track"></div>
+                  </div>
+                  <button class="win-prizes__all" type="button">Все призы</button>
+                </div>
+              </div>
+              <div class="win-block win-block--dark win-block--notifications">
+                <div class="win-notify">
+                  <div class="win-notify__text">
+                    <h3 class="win-notify__title">Уведомления</h3>
+                    <p class="win-notify__subtitle">
+                      Напомним о новых словах<br />и событиях
+                    </p>
+                  </div>
+                  <label class="win-switch">
+                    <input
+                      class="win-switch__input"
+                      type="checkbox"
+                      role="switch"
+                      aria-label="Уведомления"
+                    />
+                    <span class="win-switch__track" aria-hidden="true"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+              <div class="keyboard" id="keyboard" role="group" aria-label="Клавиатура"></div>
+            </main>
+          </div>
+
+          <div class="app-screen" id="profile-screen" hidden>
+            <section class="profile-page">
+              <div class="profile-settings">
+                <label class="profile-field profile-field--select">
+                  <span class="profile-field__label">Сценарий</span>
+                  <select class="profile-field__select" id="scenario-select">
+                    <option value="2-4-word" selected>2-4 слово</option>
+                    <option value="5-word">5 слово</option>
+                    <option value="not-guessed" disabled>Слово не отгадано (авто)</option>
+                  </select>
+                </label>
+                <div class="profile-field profile-field--switch">
+                  <span class="profile-field__label">Тематическое слово</span>
+                  <label class="win-switch">
+                    <input
+                      class="win-switch__input"
+                      id="thematic-word-switch"
+                      type="checkbox"
+                      role="switch"
+                      aria-label="Тематическое слово"
+                    />
+                    <span class="win-switch__track" aria-hidden="true"></span>
+                  </label>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <nav class="tab-bar" aria-label="Навигация">
+          <div class="tab-bar__separator"></div>
+          <div class="tab-bar__items">
+            <button class="tab tab--active" type="button" data-tab="game">
+              <span class="tab__icon">
+                <img src="assets/logo-five-letters.svg" alt="" width="28" height="28" />
+              </span>
+              <span class="tab__label">Игра</span>
+            </button>
+            <button class="tab" type="button" data-tab="raffle">
+              <span class="tab__icon">
+                <img src="assets/coupon.svg" alt="" width="28" height="28" />
+              </span>
+              <span class="tab__label">Розыгрыш</span>
+            </button>
+            <button class="tab" type="button" data-tab="prizes">
+              <span class="tab__icon">
+                <img src="assets/gift.svg" alt="" width="28" height="28" />
+              </span>
+              <span class="tab__label">Призы</span>
+            </button>
+            <button class="tab" type="button" data-tab="profile">
+              <span class="tab__icon">
+                <img src="assets/user-male.svg" alt="" width="28" height="28" />
+              </span>
+              <span class="tab__label">Профиль</span>
+            </button>
+          </div>
+          <div class="home-indicator" aria-hidden="true"></div>
+        </nav>
+
+        <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <script src="app.js?v=68"></script>
+  </body>
+</html>
