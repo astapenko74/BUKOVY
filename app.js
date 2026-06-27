@@ -422,7 +422,7 @@
   }
 
   function mountPrizeForPanel(panel, options = {}) {
-    const { hidden = false } = options;
+    const { hidden = false, bottomHidden = hidden } = options;
     if (!panel || !winProgressPrizeOverlayEl) return null;
 
     const splitLayers = shouldSplitPrizeLayers();
@@ -453,7 +453,7 @@
     }
 
     if (splitLayers) {
-      mountPrizePanelBottomLayer(panel, { hidden });
+      mountPrizePanelBottomLayer(panel, { hidden: bottomHidden });
     } else {
       removePrizePanelBottomLayer(panel);
     }
@@ -1279,9 +1279,10 @@
     return document.querySelector('.tab[data-tab="prizes"] .tab__icon img');
   }
 
-  function revealActivePanelContent() {
+  function revealActivePanelContent(options = {}) {
+    const { revealBottom = true } = options;
     revealActivePrize();
-    if (shouldSplitPrizeLayers()) {
+    if (shouldSplitPrizeLayers() && revealBottom) {
       revealActivePrizeBottom();
     }
   }
@@ -1463,7 +1464,7 @@
       applyPanelPlaceholders(nextProgress);
 
       if (shouldSplitPrizeLayers()) {
-        mountPrizePanelBottomLayer(nextPanel, { hidden: true });
+        mountPrizePanelBottomLayer(nextPanel, { hidden: false });
       }
 
       stage.appendChild(nextPanel);
@@ -1485,8 +1486,8 @@
         fifthWordPanelIndex = 1;
         refreshWinProgressRefs();
         renderWinProgress();
-        mountPrizeForPanel(winProgressPanelEl, { hidden: true });
-        revealActivePanelContent();
+        mountPrizeForPanel(winProgressPanelEl, { hidden: true, bottomHidden: false });
+        revealActivePanelContent({ revealBottom: false });
         window.setTimeout(resolve, PRIZE_REVEAL_MS);
       }, PROGRESS_SWAP_MS);
     });
