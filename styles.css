@@ -6,6 +6,7 @@
 
 :root {
   --bg: #1c1c1e;
+  --app-height: 100vh;
   --neutral-1: #333335;
   --neutral-1-pressed: #3a3a3c;
   --elevation-1: #333335;
@@ -44,13 +45,22 @@ html,
 body {
   margin: 0;
   height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --app-height: 100dvh;
+  }
 }
 
 body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100%;
+  min-height: var(--app-height);
+  height: var(--app-height);
   background: #000;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -88,13 +98,43 @@ button {
 
 .game-frame {
   width: min(100vw, 450px);
-  height: min(100vh, 960px);
+  height: min(var(--app-height), 960px);
   max-width: 450px;
-  max-height: 960px;
+  max-height: min(var(--app-height), 960px);
   flex-shrink: 0;
   background: var(--bg);
   border-radius: 40px;
   overflow: hidden;
+}
+
+@media (max-width: 450px) {
+  body {
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .game-frame {
+    width: 100%;
+    max-width: none;
+    height: var(--app-height);
+    max-height: var(--app-height);
+    border-radius: 0;
+  }
+}
+
+@media (max-height: 720px) {
+  :root {
+    --grid-kb-margin: 16px;
+    --tab-bar-height: 76px;
+  }
+
+  .keyboard {
+    padding-bottom: 12px;
+  }
+
+  .nav-row {
+    margin-top: 12px;
+  }
 }
 
 @media (min-width: 451px), (min-height: 961px), (max-width: 319px), (max-height: 567px) {

@@ -692,7 +692,24 @@
     let availW = gridArea.clientWidth;
     let availH = gridArea.clientHeight;
 
-    if (options.gameMode && mainEl && kbEl) {
+    if (availH <= 0 && mainEl && kbEl) {
+      const styles = getComputedStyle(document.documentElement);
+      const sideMargin =
+        parseFloat(styles.getPropertyValue("--side-margin")) || 20;
+      const gridKbMargin =
+        parseFloat(styles.getPropertyValue("--grid-kb-margin")) || 24;
+      const mainStyles = getComputedStyle(mainEl);
+
+      availW = mainEl.clientWidth - sideMargin * 2;
+      availH =
+        mainEl.clientHeight -
+        kbEl.offsetHeight -
+        parseFloat(mainStyles.paddingTop || "0") -
+        parseFloat(mainStyles.paddingBottom || "0") -
+        8 -
+        gridKbMargin -
+        parseFloat(getComputedStyle(kbEl).paddingBottom || "0");
+    } else if (options.gameMode && mainEl && kbEl) {
       const styles = getComputedStyle(document.documentElement);
       const sideMargin =
         parseFloat(styles.getPropertyValue("--side-margin")) || 20;
@@ -728,6 +745,30 @@
     }
 
     updateMainScrollFade();
+  }
+
+  function syncFrameViewportHeight() {
+    if (!frameEl) return;
+
+    const isMobileLayout = window.matchMedia("(max-width: 450px)").matches;
+    if (!isMobileLayout) {
+      frameEl.style.height = "";
+      frameEl.style.maxHeight = "";
+      document.documentElement.style.removeProperty("--app-height");
+      return;
+    }
+
+    const height = Math.round(window.visualViewport?.height ?? window.innerHeight);
+    document.documentElement.style.setProperty("--app-height", `${height}px`);
+    frameEl.style.height = `${height}px`;
+    frameEl.style.maxHeight = `${height}px`;
+  }
+
+  function handleViewportChange() {
+    syncFrameViewportHeight();
+    updateLayout();
+    syncActivePrizePosition();
+    layoutPrizesCarousel();
   }
 
   function updateActionKeys() {
@@ -2322,6 +2363,7 @@
   buildKeyboard();
   initTabBar();
   applyWinResultContent();
+  syncFrameViewportHeight();
   updateLayout();
   updateActionKeys();
   renderWinProgress();
@@ -2332,11 +2374,13 @@
 
   mainEl?.addEventListener("scroll", updateMainScrollFade, { passive: true });
   document.querySelector(".win-block--yellow")?.addEventListener("click", playAgain);
-  window.addEventListener("resize", () => {
-    updateLayout();
-    syncActivePrizePosition();
+  window.addEventListener("resize", handleViewportChange);
+  window.visualViewport?.addEventListener("resize", handleViewportChange);
+  window.visualViewport?.addEventListener("scroll", handleViewportChange);
+  window.addEventListener("orientationchange", () => {
+    window.setTimeout(handleViewportChange, 100);
   });
   if (document.fonts?.ready) {
-    document.fonts.ready.then(updateLayout);
+    document.fonts.ready.then(handleViewportChange);
   }
 })();
