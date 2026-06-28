@@ -1353,7 +1353,7 @@
   }
 
   function getGiftIconEl() {
-    return document.querySelector('.tab[data-tab="prizes"] .tab__icon img');
+    return document.querySelector('.tab[data-tab="prizes"] .tab__icon-svg');
   }
 
   function revealActivePanelContent(options = {}) {
