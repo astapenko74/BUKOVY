@@ -4,7 +4,7 @@
   const ROWS = 6;
   const COLS = 5;
   const FLIP_STAGGER_MS = 150;
-  const FLIP_DURATION_MS = 550;
+  const FLIP_DURATION_MS = 750;
   const NORMAL_WORD_MS = 1000;
   const WIN_HERO_MS = 800;
   const UNFLIP_DIAGONAL_COUNT = ROWS + COLS - 1;
@@ -71,7 +71,7 @@
   const FIFTH_WORD_NEXT_BADGES = [41, 42, 43, 44];
   const PRIZE_COLUMN_WORD = "ВКЛАД";
   const PRIZE_TO_TAB_MS = 1200;
-  const PROGRESS_SWAP_MS = 900;
+  const PROGRESS_SWAP_MS = 1200;
   const FIFTH_WORD_PRIZE_LINE_MS = 420;
   const PRIZE_FLY_DELAY_MS = 1000;
   const PRIZE_POP_SCALE = 1.2;
@@ -764,6 +764,42 @@
     frameEl.style.maxHeight = `${height}px`;
   }
 
+  function preventMobileZoomGestures() {
+    if (!frameEl) return;
+
+    let lastTouchEnd = 0;
+
+    frameEl.addEventListener(
+      "touchend",
+      (event) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      },
+      { passive: false }
+    );
+
+    frameEl.addEventListener(
+      "gesturestart",
+      (event) => {
+        event.preventDefault();
+      },
+      { passive: false }
+    );
+
+    frameEl.addEventListener(
+      "touchmove",
+      (event) => {
+        if (event.touches.length > 1) {
+          event.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+  }
+
   function handleViewportChange() {
     syncFrameViewportHeight();
     updateLayout();
@@ -1385,7 +1421,7 @@
         { once: true }
       );
 
-      progressAnimTimers.push(window.setTimeout(finish, 320));
+      progressAnimTimers.push(window.setTimeout(finish, 460));
     });
   }
 
@@ -2362,6 +2398,7 @@
   buildGrid();
   buildKeyboard();
   initTabBar();
+  preventMobileZoomGestures();
   applyWinResultContent();
   syncFrameViewportHeight();
   updateLayout();
