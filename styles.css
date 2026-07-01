@@ -892,16 +892,7 @@ button {
   height: 388px;
   transform-origin: 50% 50%;
   transform-style: preserve-3d;
-}
-
-.raffle-cards-track.is-scrolling .raffle-event-card-wrap {
-  will-change: transform, opacity;
-}
-
-.raffle-event-card-wrap.is-flipping {
-  filter: none !important;
-  opacity: 1 !important;
-  transform: translateY(0) rotate(var(--raffle-center-rotate, 0deg)) scale(1) !important;
+  will-change: transform, filter;
 }
 
 .raffle-event-card {
@@ -933,7 +924,7 @@ button {
 }
 
 .raffle-event-card__face--back {
-  transform: rotateY(180deg) translateZ(0.1px);
+  transform: rotateY(180deg);
 }
 
 .raffle-event-card__back-content {
@@ -1116,8 +1107,6 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .raffle-event-card__badge {

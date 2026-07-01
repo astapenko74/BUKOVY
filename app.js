@@ -163,7 +163,6 @@
   ];
   const RAFFLE_LOOP_SLIDE_INDICES = [2, 0, 1, 2, 0];
   const RAFFLE_CENTER_ROTATIONS = [1, -2, 0];
-  const RAFFLE_SIDE_CARD_OPACITY = 0.75;
 
   let raffleCarouselRefs = null;
   let raffleParticipateSession = null;
@@ -1899,22 +1898,12 @@
     );
   }
 
-  function getRaffleWrapScrollOffset(wrap, track, carousel) {
-    const slide = wrap.closest(".raffle-cards-slide");
-    if (!slide || !track || !carousel) return 0;
-
-    const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
-    const viewportCenter = track.scrollLeft + carousel.clientWidth / 2;
-    return slideCenter - viewportCenter;
-  }
-
-  function getRaffleWrapProgress(wrap, track, carousel) {
-    const offset = getRaffleWrapScrollOffset(wrap, track, carousel);
-    return Math.min(1, Math.abs(offset) / RAFFLE_SLIDE_STEP);
-  }
-
-  function getRaffleWrapOpacity(progress) {
-    return 1 - progress * (1 - RAFFLE_SIDE_CARD_OPACITY);
+  function getRaffleWrapProgress(wrap, carousel) {
+    const carouselRect = carousel.getBoundingClientRect();
+    const centerX = carouselRect.left + carouselRect.width / 2;
+    const cardRect = wrap.getBoundingClientRect();
+    const cardCenterX = cardRect.left + cardRect.width / 2;
+    return Math.min(1, Math.abs(cardCenterX - centerX) / RAFFLE_SLIDE_STEP);
   }
 
   function isRaffleButtonSafeZone(event, card) {
@@ -1953,11 +1942,11 @@
     toggleRaffleCardFlip(flip);
   }
 
-  function unflipRaffleCardsOnScroll(carousel, wraps, track) {
+  function unflipRaffleCardsOnScroll(carousel, wraps) {
     wraps.forEach((wrap) => {
       const flip = wrap.querySelector(".raffle-event-card__flip");
       if (!flip?.classList.contains("is-flipped")) return;
-      if (getRaffleWrapProgress(wrap, track, carousel) <= 0.08) return;
+      if (getRaffleWrapProgress(wrap, carousel) <= 0.08) return;
       animateRaffleCardToFront(flip);
     });
   }
@@ -2088,7 +2077,6 @@
       wrap.style.transition = "";
       wrap.style.transform = "";
       wrap.style.filter = "";
-      wrap.style.opacity = "";
       wrap.style.zIndex = "";
     });
 
@@ -2214,7 +2202,6 @@
     wrap.style.transform =
       "translateY(0px) rotate(" + centerRotate + "deg) scale(1)";
     wrap.style.filter = "none";
-    wrap.style.opacity = "1";
     delete wrap.dataset.participating;
 
     document.querySelector(".raffle-cards-block")?.classList.remove("is-participate-active");
@@ -2234,7 +2221,7 @@
       !carousel ||
       raffleParticipatedIndices.has(cardIndex) ||
       wrap.dataset.participating === "true" ||
-      getRaffleWrapProgress(wrap, raffleCarouselRefs?.track, carousel) > 0.08
+      getRaffleWrapProgress(wrap, carousel) > 0.08
     ) {
       return;
     }
@@ -2259,11 +2246,10 @@
       wrap.style.transition =
         "transform " +
         RAFFLE_PARTICIPATE_SCALE_MS +
-        "ms cubic-bezier(0, 0, 0.4, 0.9), opacity " +
+        "ms cubic-bezier(0, 0, 0.4, 0.9), filter " +
         RAFFLE_PARTICIPATE_SCALE_MS +
         "ms ease";
       wrap.style.filter = "none";
-      wrap.style.opacity = "1";
       wrap.style.transform =
         "translateY(0px) rotate(0deg) scale(" + RAFFLE_PARTICIPATE_SCALE + ")";
       await waitRaffleTransition(wrap, "transform", RAFFLE_PARTICIPATE_SCALE_MS);
@@ -2319,15 +2305,8 @@
   function toggleRaffleCardFlip(flip) {
     if (flip.dataset.flipAnimating === "true") return;
 
-    const wrap = flip.closest(".raffle-event-card-wrap");
-    const card = wrap?.querySelector(".raffle-event-card");
-    const cardIndex = Number(card?.dataset.cardIndex ?? 0);
-    const centerRotate = RAFFLE_CENTER_ROTATIONS[cardIndex] ?? 0;
     const current = Number(flip.dataset.rotation || 0);
     const next = current + 180;
-
-    wrap?.classList.add("is-flipping");
-    wrap?.style.setProperty("--raffle-center-rotate", centerRotate + "deg");
 
     flip.dataset.flipAnimating = "true";
     flip.style.transform = "rotateY(" + next + "deg)";
@@ -2343,16 +2322,13 @@
       done = true;
       flip.removeEventListener("transitionend", finish);
       delete flip.dataset.flipAnimating;
-      wrap?.classList.remove("is-flipping");
-      wrap?.style.removeProperty("--raffle-center-rotate");
-      raffleCarouselRefs?.updateCardTransforms();
     };
 
     flip.addEventListener("transitionend", finish);
     window.setTimeout(() => finish(), FLIP_DURATION_MS + 60);
   }
 
-  function initRaffleCardFlip(carousel, wraps, track) {
+  function initRaffleCardFlip(carousel, wraps) {
     wraps.forEach((wrap) => {
       const card = wrap.querySelector(".raffle-event-card");
       const flip = wrap.querySelector(".raffle-event-card__flip");
@@ -2383,7 +2359,7 @@
       faces.forEach((face) => {
         face.addEventListener("click", (event) => {
           if (wrap.dataset.participating === "true") return;
-          if (getRaffleWrapProgress(wrap, track, carousel) > 0.08) return;
+          if (getRaffleWrapProgress(wrap, carousel) > 0.08) return;
           if (face.classList.contains("raffle-event-card__face--front")) {
             if (isRaffleButtonSafeZone(event, card)) return;
             if (event.target.closest(".raffle-event-card__btn")) return;
@@ -2528,8 +2504,8 @@
       rotate: transform.rotate ?? 0,
       scale,
       visualScale: scale,
-      wrapOpacity: transform.wrapOpacity ?? 1,
-      opacity: opacity ?? transform.opacity ?? 1,
+      wrapOpacity: transform.opacity ?? 1,
+      opacity: opacity ?? 1,
     };
   }
 
@@ -2560,8 +2536,8 @@
       "deg) scale(" +
       state.scale +
       ")";
-    wrap.style.filter = "none";
     wrap.style.opacity = String(state.wrapOpacity ?? 1);
+    wrap.style.filter = "none";
   }
 
   function setRaffleIntroSlotTransitions(slot, durationMs, easing, includePosition) {
@@ -2576,7 +2552,7 @@
 
     if (wrap) {
       wrap.style.transition =
-        "transform " + durationMs + "ms " + easing + ", opacity " + durationMs + "ms ease";
+        "transform " + durationMs + "ms " + easing + ", filter " + durationMs + "ms ease";
     }
   }
 
@@ -2598,8 +2574,7 @@
       scale: 1 - progress * 0.1,
       rotate: centerRotate * (1 - progress) + (offsetFromCenter / RAFFLE_SLIDE_STEP) * 4,
       translateY: progress * 48,
-      wrapOpacity: getRaffleWrapOpacity(progress),
-      opacity: 1,
+      opacity: 1 - progress * 0.25,
     };
   }
 
@@ -2618,7 +2593,7 @@
 
     const stage1Center = buildIntroSlotState(
       centerAnchor,
-      { translateY: 0, rotate: 0, scale: 1, wrapOpacity: 1 },
+      { translateY: 0, rotate: 0, scale: 1, opacity: 1 },
       1
     );
 
@@ -2644,7 +2619,7 @@
       rotate: 0,
       scale: 0.8,
       visualScale: 0.8,
-      wrapOpacity: 1,
+      blur: 0,
       opacity: 0,
     };
   }
@@ -2657,7 +2632,7 @@
       rotate: 0,
       scale: 1,
       visualScale: 1,
-      wrapOpacity: 1,
+      blur: 0,
     };
 
     if (cardIndex === 0) {
@@ -2894,18 +2869,16 @@
     }
 
     function updateCardTransforms() {
-      const viewportCenter = track.scrollLeft + carousel.clientWidth / 2;
+      const carouselRect = carousel.getBoundingClientRect();
+      const centerX = carouselRect.left + carouselRect.width / 2;
       const slideStep = RAFFLE_SLIDE_STEP;
 
       wraps.forEach((wrap) => {
         if (wrap.dataset.participating === "true") return;
-        if (wrap.classList.contains("is-flipping")) return;
 
-        const slide = wrap.closest(".raffle-cards-slide");
-        if (!slide) return;
-
-        const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
-        const offset = slideCenter - viewportCenter;
+        const cardRect = wrap.getBoundingClientRect();
+        const cardCenterX = cardRect.left + cardRect.width / 2;
+        const offset = cardCenterX - centerX;
         const progress = Math.min(1, Math.abs(offset) / slideStep);
         const cardIndex = Number(
           wrap.querySelector(".raffle-event-card")?.dataset.cardIndex ?? 2
@@ -2915,7 +2888,7 @@
         const rotateDeg =
           centerRotate * (1 - progress) + (offset / slideStep) * 4;
         const translateY = progress * 48;
-        const wrapOpacity = getRaffleWrapOpacity(progress);
+        const opacity = 1 - progress * 0.25;
 
         wrap.style.transform =
           "translateY(" +
@@ -2925,8 +2898,8 @@
           "deg) scale(" +
           scale +
           ")";
+        wrap.style.opacity = String(opacity);
         wrap.style.filter = "none";
-        wrap.style.opacity = String(wrapOpacity);
         wrap.style.zIndex = String(10 - Math.round(progress * 10));
 
         const visual = wrap.querySelector(".raffle-event-card__visual");
@@ -2962,10 +2935,6 @@
     }
 
     function handleScrollEnd() {
-      track.classList.remove("is-scrolling");
-      if (!raffleParticipateSession) {
-        unflipRaffleCardsOnScroll(carousel, wraps, track);
-      }
       handleLoop();
       updateCardTransforms();
     }
@@ -2987,7 +2956,7 @@
       "scroll",
       () => {
         if (raffleParticipateSession) return;
-        track.classList.add("is-scrolling");
+        unflipRaffleCardsOnScroll(carousel, wraps);
         scheduleTransformUpdate();
         clearTimeout(scrollEndTimer);
         scrollEndTimer = window.setTimeout(handleScrollEnd, 120);
@@ -2996,7 +2965,7 @@
     );
     track.addEventListener("scrollend", handleScrollEnd);
 
-    initRaffleCardFlip(carousel, wraps, track);
+    initRaffleCardFlip(carousel, wraps);
 
     raffleCarouselRefs = {
       carousel,
