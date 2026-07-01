@@ -716,6 +716,10 @@ button {
   color: var(--tab-inactive);
 }
 
+.tab[hidden] {
+  display: none !important;
+}
+
 .tab--active {
   color: #ffffff;
 }
@@ -775,7 +779,510 @@ button {
   flex-direction: column;
 }
 
+/* ——— Розыгрыш ——— */
+.raffle-page {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: auto;
+  padding: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.raffle-page-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: clip;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(28, 28, 30, 0) 0%, #1c1c1e 60%);
+}
+
+.raffle-page-footer__frame {
+  width: 105%;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  transform: rotate(-2deg);
+  transform-origin: center center;
+}
+
+.raffle-page-footer__text {
+  margin: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #333333;
+  text-align: center;
+}
+
+.raffle-cards-block {
+  position: relative;
+  width: 100%;
+  height: 468px;
+  padding-top: 0;
+  padding-bottom: 16px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.raffle-cards-block.is-participate-active {
+  z-index: 5;
+}
+
+.raffle-cards-carousel {
+  width: 100%;
+  height: 460px;
+  overflow: visible;
+}
+
+.raffle-cards-track--locked {
+  overflow: hidden;
+  pointer-events: none;
+  touch-action: none;
+}
+
+.raffle-cards-track {
+  display: flex;
+  height: 460px;
+  padding-top: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: calc(50% - 145px);
+  padding-inline: calc(50% - 145px);
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+
+.raffle-cards-track::-webkit-scrollbar {
+  display: none;
+}
+
+.raffle-cards-slide {
+  position: relative;
+  flex: 0 0 290px;
+  width: 290px;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: visible;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.raffle-event-card-wrap {
+  width: 270px;
+  height: 388px;
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  will-change: transform, filter;
+}
+
+.raffle-event-card {
+  width: 270px;
+  height: 388px;
+  position: relative;
+  overflow: visible;
+  perspective: 1200px;
+  perspective-origin: center center;
+}
+
+.raffle-event-card__flip {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  transition: transform 0.75s cubic-bezier(0.4, 0, 0.15, 1);
+}
+
+.raffle-event-card__face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.raffle-event-card__face--back {
+  transform: rotateY(180deg);
+}
+
+.raffle-event-card__back-content {
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 32px 16px 29px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.raffle-event-card__turnover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  display: none;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-event-card__face--back.is-turnover .raffle-event-card__turnover {
+  display: block;
+}
+
+.raffle-event-card__face--back.is-turnover .raffle-event-card__back-content {
+  visibility: hidden;
+}
+
+.raffle-cards-block.is-intro-active {
+  z-index: 5;
+}
+
+.raffle-cards-block.is-intro-active .raffle-cards-pagination {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.raffle-cards-carousel.is-intro-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.raffle-cards-pagination.is-intro-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.raffle-intro {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.raffle-intro__slot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 270px;
+  height: 388px;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity, filter;
+}
+
+.raffle-intro__wrap {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 50%;
+  will-change: transform, filter;
+}
+
+.raffle-intro .raffle-event-card__flip {
+  transition: none;
+}
+
+.raffle-event-card__turnover-entry {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  display: none;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-event-card__face--back.is-entry-turnover .raffle-event-card__turnover-entry {
+  display: block;
+}
+
+.raffle-event-card__face--back.is-entry-turnover .raffle-event-card__back-content {
+  visibility: hidden;
+}
+
+.raffle-event-card__back-title {
+  margin: 0;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 36px;
+  color: #ffffff;
+}
+
+.raffle-event-card__back-subtitle {
+  margin: 12px 0 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #ffffff;
+  width: 100%;
+}
+
+.raffle-event-card__back-footer {
+  margin: auto 0 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #ffffff;
+  width: 100%;
+}
+
+.raffle-event-card__face--front {
+  cursor: pointer;
+}
+
+.raffle-event-card__face--front .raffle-event-card__btn {
+  cursor: pointer;
+}
+
+.raffle-event-card__face--back {
+  cursor: pointer;
+}
+
+.raffle-event-card__visual {
+  position: absolute;
+  right: 0;
+  bottom: 60px;
+  width: 286px;
+  height: 222px;
+  transform-origin: right bottom;
+  z-index: 2;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-event-card__base {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-event-card__content {
+  position: relative;
+  z-index: 3;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.raffle-event-card__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #333333;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.raffle-event-card__title {
+  margin: 8px 0 0;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 36px;
+  color: #ffffff;
+  text-align: center;
+  width: 100%;
+}
+
+.raffle-event-card__subtitle {
+  margin: 4px 0 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  width: 100%;
+}
+
+.raffle-event-card__subtitle.is-participated {
+  color: #ffffff;
+}
+
+.raffle-event-card__btn {
+  position: relative;
+  z-index: 4;
+  margin-top: auto;
+  width: 238px;
+  height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 16px;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.raffle-event-card__btn.is-participated {
+  gap: 8px;
+  pointer-events: none;
+  cursor: default;
+}
+
+.raffle-event-card__btn.is-participated:active {
+  background: #ffffff;
+}
+
+.raffle-event-card__btn.is-participated .raffle-event-card__btn-text {
+  font-weight: 600;
+}
+
+.raffle-event-card__face--front.is-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 60%
+  );
+  transform: translate(-55%, 55%);
+  animation: raffle-card-shimmer 380ms ease-out forwards;
+  pointer-events: none;
+  z-index: 4;
+}
+
+@keyframes raffle-card-shimmer {
+  to {
+    transform: translate(55%, -55%);
+  }
+}
+
+.raffle-participate-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 6;
+}
+
+.raffle-participate-particles .win-progress__prize-particle {
+  left: 50%;
+  top: 42%;
+}
+
+.raffle-event-card__btn:active {
+  background: #f6f7f8;
+}
+
+.raffle-event-card__btn-text {
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #333333;
+  white-space: nowrap;
+}
+
+.raffle-event-card__btn-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-cards-pagination {
+  position: absolute;
+  left: 50%;
+  top: 440px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  pointer-events: none;
+}
+
+.raffle-cards-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background-color 200ms ease;
+}
+
+.raffle-cards-dot.is-active {
+  background: #ffffff;
+}
+
 .profile-settings {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-block + .profile-block {
+  margin-top: 36px;
+}
+
+.profile-section-title {
+  margin: 0 0 20px;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 36px;
+  color: #ffffff;
+}
+
+.profile-block__fields {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -799,6 +1306,31 @@ button {
 
 .profile-field--switch {
   padding-right: 16px;
+}
+
+.profile-reset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  margin: 0;
+  padding: 0 20px;
+  border: none;
+  border-radius: 16px;
+  background: #333335;
+  box-sizing: border-box;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--primary-on-dark);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.profile-reset-btn:active {
+  background: #3a3a3c;
 }
 
 .profile-field__label {
@@ -1662,8 +2194,8 @@ button {
 }
 
 .win-progress__badge-layer--inner {
-  width: 36px;
-  height: 36px;
+  width: 35px;
+  height: 35px;
 }
 
 .win-progress__badge-fill {
@@ -1682,7 +2214,7 @@ button {
 }
 
 .win-progress__badge-fill--yellow {
-  background: #ffdd2d;
+  background: #ffd600;
 }
 
 .win-progress__badge-fill.is-transitioning {

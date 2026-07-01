@@ -37,12 +37,16 @@
   let fifthWordPrizeLabelRevealed = false;
   const mainEl = document.querySelector(".main");
   const gameScreenEl = document.getElementById("game-screen");
+  const raffleScreenEl = document.getElementById("raffle-screen");
   const profileScreenEl = document.getElementById("profile-screen");
   const winMessageEl = document.getElementById("win-message");
   const winWordEl = document.getElementById("win-word");
   const winShareEl = document.getElementById("win-share");
   const scenarioSelectEl = document.getElementById("scenario-select");
   const thematicWordSwitchEl = document.getElementById("thematic-word-switch");
+  const raffleSectionSwitchEl = document.getElementById("raffle-section-switch");
+  const raffleResetProgressBtnEl = document.getElementById("raffle-reset-progress-btn");
+  const raffleTabEl = document.querySelector('.tab[data-tab="raffle"]');
 
   let activeScenario = scenarioSelectEl?.value ?? "2-4-word";
   let activeThematicWord = Boolean(thematicWordSwitchEl?.checked);
@@ -90,6 +94,81 @@
   const CONFETTI_DECAY_RANGE = 0.004;
   const PRIZE_WIGGLE_INTERVAL_MS = 7000;
   const PRIZE_PARTICLE_COLORS = ["#ffdd2d", "#ffb400", "#ffcd33", "#ffe566"];
+
+  const RAFFLE_CARD_COUNT = 3;
+  const RAFFLE_CARD_WIDTH = 270;
+  const RAFFLE_CARD_HEIGHT = 388;
+  const RAFFLE_CARD_GAP = 20;
+  const RAFFLE_SLIDE_STEP = RAFFLE_CARD_WIDTH + RAFFLE_CARD_GAP;
+  const RAFFLE_CARD_SRC = "assets/raffle-event-card-inactive.svg";
+  const RAFFLE_TOKEN_SRC = "assets/raffle-token.png";
+  const RAFFLE_CHECK_SRC = "assets/check-circle-positive.svg";
+  const RAFFLE_TURNOVER_SRC = "assets/raffle-turnover.svg";
+  const RAFFLE_TURNOVER_ENTRY_SRC = "assets/raffle-turnover-entry.svg";
+  const RAFFLE_INTRO_SEEN_KEY = "raffle-intro-seen";
+  const RAFFLE_INTRO_ENTRY_DELAY_MS = 400;
+  const RAFFLE_INTRO_STAGE1_MS = 900;
+  const RAFFLE_INTRO_PAUSE_MS = 400;
+  const RAFFLE_INTRO_STAGE2_MS = 1200;
+  const RAFFLE_PARTICIPATE_SCALE = 1.05;
+  const RAFFLE_PARTICIPATE_SCALE_DELAY_MS = 200;
+  const RAFFLE_PARTICIPATE_SCALE_MS = 600;
+  const RAFFLE_PARTICIPATE_FLIP_SLOW_MS = 500;
+  const RAFFLE_PARTICIPATE_FLIP_FAST_MS = 1200;
+  const RAFFLE_PARTICIPATE_PAUSE_MS = 400;
+  const RAFFLE_PARTICIPATE_RETURN_MS = 300;
+  const RAFFLE_PARTICIPATE_SPARKS_AT_MS = Math.round(
+    RAFFLE_PARTICIPATE_RETURN_MS * 0.5
+  );
+  const RAFFLE_CARDS = [
+    {
+      badge: "Делим деньги",
+      title: "5 000 000₽",
+      subtitle: "Получите долю от суммы",
+      buttonCost: 200,
+      visualSrc: "assets/raffle-prize-visual.png",
+      activeBaseSrc: "assets/raffle-event-card-1-active.svg",
+      participatedSubtitle: "Делят 155 456 игроков",
+      backTitle: "Делим деньги",
+      backSubtitle:
+        "Разделим 5 000 000 рублей между всеми игроками, принявшими участие в розыгрыше этого приза",
+      backFooter: "Итоги подведём 1 декабря",
+    },
+    {
+      badge: "Розыгрыш 1 000 призов",
+      title: "Кэшбэк 50%<br>в шопинге",
+      subtitle: "Участвуйте в розыгрыше",
+      buttonCost: 50,
+      visualSrc: "assets/raffle-cashback-visual.png",
+      activeBaseSrc: "assets/raffle-event-card-2-active.svg",
+      participatedSubtitle: "Участвуют 564 238 игроков",
+      backTitle: "Розыгрыш",
+      backSubtitle:
+        "Разыграем 1 000 призов с кэшбэком 50% в шопинге между всеми игроками, принявшими участие в этом розыгрыше",
+      backFooter: "Итоги подведём 1 декабря",
+    },
+    {
+      badge: "Розыгрыш 1 приза",
+      title: "Аааавтомобиль<br>от Fresh Auto",
+      subtitle: "Участвуйте в розыгрыше",
+      buttonCost: 500,
+      visualSrc: "assets/raffle-car-visual.png",
+      activeBaseSrc: "assets/raffle-event-card-3-active.svg",
+      participatedSubtitle: "Участвуют 37 174 игрока",
+      backTitle: "Розыгрыш",
+      backSubtitle:
+        "Разыграем Jeepv X-Cross 7 от Fresh Auto в полной комплектации между всеми игроками, принявшими участие в этом розыгрыше",
+      backFooter: "Итоги подведём 1 декабря",
+    },
+  ];
+  const RAFFLE_LOOP_SLIDE_INDICES = [2, 0, 1, 2, 0];
+  const RAFFLE_CENTER_ROTATIONS = [1, -2, 0];
+
+  let raffleCarouselRefs = null;
+  let raffleParticipateSession = null;
+  let raffleIntroRunning = false;
+  let raffleIntroLayerEl = null;
+  const raffleParticipatedIndices = new Set();
 
   const PRIZE_CAROUSEL_ITEMS = [
     {
@@ -233,6 +312,53 @@
 
   function markProfileSettingsDirty() {
     profileSettingsDirty = true;
+  }
+
+  function setRaffleTabVisible(visible) {
+    if (!raffleTabEl) return;
+
+    raffleTabEl.hidden = !visible;
+
+    if (!visible && raffleTabEl.classList.contains("tab--active")) {
+      activateTab("game");
+      showAppScreen("game");
+      updateLayout();
+    }
+  }
+
+  function applyRaffleSectionVisibility() {
+    setRaffleTabVisible(Boolean(raffleSectionSwitchEl?.checked));
+  }
+
+  const TAB_SCREENS = {
+    game: () => gameScreenEl,
+    raffle: () => raffleScreenEl,
+    profile: () => profileScreenEl,
+  };
+
+  function showAppScreen(tabId) {
+    if (tabId !== "raffle") {
+      skipRaffleParticipateAnimation();
+      cancelRaffleIntro(false);
+      cancelRaffleIntroPresentation();
+    }
+
+    Object.entries(TAB_SCREENS).forEach(([id, getScreen]) => {
+      const screen = getScreen();
+      if (!screen) return;
+      screen.hidden = id !== tabId;
+    });
+
+    if (tabId === "raffle") {
+      prepareRaffleIntroPresentation();
+      void maybePlayRaffleIntro();
+    }
+  }
+
+  function activateTab(tabId) {
+    document.querySelectorAll(".tab-bar .tab[data-tab]").forEach((tab) => {
+      tab.classList.toggle("tab--active", tab.dataset.tab === tabId);
+    });
   }
 
   function commitProfileSettingsIfNeeded() {
@@ -653,26 +779,20 @@
   }
 
   function initTabBar() {
-    const tabs = document.querySelectorAll(".tab-bar .tab[data-tab]");
+    const navigableTabs = new Set(["game", "raffle", "profile"]);
 
-    tabs.forEach((tab) => {
+    document.querySelectorAll(".tab-bar .tab[data-tab]").forEach((tab) => {
       tab.addEventListener("click", () => {
         const tabId = tab.dataset.tab;
-        if (tabId !== "game" && tabId !== "profile") return;
+        if (!navigableTabs.has(tabId)) return;
+        if (tabId === "raffle" && raffleTabEl?.hidden) return;
 
-        tabs.forEach((item) => {
-          item.classList.toggle("tab--active", item === tab);
-        });
+        activateTab(tabId);
+        showAppScreen(tabId);
 
         if (tabId === "game") {
-          if (gameScreenEl) gameScreenEl.hidden = false;
-          if (profileScreenEl) profileScreenEl.hidden = true;
           updateLayout();
-          return;
         }
-
-        if (gameScreenEl) gameScreenEl.hidden = true;
-        if (profileScreenEl) profileScreenEl.hidden = false;
       });
     });
   }
@@ -1712,20 +1832,1187 @@
     window.addEventListener("resize", layoutPrizesCarousel);
   }
 
-  function spawnPrizeParticles(stage, particleScale = 1) {
+  function raffleCardMarkup(cardIndex) {
+    const card = RAFFLE_CARDS[cardIndex];
+    if (!card) return "";
+
+    const baseMarkup =
+      '<img class="raffle-event-card__base" src="' +
+      RAFFLE_CARD_SRC +
+      '" width="270" height="388" alt="" draggable="false" />';
+
+    const frontFaceMarkup =
+      '<div class="raffle-event-card__face raffle-event-card__face--front">' +
+      baseMarkup +
+      '<div class="raffle-event-card__content">' +
+      '<span class="raffle-event-card__badge">' +
+      card.badge +
+      "</span>" +
+      '<h3 class="raffle-event-card__title">' +
+      card.title +
+      "</h3>" +
+      '<p class="raffle-event-card__subtitle">' +
+      card.subtitle +
+      "</p>" +
+      '<button class="raffle-event-card__btn" type="button">' +
+      '<span class="raffle-event-card__btn-text">Участвовать за ' +
+      card.buttonCost +
+      "</span>" +
+      '<img class="raffle-event-card__btn-icon" src="' +
+      RAFFLE_TOKEN_SRC +
+      '" width="24" height="24" alt="" draggable="false" />' +
+      "</button></div>" +
+      '<img class="raffle-event-card__visual" src="' +
+      card.visualSrc +
+      '" width="286" height="222" alt="" draggable="false" />' +
+      "</div>";
+
+    const backFaceMarkup =
+      '<div class="raffle-event-card__face raffle-event-card__face--back">' +
+      baseMarkup +
+      '<img class="raffle-event-card__turnover" src="' +
+      RAFFLE_TURNOVER_SRC +
+      '" width="270" height="388" alt="" draggable="false" />' +
+      '<img class="raffle-event-card__turnover-entry" src="' +
+      RAFFLE_TURNOVER_ENTRY_SRC +
+      '" width="270" height="388" alt="" draggable="false" />' +
+      '<div class="raffle-event-card__back-content">' +
+      '<h3 class="raffle-event-card__back-title">' +
+      card.backTitle +
+      "</h3>" +
+      '<p class="raffle-event-card__back-subtitle">' +
+      card.backSubtitle +
+      "</p>" +
+      '<p class="raffle-event-card__back-footer">' +
+      card.backFooter +
+      "</p></div></div>";
+
+    return (
+      '<article class="raffle-event-card" data-card-index="' +
+      cardIndex +
+      '">' +
+      '<div class="raffle-event-card__flip">' +
+      frontFaceMarkup +
+      backFaceMarkup +
+      "</div></article>"
+    );
+  }
+
+  function getRaffleWrapProgress(wrap, carousel) {
+    const carouselRect = carousel.getBoundingClientRect();
+    const centerX = carouselRect.left + carouselRect.width / 2;
+    const cardRect = wrap.getBoundingClientRect();
+    const cardCenterX = cardRect.left + cardRect.width / 2;
+    return Math.min(1, Math.abs(cardCenterX - centerX) / RAFFLE_SLIDE_STEP);
+  }
+
+  function isRaffleButtonSafeZone(event, card) {
+    const btn = card.querySelector(".raffle-event-card__btn");
+    if (!btn) return false;
+
+    const rect = btn.getBoundingClientRect();
+    const safe = 16;
+    const point = event.changedTouches?.[0] ?? event;
+    const x = point.clientX;
+    const y = point.clientY;
+
+    if (x == null || y == null) return false;
+
+    return (
+      x >= rect.left - safe &&
+      x <= rect.right + safe &&
+      y >= rect.top - safe &&
+      y <= rect.bottom + safe
+    );
+  }
+
+  function resetRaffleFlip(flip) {
+    flip.style.transition = "none";
+    flip.classList.remove("is-flipped");
+    flip.style.transform = "";
+    delete flip.dataset.rotation;
+    delete flip.dataset.flipAnimating;
+    void flip.offsetWidth;
+    flip.style.transition = "";
+  }
+
+  function animateRaffleCardToFront(flip) {
+    if (!flip.classList.contains("is-flipped")) return;
+    if (flip.dataset.flipAnimating === "true") return;
+    toggleRaffleCardFlip(flip);
+  }
+
+  function unflipRaffleCardsOnScroll(carousel, wraps) {
+    wraps.forEach((wrap) => {
+      const flip = wrap.querySelector(".raffle-event-card__flip");
+      if (!flip?.classList.contains("is-flipped")) return;
+      if (getRaffleWrapProgress(wrap, carousel) <= 0.08) return;
+      animateRaffleCardToFront(flip);
+    });
+  }
+
+  function waitRaffleDelay(durationMs) {
+    return new Promise((resolve) => {
+      window.setTimeout(resolve, durationMs);
+    });
+  }
+
+  function waitRaffleTransition(element, propertyName, durationMs) {
+    return new Promise((resolve) => {
+      let done = false;
+      const finish = (event) => {
+        if (done) return;
+        if (event && (event.target !== element || event.propertyName !== propertyName)) {
+          return;
+        }
+        done = true;
+        element.removeEventListener("transitionend", finish);
+        resolve();
+      };
+
+      element.addEventListener("transitionend", finish);
+      window.setTimeout(finish, durationMs + 60);
+    });
+  }
+
+  function setRaffleScrollLocked(locked) {
+    const track = raffleCarouselRefs?.track;
+    if (!track) return;
+    track.classList.toggle("raffle-cards-track--locked", locked);
+  }
+
+  function setRaffleEntryTurnoverBack(cardEl, visible) {
+    const back = cardEl.querySelector(".raffle-event-card__face--back");
+    if (!back) return;
+    back.classList.toggle("is-entry-turnover", visible);
+  }
+
+  function setRaffleTurnoverBack(cardEl, visible) {
+    const back = cardEl.querySelector(".raffle-event-card__face--back");
+    if (!back) return;
+    back.classList.toggle("is-turnover", visible);
+  }
+
+  function setRaffleTurnoverBackToAll(cardIndex, visible) {
+    document
+      .querySelectorAll('.raffle-event-card[data-card-index="' + cardIndex + '"]')
+      .forEach((cardEl) => {
+        setRaffleTurnoverBack(cardEl, visible);
+      });
+  }
+
+  function clearRaffleIntroSeen() {
+    try {
+      localStorage.removeItem(RAFFLE_INTRO_SEEN_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function restoreRaffleCardDefaultContent(cardEl, cardIndex) {
+    const data = RAFFLE_CARDS[cardIndex];
+    if (!data || !cardEl) return;
+
+    const front = cardEl.querySelector(".raffle-event-card__face--front");
+    const back = cardEl.querySelector(".raffle-event-card__face--back");
+    const flip = cardEl.querySelector(".raffle-event-card__flip");
+
+    if (front) {
+      const base = front.querySelector(".raffle-event-card__base");
+      const subtitle = front.querySelector(".raffle-event-card__subtitle");
+      const btn = front.querySelector(".raffle-event-card__btn");
+
+      if (base) base.src = RAFFLE_CARD_SRC;
+      if (subtitle) {
+        subtitle.textContent = data.subtitle;
+        subtitle.classList.remove("is-participated");
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.classList.remove("is-participated");
+        btn.innerHTML =
+          '<span class="raffle-event-card__btn-text">Участвовать за ' +
+          data.buttonCost +
+          "</span>" +
+          '<img class="raffle-event-card__btn-icon" src="' +
+          RAFFLE_TOKEN_SRC +
+          '" width="24" height="24" alt="" draggable="false" />';
+      }
+    }
+
+    if (back) {
+      const base = back.querySelector(".raffle-event-card__base");
+      if (base) base.src = RAFFLE_CARD_SRC;
+      back.classList.remove("is-entry-turnover", "is-turnover");
+    }
+
+    cardEl.classList.remove("is-participated");
+    cardEl.querySelector(".raffle-participate-particles")?.remove();
+
+    if (flip) {
+      resetRaffleFlip(flip);
+    }
+  }
+
+  function resetRaffleProgress() {
+    skipRaffleParticipateAnimation();
+    cancelRaffleIntro(false);
+
+    raffleParticipatedIndices.clear();
+    clearRaffleIntroSeen();
+
+    if (raffleIntroLayerEl) {
+      raffleIntroLayerEl.remove();
+      raffleIntroLayerEl = null;
+    }
+
+    document.querySelectorAll(".raffle-event-card").forEach((cardEl) => {
+      const cardIndex = Number(cardEl.dataset.cardIndex);
+      if (Number.isNaN(cardIndex)) return;
+      restoreRaffleCardDefaultContent(cardEl, cardIndex);
+    });
+
+    raffleCarouselRefs?.wraps?.forEach((wrap) => {
+      delete wrap.dataset.participating;
+      wrap.style.transition = "";
+      wrap.style.transform = "";
+      wrap.style.filter = "";
+      wrap.style.zIndex = "";
+    });
+
+    document
+      .querySelector(".raffle-cards-block")
+      ?.classList.remove("is-participate-active", "is-intro-active");
+    document.getElementById("raffle-cards-carousel")?.classList.remove("is-intro-hidden");
+    clearRaffleIntroPaginationStyles();
+    setRaffleScrollLocked(false);
+    raffleParticipateSession = null;
+    raffleIntroRunning = false;
+
+    raffleCarouselRefs?.scrollToSlide?.(1);
+    raffleCarouselRefs?.updateCardTransforms?.();
+  }
+
+  function applyRaffleParticipatedContent(cardEl, cardIndex) {
+    const data = RAFFLE_CARDS[cardIndex];
+    if (!data || !cardEl) return;
+
+    const front = cardEl.querySelector(".raffle-event-card__face--front");
+    if (!front) return;
+
+    const base = front.querySelector(".raffle-event-card__base");
+    const subtitle = front.querySelector(".raffle-event-card__subtitle");
+    const btn = front.querySelector(".raffle-event-card__btn");
+
+    if (base) base.src = data.activeBaseSrc;
+    if (subtitle) {
+      subtitle.textContent = data.participatedSubtitle;
+      subtitle.classList.add("is-participated");
+    }
+    if (btn) {
+      btn.disabled = true;
+      btn.classList.add("is-participated");
+      btn.innerHTML =
+        '<img class="raffle-event-card__btn-icon raffle-event-card__btn-icon--check" src="' +
+        RAFFLE_CHECK_SRC +
+        '" width="24" height="24" alt="" draggable="false" />' +
+        '<span class="raffle-event-card__btn-text">Вы участвуете</span>';
+    }
+
+    cardEl.classList.add("is-participated");
+  }
+
+  function applyRaffleParticipatedBackBase(cardEl, cardIndex) {
+    const data = RAFFLE_CARDS[cardIndex];
+    if (!data || !cardEl) return;
+
+    const back = cardEl.querySelector(".raffle-event-card__face--back");
+    const base = back?.querySelector(".raffle-event-card__base");
+    if (base) base.src = data.activeBaseSrc;
+  }
+
+  function applyRaffleParticipatedContentToAll(cardIndex) {
+    document
+      .querySelectorAll('.raffle-event-card[data-card-index="' + cardIndex + '"]')
+      .forEach((cardEl) => {
+        applyRaffleParticipatedContent(cardEl, cardIndex);
+      });
+  }
+
+  function applyRaffleParticipatedBackBaseToAll(cardIndex) {
+    document
+      .querySelectorAll('.raffle-event-card[data-card-index="' + cardIndex + '"]')
+      .forEach((cardEl) => {
+        applyRaffleParticipatedBackBase(cardEl, cardIndex);
+      });
+  }
+
+  function normalizeRaffleFlipRotation(flip) {
+    const total = Number(flip.dataset.rotation || 0);
+    const frontRotation = Math.round(total / 360) * 360;
+    flip.style.transition = "none";
+    flip.style.transform = "rotateY(" + frontRotation + "deg)";
+    flip.dataset.rotation = String(frontRotation);
+    flip.classList.remove("is-flipped");
+    void flip.offsetWidth;
+    flip.style.transition = "";
+  }
+
+  function spawnRaffleImpactSparks(wrap) {
+    const card = wrap.querySelector(".raffle-event-card");
+    if (!card) return;
+
+    let stage = card.querySelector(".raffle-participate-particles");
+    if (!stage) {
+      stage = document.createElement("div");
+      stage.className = "raffle-participate-particles";
+      stage.setAttribute("aria-hidden", "true");
+      card.appendChild(stage);
+    }
+
+    stage.replaceChildren();
+    spawnPrizeParticles(stage, {
+      particleScale: 4.05,
+      sparkOnly: true,
+      randomOrigin: true,
+      originInsetX: 2,
+      originSpanX: 118,
+      originInsetY: 4,
+      originSpanY: 116,
+      distanceMin: 42,
+      distanceRange: 120,
+      angleSpread: Math.PI * 1.85,
+    });
+  }
+
+  function skipRaffleParticipateAnimation() {
+    if (!raffleParticipateSession) return;
+
+    const { wrap, cardIndex, flip, centerRotate, flipStart = 0 } =
+      raffleParticipateSession;
+
+    applyRaffleParticipatedContentToAll(cardIndex);
+    applyRaffleParticipatedBackBaseToAll(cardIndex);
+    setRaffleTurnoverBackToAll(cardIndex, false);
+    raffleParticipatedIndices.add(cardIndex);
+
+    flip.dataset.rotation = String(flipStart + 360);
+    normalizeRaffleFlipRotation(flip);
+    wrap.style.transition = "";
+    wrap.style.transform =
+      "translateY(0px) rotate(" + centerRotate + "deg) scale(1)";
+    wrap.style.filter = "none";
+    delete wrap.dataset.participating;
+
+    document.querySelector(".raffle-cards-block")?.classList.remove("is-participate-active");
+    setRaffleScrollLocked(false);
+    raffleParticipateSession = null;
+    raffleCarouselRefs?.updateCardTransforms();
+  }
+
+  async function runRaffleParticipate(wrap, cardIndex) {
+    const card = wrap.querySelector(".raffle-event-card");
+    const flip = wrap.querySelector(".raffle-event-card__flip");
+    const carousel = raffleCarouselRefs?.carousel;
+
+    if (
+      !card ||
+      !flip ||
+      !carousel ||
+      raffleParticipatedIndices.has(cardIndex) ||
+      wrap.dataset.participating === "true" ||
+      getRaffleWrapProgress(wrap, carousel) > 0.08
+    ) {
+      return;
+    }
+
+    const centerRotate = RAFFLE_CENTER_ROTATIONS[cardIndex] ?? 0;
+    const flipStart = Number(flip.dataset.rotation || 0);
+
+    wrap.dataset.participating = "true";
+    raffleParticipateSession = { wrap, card, flip, cardIndex, centerRotate, flipStart };
+    setRaffleScrollLocked(true);
+    document.querySelector(".raffle-cards-block")?.classList.add("is-participate-active");
+    setRaffleTurnoverBackToAll(cardIndex, true);
+
+    flip.style.transition = "none";
+    flip.style.transform = "rotateY(" + flipStart + "deg)";
+    void flip.offsetWidth;
+    flip.style.transition = "";
+
+    try {
+      await waitRaffleDelay(RAFFLE_PARTICIPATE_SCALE_DELAY_MS);
+
+      wrap.style.transition =
+        "transform " +
+        RAFFLE_PARTICIPATE_SCALE_MS +
+        "ms cubic-bezier(0, 0, 0.4, 0.9), filter " +
+        RAFFLE_PARTICIPATE_SCALE_MS +
+        "ms ease";
+      wrap.style.filter = "none";
+      wrap.style.transform =
+        "translateY(0px) rotate(0deg) scale(" + RAFFLE_PARTICIPATE_SCALE + ")";
+      await waitRaffleTransition(wrap, "transform", RAFFLE_PARTICIPATE_SCALE_MS);
+
+      flip.style.transition =
+        "transform " +
+        RAFFLE_PARTICIPATE_FLIP_SLOW_MS +
+        "ms cubic-bezier(0.4, 0, 1, 1)";
+      flip.style.transform = "rotateY(" + (flipStart + 180) + "deg)";
+      await waitRaffleTransition(flip, "transform", RAFFLE_PARTICIPATE_FLIP_SLOW_MS);
+
+      applyRaffleParticipatedContentToAll(cardIndex);
+      raffleParticipatedIndices.add(cardIndex);
+
+      flip.style.transition =
+        "transform " +
+        RAFFLE_PARTICIPATE_FLIP_FAST_MS +
+        "ms cubic-bezier(0.4, 0.1, 0.2, 1)";
+      flip.style.transform = "rotateY(" + (flipStart + 360) + "deg)";
+      await waitRaffleTransition(flip, "transform", RAFFLE_PARTICIPATE_FLIP_FAST_MS);
+
+      flip.dataset.rotation = String(flipStart + 360);
+      normalizeRaffleFlipRotation(flip);
+
+      await waitRaffleDelay(RAFFLE_PARTICIPATE_PAUSE_MS);
+
+      wrap.style.transition =
+        "transform " +
+        RAFFLE_PARTICIPATE_RETURN_MS +
+        "ms cubic-bezier(0.45, 1.45, 0.48, 1)";
+      wrap.style.transform =
+        "translateY(0px) rotate(" + centerRotate + "deg) scale(1)";
+
+      window.setTimeout(() => {
+        spawnRaffleImpactSparks(wrap);
+      }, RAFFLE_PARTICIPATE_SPARKS_AT_MS);
+
+      await waitRaffleTransition(wrap, "transform", RAFFLE_PARTICIPATE_RETURN_MS);
+      applyRaffleParticipatedBackBaseToAll(cardIndex);
+      setRaffleTurnoverBackToAll(cardIndex, false);
+    } finally {
+      setRaffleTurnoverBackToAll(cardIndex, false);
+      wrap.style.transition = "";
+      flip.style.transition = "";
+      delete wrap.dataset.participating;
+      document.querySelector(".raffle-cards-block")?.classList.remove("is-participate-active");
+      setRaffleScrollLocked(false);
+      raffleParticipateSession = null;
+      raffleCarouselRefs?.updateCardTransforms();
+    }
+  }
+
+  function toggleRaffleCardFlip(flip) {
+    if (flip.dataset.flipAnimating === "true") return;
+
+    const current = Number(flip.dataset.rotation || 0);
+    const next = current + 180;
+
+    flip.dataset.flipAnimating = "true";
+    flip.style.transform = "rotateY(" + next + "deg)";
+    flip.dataset.rotation = String(next);
+    flip.classList.toggle("is-flipped", (next / 180) % 2 === 1);
+
+    let done = false;
+    const finish = (event) => {
+      if (done) return;
+      if (event && (event.target !== flip || event.propertyName !== "transform")) {
+        return;
+      }
+      done = true;
+      flip.removeEventListener("transitionend", finish);
+      delete flip.dataset.flipAnimating;
+    };
+
+    flip.addEventListener("transitionend", finish);
+    window.setTimeout(() => finish(), FLIP_DURATION_MS + 60);
+  }
+
+  function initRaffleCardFlip(carousel, wraps) {
+    wraps.forEach((wrap) => {
+      const card = wrap.querySelector(".raffle-event-card");
+      const flip = wrap.querySelector(".raffle-event-card__flip");
+      if (!card || !flip) return;
+
+      const faces = flip.querySelectorAll(".raffle-event-card__face");
+      const buttons = flip.querySelectorAll(".raffle-event-card__btn");
+
+      buttons.forEach((button) => {
+        ["pointerdown", "pointerup", "touchstart", "touchend"].forEach((eventName) => {
+          button.addEventListener(
+            eventName,
+            (event) => {
+              event.stopPropagation();
+            },
+            { passive: eventName === "touchstart" }
+          );
+        });
+
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (button.disabled || button.classList.contains("is-participated")) return;
+          const cardIndex = Number(card.dataset.cardIndex);
+          runRaffleParticipate(wrap, cardIndex);
+        });
+      });
+
+      faces.forEach((face) => {
+        face.addEventListener("click", (event) => {
+          if (wrap.dataset.participating === "true") return;
+          if (getRaffleWrapProgress(wrap, carousel) > 0.08) return;
+          if (face.classList.contains("raffle-event-card__face--front")) {
+            if (isRaffleButtonSafeZone(event, card)) return;
+            if (event.target.closest(".raffle-event-card__btn")) return;
+          }
+
+          toggleRaffleCardFlip(flip);
+        });
+      });
+    });
+  }
+
+  function getTabBarTop() {
+    const tabBar = document.querySelector(".tab-bar");
+    return tabBar?.getBoundingClientRect().top ?? window.innerHeight - 84;
+  }
+
+  function hasSeenRaffleIntro() {
+    try {
+      return localStorage.getItem(RAFFLE_INTRO_SEEN_KEY) === "1";
+    } catch {
+      return true;
+    }
+  }
+
+  function markRaffleIntroSeen() {
+    try {
+      localStorage.setItem(RAFFLE_INTRO_SEEN_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function clearRaffleIntroPaginationStyles() {
+    const pagination = document.getElementById("raffle-cards-pagination");
+    if (!pagination) return;
+    pagination.style.transition = "";
+    pagination.style.opacity = "";
+    pagination.style.pointerEvents = "";
+  }
+
+  function setRaffleIntroVisualScale(slot, scale, transition) {
+    const visual = slot.querySelector(".raffle-event-card__visual");
+    if (!visual) return;
+    visual.style.transition = transition || "none";
+    visual.style.transform = "scale(" + scale + ")";
+    if (!transition) {
+      void visual.offsetWidth;
+    }
+  }
+
+  function prepareRaffleIntroPresentation() {
+    if (hasSeenRaffleIntro() || raffleIntroRunning) return;
+
+    const block = document.querySelector(".raffle-cards-block");
+    const carouselEl = document.getElementById("raffle-cards-carousel");
+    const layer = ensureRaffleIntroLayer();
+    if (!block || !carouselEl || !layer) return;
+
+    block.classList.add("is-intro-active");
+    carouselEl.classList.add("is-intro-hidden");
+    setRaffleScrollLocked(true);
+    layer.hidden = false;
+
+    const pagination = document.getElementById("raffle-cards-pagination");
+    if (pagination) {
+      pagination.style.transition = "none";
+      pagination.style.opacity = "0";
+      pagination.style.pointerEvents = "none";
+    }
+
+    const initial = getRaffleIntroInitialState();
+    getRaffleIntroSlots(layer).forEach((slot, index) => {
+      const card = slot.querySelector(".raffle-event-card");
+      const flip = slot.querySelector(".raffle-event-card__flip");
+
+      slot.style.transition = "none";
+      slot.style.zIndex = String(RAFFLE_CARD_COUNT - index);
+      setRaffleEntryTurnoverBack(card, index === 0);
+
+      if (flip) {
+        applyRaffleIntroFlip(flip, index === 0 ? 180 : 0, false);
+      }
+
+      applyRaffleIntroSlotStyle(slot, initial);
+      setRaffleIntroVisualScale(slot, initial.visualScale, "");
+    });
+  }
+
+  function cancelRaffleIntroPresentation() {
+    if (raffleIntroRunning || hasSeenRaffleIntro()) return;
+
+    const block = document.querySelector(".raffle-cards-block");
+    const carouselEl = document.getElementById("raffle-cards-carousel");
+
+    block?.classList.remove("is-intro-active");
+    carouselEl?.classList.remove("is-intro-hidden");
+    if (raffleIntroLayerEl) {
+      raffleIntroLayerEl.hidden = true;
+    }
+    clearRaffleIntroPaginationStyles();
+    setRaffleScrollLocked(false);
+  }
+
+  function ensureRaffleIntroLayer() {
+    if (raffleIntroLayerEl) return raffleIntroLayerEl;
+
+    const block = document.querySelector(".raffle-cards-block");
+    if (!block) return null;
+
+    const layer = document.createElement("div");
+    layer.id = "raffle-intro";
+    layer.className = "raffle-intro";
+    layer.hidden = true;
+    layer.setAttribute("aria-hidden", "true");
+    layer.innerHTML = Array.from({ length: RAFFLE_CARD_COUNT }, (_, cardIndex) => {
+      return (
+        '<div class="raffle-intro__slot" data-intro-card="' +
+        cardIndex +
+        '">' +
+        '<div class="raffle-event-card-wrap raffle-intro__wrap">' +
+        raffleCardMarkup(cardIndex) +
+        "</div></div>"
+      );
+    }).join("");
+    block.appendChild(layer);
+    raffleIntroLayerEl = layer;
+    return layer;
+  }
+
+  function getRaffleIntroSlots(layer) {
+    return [...layer.querySelectorAll(".raffle-intro__slot")].sort(
+      (a, b) => Number(a.dataset.introCard) - Number(b.dataset.introCard)
+    );
+  }
+
+  function buildIntroSlotState(anchor, transform, opacity) {
+    const scale = transform.scale ?? 1;
+    return {
+      centerX: anchor.centerX,
+      centerY: anchor.centerY,
+      translateY: transform.translateY ?? 0,
+      rotate: transform.rotate ?? 0,
+      scale,
+      visualScale: scale,
+      blur: transform.blur ?? 0,
+      opacity: opacity ?? transform.opacity ?? 1,
+    };
+  }
+
+  function getSlideWrapAnchor(slide) {
+    if (!slide) return null;
+    const slideRect = slide.getBoundingClientRect();
+    return {
+      centerX: slideRect.left + slideRect.width / 2,
+      centerY: slideRect.top + RAFFLE_CARD_HEIGHT / 2,
+    };
+  }
+
+  function applyRaffleIntroSlotStyle(slot, state) {
+    slot.style.left = state.centerX + "px";
+    slot.style.top = state.centerY + "px";
+    slot.style.transform = "translate(-50%, -50%)";
+    slot.style.opacity = String(state.opacity);
+    slot.style.filter = "none";
+
+    const wrap = slot.querySelector(".raffle-intro__wrap");
+    if (!wrap) return;
+
+    wrap.style.transform =
+      "translateY(" +
+      (state.translateY || 0) +
+      "px) rotate(" +
+      state.rotate +
+      "deg) scale(" +
+      state.scale +
+      ")";
+    wrap.style.filter = state.blur > 0.05 ? "blur(" + state.blur + "px)" : "none";
+  }
+
+  function setRaffleIntroSlotTransitions(slot, durationMs, easing, includePosition) {
+    const wrap = slot.querySelector(".raffle-intro__wrap");
+    const positionPart = includePosition ? "left " + durationMs + "ms " + easing + ", top " + durationMs + "ms " + easing + ", " : "";
+    slot.style.transition =
+      positionPart +
+      "opacity " +
+      durationMs +
+      "ms " +
+      easing;
+
+    if (wrap) {
+      wrap.style.transition =
+        "transform " + durationMs + "ms " + easing + ", filter " + durationMs + "ms ease";
+    }
+  }
+
+  function applyRaffleIntroFlip(flip, degrees, withTransition) {
+    if (!withTransition) {
+      flip.style.transition = "none";
+    }
+    flip.style.transform = "rotateY(" + degrees + "deg)";
+    flip.classList.toggle("is-flipped", (degrees / 180) % 2 === 1);
+    if (!withTransition) {
+      void flip.offsetWidth;
+    }
+  }
+
+  function getRaffleCarouselWrapTransform(cardIndex, offsetFromCenter) {
+    const progress = Math.min(1, Math.abs(offsetFromCenter) / RAFFLE_SLIDE_STEP);
+    const centerRotate = RAFFLE_CENTER_ROTATIONS[cardIndex] ?? 0;
+    return {
+      scale: 1 - progress * 0.1,
+      rotate: centerRotate * (1 - progress) + (offsetFromCenter / RAFFLE_SLIDE_STEP) * 4,
+      translateY: progress * 48,
+      blur: progress * 4,
+      opacity: 1,
+    };
+  }
+
+  function measureRaffleIntroTargets() {
+    const { carousel, slides, scrollToSlide, updateCardTransforms } =
+      raffleCarouselRefs ?? {};
+    if (!carousel || !slides?.length) return null;
+
+    scrollToSlide(1);
+    updateCardTransforms();
+
+    const carouselRect = carousel.getBoundingClientRect();
+    const carouselCenterX = carouselRect.left + carouselRect.width / 2;
+    const centerAnchor = getSlideWrapAnchor(slides[1]);
+    if (!centerAnchor) return null;
+
+    const stage1Center = buildIntroSlotState(
+      centerAnchor,
+      { translateY: 0, rotate: 0, scale: 1, blur: 0 },
+      1
+    );
+
+    const slideByCardIndex = { 0: 1, 1: 2, 2: 0 };
+    const stage2 = {};
+    Object.entries(slideByCardIndex).forEach(([cardIndex, slideIndex]) => {
+      const anchor = getSlideWrapAnchor(slides[slideIndex]);
+      if (!anchor) return;
+
+      const offset = anchor.centerX - carouselCenterX;
+      const transform = getRaffleCarouselWrapTransform(Number(cardIndex), offset);
+      stage2[Number(cardIndex)] = buildIntroSlotState(anchor, transform);
+    });
+
+    return { stage1Center, stage2 };
+  }
+
+  function getRaffleIntroInitialState() {
+    return {
+      centerX: window.innerWidth / 2,
+      centerY: getTabBarTop() + RAFFLE_CARD_HEIGHT / 2,
+      translateY: 0,
+      rotate: 0,
+      scale: 0.8,
+      visualScale: 0.8,
+      blur: 0,
+      opacity: 0,
+    };
+  }
+
+  function getRaffleIntroStage2Start(cardIndex, stage1Center) {
+    const base = {
+      centerX: stage1Center.centerX,
+      centerY: stage1Center.centerY,
+      translateY: 0,
+      rotate: 0,
+      scale: 1,
+      visualScale: 1,
+      blur: 0,
+    };
+
+    if (cardIndex === 0) {
+      return { ...base, opacity: 1 };
+    }
+
+    return { ...base, opacity: 0 };
+  }
+
+  function finishRaffleIntro(layer, block, carouselEl) {
+    raffleCarouselRefs?.updateCardTransforms();
+    layer.hidden = true;
+    block?.classList.remove("is-intro-active");
+    carouselEl?.classList.remove("is-intro-hidden");
+    clearRaffleIntroPaginationStyles();
+    setRaffleScrollLocked(false);
+    raffleIntroRunning = false;
+  }
+
+  function cancelRaffleIntro(markSeen = true) {
+    if (!raffleIntroRunning) return;
+
+    const layer = raffleIntroLayerEl;
+    const block = document.querySelector(".raffle-cards-block");
+    const carouselEl = document.getElementById("raffle-cards-carousel");
+
+    if (layer) {
+      getRaffleIntroSlots(layer).forEach((slot) => {
+        const card = slot.querySelector(".raffle-event-card");
+        const flip = slot.querySelector(".raffle-event-card__flip");
+        setRaffleEntryTurnoverBack(card, false);
+        if (flip) {
+          applyRaffleIntroFlip(flip, 0, false);
+        }
+      });
+    }
+
+    if (markSeen) {
+      markRaffleIntroSeen();
+    }
+    if (layer) {
+      finishRaffleIntro(layer, block, carouselEl);
+    } else {
+      block?.classList.remove("is-intro-active");
+      carouselEl?.classList.remove("is-intro-hidden");
+      clearRaffleIntroPaginationStyles();
+      setRaffleScrollLocked(false);
+      raffleIntroRunning = false;
+    }
+  }
+
+  async function runRaffleIntroAnimation() {
+    const layer = raffleIntroLayerEl ?? ensureRaffleIntroLayer();
+    const block = document.querySelector(".raffle-cards-block");
+    const carouselEl = document.getElementById("raffle-cards-carousel");
+    const pagination = document.getElementById("raffle-cards-pagination");
+    if (!layer || !block || !carouselEl || !raffleCarouselRefs) return;
+
+    prepareRaffleIntroPresentation();
+    raffleIntroRunning = true;
+
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+
+    const targets = measureRaffleIntroTargets();
+    if (!targets?.stage1Center || !targets.stage2) {
+      finishRaffleIntro(layer, block, carouselEl);
+      markRaffleIntroSeen();
+      return;
+    }
+
+    const slots = getRaffleIntroSlots(layer);
+    const stage1Ease = "cubic-bezier(0, 0, 0.4, 0.9)";
+    const stage2Ease = "cubic-bezier(0.35, 1.3, 0.25, 1)";
+
+    const stage1Promises = slots.map((slot, index) => {
+      const endState =
+        index === 0
+          ? { ...targets.stage1Center, opacity: 1 }
+          : { ...targets.stage1Center, opacity: 0 };
+
+      setRaffleIntroSlotTransitions(slot, RAFFLE_INTRO_STAGE1_MS, stage1Ease, true);
+      applyRaffleIntroSlotStyle(slot, endState);
+      setRaffleIntroVisualScale(
+        slot,
+        1,
+        "transform " + RAFFLE_INTRO_STAGE1_MS + "ms " + stage1Ease
+      );
+
+      if (index === 0) {
+        const flip = slot.querySelector(".raffle-event-card__flip");
+        if (flip) {
+          flip.style.transition =
+            "transform " + RAFFLE_INTRO_STAGE1_MS + "ms " + stage1Ease;
+          applyRaffleIntroFlip(flip, 0, true);
+        }
+      }
+
+      const wrap = slot.querySelector(".raffle-intro__wrap");
+      return waitRaffleTransition(wrap, "transform", RAFFLE_INTRO_STAGE1_MS);
+    });
+
+    await Promise.all(stage1Promises);
+
+    await waitRaffleDelay(RAFFLE_INTRO_PAUSE_MS);
+
+    slots.forEach((slot) => {
+      const card = slot.querySelector(".raffle-event-card");
+      setRaffleEntryTurnoverBack(card, false);
+    });
+
+    slots.forEach((slot, index) => {
+      const startState = getRaffleIntroStage2Start(index, targets.stage1Center);
+      slot.style.transition = "none";
+      applyRaffleIntroSlotStyle(slot, startState);
+      setRaffleIntroVisualScale(slot, 1, "");
+      void slot.offsetWidth;
+    });
+
+    if (pagination) {
+      pagination.style.transition = "none";
+      pagination.style.opacity = "0";
+      pagination.style.pointerEvents = "none";
+      void pagination.offsetWidth;
+      pagination.style.transition =
+        "opacity " + RAFFLE_INTRO_STAGE2_MS + "ms " + stage2Ease;
+      pagination.style.opacity = "1";
+    }
+
+    const stage2Promises = slots.map((slot, index) => {
+      const endState = targets.stage2[index];
+      if (!endState) return Promise.resolve();
+
+      setRaffleIntroSlotTransitions(slot, RAFFLE_INTRO_STAGE2_MS, stage2Ease, true);
+      applyRaffleIntroSlotStyle(slot, endState);
+      setRaffleIntroVisualScale(
+        slot,
+        endState.visualScale,
+        "transform " + RAFFLE_INTRO_STAGE2_MS + "ms " + stage2Ease
+      );
+
+      const wrap = slot.querySelector(".raffle-intro__wrap");
+      return waitRaffleTransition(wrap, "transform", RAFFLE_INTRO_STAGE2_MS);
+    });
+
+    await Promise.all(stage2Promises);
+
+    if (pagination) {
+      pagination.style.pointerEvents = "";
+    }
+
+    markRaffleIntroSeen();
+    finishRaffleIntro(layer, block, carouselEl);
+  }
+
+  async function maybePlayRaffleIntro() {
+    if (hasSeenRaffleIntro() || raffleIntroRunning || !raffleCarouselRefs) return;
+
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+
+    if (hasSeenRaffleIntro() || raffleIntroRunning) return;
+
+    await waitRaffleDelay(RAFFLE_INTRO_ENTRY_DELAY_MS);
+
+    if (hasSeenRaffleIntro() || raffleIntroRunning) return;
+
+    try {
+      await runRaffleIntroAnimation();
+    } catch {
+      cancelRaffleIntro();
+    }
+  }
+
+  function raffleSlideMarkup(slideIndex, cardIndex) {
+    return (
+      '<div class="raffle-cards-slide" data-slide-index="' +
+      slideIndex +
+      '">' +
+      '<div class="raffle-event-card-wrap">' +
+      raffleCardMarkup(cardIndex) +
+      "</div></div>"
+    );
+  }
+
+  function initRaffleCarousel() {
+    const track = document.getElementById("raffle-cards-track");
+    const carousel = document.getElementById("raffle-cards-carousel");
+    const pagination = document.getElementById("raffle-cards-pagination");
+    if (!track || !carousel || !pagination) return;
+
+    track.innerHTML = RAFFLE_LOOP_SLIDE_INDICES.map((cardIndex, slideIndex) =>
+      raffleSlideMarkup(slideIndex, cardIndex)
+    ).join("");
+
+    pagination.innerHTML = Array.from({ length: RAFFLE_CARD_COUNT }, (_, index) => {
+      const activeClass = index === 0 ? " is-active" : "";
+      return (
+        '<span class="raffle-cards-dot' +
+        activeClass +
+        '" data-dot-index="' +
+        index +
+        '"></span>'
+      );
+    }).join("");
+
+    const slides = [...track.querySelectorAll(".raffle-cards-slide")];
+    const wraps = [...track.querySelectorAll(".raffle-event-card-wrap")];
+    const dots = [...pagination.querySelectorAll(".raffle-cards-dot")];
+    let isRepositioning = false;
+    let rafId = null;
+    let scrollEndTimer = null;
+
+    function scrollToSlide(slideIndex, behavior = "auto") {
+      track.scrollTo({ left: slideIndex * RAFFLE_SLIDE_STEP, behavior });
+    }
+
+    function getNearestSlideIndex() {
+      return Math.round(track.scrollLeft / RAFFLE_SLIDE_STEP);
+    }
+
+    function getRealCardIndex(slideIndex) {
+      return (
+        ((slideIndex - 1) % RAFFLE_CARD_COUNT) + RAFFLE_CARD_COUNT
+      ) % RAFFLE_CARD_COUNT;
+    }
+
+    function updateDots(realIndex) {
+      dots.forEach((dot, index) => {
+        dot.classList.toggle("is-active", index === realIndex);
+      });
+    }
+
+    function updateCardTransforms() {
+      const carouselRect = carousel.getBoundingClientRect();
+      const centerX = carouselRect.left + carouselRect.width / 2;
+      const slideStep = RAFFLE_SLIDE_STEP;
+
+      wraps.forEach((wrap) => {
+        if (wrap.dataset.participating === "true") return;
+
+        const cardRect = wrap.getBoundingClientRect();
+        const cardCenterX = cardRect.left + cardRect.width / 2;
+        const offset = cardCenterX - centerX;
+        const progress = Math.min(1, Math.abs(offset) / slideStep);
+        const cardIndex = Number(
+          wrap.querySelector(".raffle-event-card")?.dataset.cardIndex ?? 2
+        );
+        const centerRotate = RAFFLE_CENTER_ROTATIONS[cardIndex] ?? 0;
+        const scale = 1 - progress * 0.1;
+        const rotateDeg =
+          centerRotate * (1 - progress) + (offset / slideStep) * 4;
+        const translateY = progress * 48;
+        const blur = progress * 4;
+
+        wrap.style.transform =
+          "translateY(" +
+          translateY +
+          "px) rotate(" +
+          rotateDeg +
+          "deg) scale(" +
+          scale +
+          ")";
+        wrap.style.filter = blur > 0.05 ? "blur(" + blur + "px)" : "none";
+        wrap.style.zIndex = String(10 - Math.round(progress * 10));
+
+        const visual = wrap.querySelector(".raffle-event-card__visual");
+        if (visual) {
+          const visualScale = 1 - progress * 0.1;
+          visual.style.transform = "scale(" + visualScale + ")";
+        }
+      });
+
+      updateDots(getRealCardIndex(getNearestSlideIndex()));
+    }
+
+    function handleLoop() {
+      if (isRepositioning) return;
+
+      const slideIndex = getNearestSlideIndex();
+      if (slideIndex === 0) {
+        isRepositioning = true;
+        scrollToSlide(3);
+        isRepositioning = false;
+      } else if (slideIndex === slides.length - 1) {
+        isRepositioning = true;
+        scrollToSlide(1);
+        isRepositioning = false;
+      }
+    }
+
+    function scheduleTransformUpdate() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        updateCardTransforms();
+      });
+    }
+
+    function handleScrollEnd() {
+      handleLoop();
+      updateCardTransforms();
+    }
+
+    function layoutRaffleCarousel() {
+      slides.forEach((slide) => {
+        slide.style.flexBasis = RAFFLE_SLIDE_STEP + "px";
+        slide.style.width = RAFFLE_SLIDE_STEP + "px";
+      });
+
+      const currentSlide = getNearestSlideIndex();
+      const targetSlide =
+        currentSlide <= 0 || currentSlide >= slides.length - 1 ? 1 : currentSlide;
+      scrollToSlide(targetSlide);
+      updateCardTransforms();
+    }
+
+    track.addEventListener(
+      "scroll",
+      () => {
+        if (raffleParticipateSession) return;
+        unflipRaffleCardsOnScroll(carousel, wraps);
+        scheduleTransformUpdate();
+        clearTimeout(scrollEndTimer);
+        scrollEndTimer = window.setTimeout(handleScrollEnd, 120);
+      },
+      { passive: true }
+    );
+    track.addEventListener("scrollend", handleScrollEnd);
+
+    initRaffleCardFlip(carousel, wraps);
+
+    raffleCarouselRefs = {
+      carousel,
+      track,
+      slides,
+      wraps,
+      scrollToSlide,
+      updateCardTransforms,
+    };
+
+    requestAnimationFrame(() => {
+      layoutRaffleCarousel();
+      scrollToSlide(1);
+      updateCardTransforms();
+    });
+    window.addEventListener("resize", layoutRaffleCarousel);
+  }
+
+  function spawnPrizeParticles(stage, options = {}) {
+    const opts = typeof options === "number" ? { particleScale: options } : options;
+    const particleScale = opts.particleScale ?? 1;
+    const sparkOnly = opts.sparkOnly ?? false;
+    const randomOrigin = opts.randomOrigin ?? false;
+    const originInsetX = opts.originInsetX ?? 12;
+    const originSpanX = opts.originSpanX ?? 76;
+    const originInsetY = opts.originInsetY ?? 18;
+    const originSpanY = opts.originSpanY ?? 64;
+    const distanceMin = opts.distanceMin ?? 28;
+    const distanceRange = opts.distanceRange ?? 34;
+    const angleSpread = opts.angleSpread ?? Math.PI * 1.25;
     const count = Math.floor((12 + Math.floor(Math.random() * 6)) * particleScale);
 
     for (let i = 0; i < count; i += 1) {
       const particle = document.createElement("span");
-      const isSpark = Math.random() > 0.55;
+      const isSpark = sparkOnly || Math.random() > 0.55;
       particle.className = isSpark
         ? "win-progress__prize-particle win-progress__prize-particle--spark"
         : "win-progress__prize-particle";
       particle.setAttribute("aria-hidden", "true");
 
-      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.25;
-      const distance = 28 + Math.random() * 34;
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * angleSpread;
+      const distance = distanceMin + Math.random() * distanceRange;
       const size = isSpark ? 4 + Math.random() * 4 : 6 + Math.random() * 5;
+
+      if (randomOrigin) {
+        particle.style.left = originInsetX + Math.random() * originSpanX + "%";
+        particle.style.top = originInsetY + Math.random() * originSpanY + "%";
+      }
 
       particle.style.width = `${size}px`;
       particle.style.height = `${size}px`;
@@ -2394,10 +3681,16 @@
 
   scenarioSelectEl?.addEventListener("change", markProfileSettingsDirty);
   thematicWordSwitchEl?.addEventListener("change", markProfileSettingsDirty);
+  raffleSectionSwitchEl?.addEventListener("change", () => {
+    resetRaffleProgress();
+    applyRaffleSectionVisibility();
+  });
+  raffleResetProgressBtnEl?.addEventListener("click", resetRaffleProgress);
 
   buildGrid();
   buildKeyboard();
   initTabBar();
+  applyRaffleSectionVisibility();
   preventMobileZoomGestures();
   applyWinResultContent();
   syncFrameViewportHeight();
@@ -2407,6 +3700,8 @@
   mountPrizeForPanel(winProgressPanelEl, { hidden: false });
   syncActivePrizePosition();
   initPrizesCarousel();
+  initRaffleCarousel();
+  resetRaffleProgress();
   updateMainScrollFade();
 
   mainEl?.addEventListener("scroll", updateMainScrollFade, { passive: true });

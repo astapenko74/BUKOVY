@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>5 букв</title>
-    <link rel="stylesheet" href="styles.css?v=97" />
+    <link rel="stylesheet" href="styles.css?v=122" />
   </head>
   <body>
     <div class="viewport-gate" id="viewport-gate">
@@ -274,29 +274,81 @@
             </main>
           </div>
 
+          <div class="app-screen" id="raffle-screen" hidden>
+            <section class="raffle-page" aria-label="Розыгрыш">
+              <div class="raffle-cards-block">
+                <div class="raffle-cards-carousel" id="raffle-cards-carousel">
+                  <div class="raffle-cards-track" id="raffle-cards-track"></div>
+                </div>
+                <div
+                  class="raffle-cards-pagination"
+                  id="raffle-cards-pagination"
+                  aria-hidden="true"
+                ></div>
+              </div>
+              <div class="raffle-page-footer">
+                <div class="raffle-page-footer__frame">
+                  <p class="raffle-page-footer__text">Подведём итоги 1 декабря</p>
+                </div>
+              </div>
+            </section>
+          </div>
+
           <div class="app-screen" id="profile-screen" hidden>
             <section class="profile-page">
               <div class="profile-settings">
-                <label class="profile-field profile-field--select">
-                  <span class="profile-field__label">Сценарий</span>
-                  <select class="profile-field__select" id="scenario-select">
-                    <option value="2-4-word" selected>2-4 слово</option>
-                    <option value="5-word">5 слово</option>
-                    <option value="not-guessed" disabled>Слово не отгадано (авто)</option>
-                  </select>
-                </label>
-                <div class="profile-field profile-field--switch">
-                  <span class="profile-field__label">Тематическое слово</span>
-                  <label class="win-switch">
-                    <input
-                      class="win-switch__input"
-                      id="thematic-word-switch"
-                      type="checkbox"
-                      role="switch"
-                      aria-label="Тематическое слово"
-                    />
-                    <span class="win-switch__track" aria-hidden="true"></span>
-                  </label>
+                <div class="profile-block">
+                  <h2 class="profile-section-title">Core</h2>
+                  <div class="profile-block__fields">
+                    <label class="profile-field profile-field--select">
+                      <span class="profile-field__label">Сценарий</span>
+                      <select class="profile-field__select" id="scenario-select">
+                        <option value="2-4-word" selected>2-4 слово</option>
+                        <option value="5-word">5 слово</option>
+                        <option value="not-guessed" disabled>Слово не отгадано (авто)</option>
+                      </select>
+                    </label>
+                    <div class="profile-field profile-field--switch">
+                      <span class="profile-field__label">Тематическое слово</span>
+                      <label class="win-switch">
+                        <input
+                          class="win-switch__input"
+                          id="thematic-word-switch"
+                          type="checkbox"
+                          role="switch"
+                          aria-label="Тематическое слово"
+                        />
+                        <span class="win-switch__track" aria-hidden="true"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="profile-block">
+                  <h2 class="profile-section-title">Розыгрыши</h2>
+                  <div class="profile-block__fields">
+                    <div class="profile-field profile-field--switch">
+                      <span class="profile-field__label">Отображение раздела</span>
+                      <label class="win-switch">
+                        <input
+                          class="win-switch__input"
+                          id="raffle-section-switch"
+                          type="checkbox"
+                          role="switch"
+                          aria-label="Отображение раздела «Розыгрыш»"
+                          checked
+                        />
+                        <span class="win-switch__track" aria-hidden="true"></span>
+                      </label>
+                    </div>
+                    <button
+                      class="profile-reset-btn"
+                      id="raffle-reset-progress-btn"
+                      type="button"
+                    >
+                      Сбросить прогресс
+                    </button>
+                  </div>
                 </div>
               </div>
             </section>
@@ -391,6 +443,6 @@
       </div>
     </div>
 
-    <script src="app.js?v=72"></script>
+    <script src="app.js?v=100"></script>
   </body>
 </html>
