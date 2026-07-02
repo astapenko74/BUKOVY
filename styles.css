@@ -111,6 +111,7 @@ button {
   border-radius: 40px;
   overflow: hidden;
   touch-action: manipulation;
+  position: relative;
 }
 
 @media (max-width: 450px) {
@@ -919,6 +920,7 @@ button {
   width: 100%;
   height: 100%;
   overflow: visible;
+  background-color: #1c1c1e;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -1084,6 +1086,16 @@ button {
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
+}
+
+.raffle-event-card__flip[data-flip-animating="true"]
+  .raffle-event-card__face--front
+  .raffle-event-card__visual {
+  transition: transform 0.75s cubic-bezier(0.4, 0, 0.15, 1);
+}
+
+.raffle-event-card__flip.is-flipped .raffle-event-card__face--front .raffle-event-card__visual {
+  transform: scale(0.9) !important;
 }
 
 .raffle-event-card__base {
@@ -1459,6 +1471,10 @@ button {
     opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
 }
 
+.app.scenario-normal-word.is-animating-reverse-win-hero .cell-inner {
+  transition: transform var(--mini-unflip-ms, 360ms) cubic-bezier(0.4, 0, 0.15, 1);
+}
+
 .app.is-animating-reverse-normal-word .grid-area {
   transition: margin-top 1000ms cubic-bezier(0.7, 0, 0.3, 1);
   justify-content: center;
@@ -1626,6 +1642,7 @@ button {
   align-items: center;
   justify-content: center;
   min-height: auto;
+  cursor: pointer;
 }
 
 .app.scenario-normal-word .grid {
@@ -2727,4 +2744,235 @@ button {
 
 .app.scenario-normal-word.scenario-win-hero .win-panel {
   pointer-events: auto;
+}
+
+/* ——— Штора результата ——— */
+.result-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(28, 28, 30, 0.85);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 500ms cubic-bezier(0.4, 0.1, 0.2, 1),
+    visibility 500ms cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.result-sheet-backdrop.is-closing {
+  transition:
+    opacity 300ms cubic-bezier(0.4, 0, 1, 1),
+    visibility 300ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.result-sheet-backdrop.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.main.result-sheet-open {
+  overflow: hidden !important;
+}
+
+.result-sheet[hidden] {
+  display: none !important;
+}
+
+.result-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 150;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.result-sheet.is-open,
+.result-sheet.is-closing {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.result-sheet__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: #1c1c1e;
+  border-radius: 32px 32px 0 0;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 500ms cubic-bezier(0.4, 0.1, 0.2, 1);
+  padding-bottom: 56px;
+}
+
+.result-sheet.is-open:not(.is-closing) .result-sheet__panel {
+  transform: translateY(0);
+}
+
+.result-sheet.is-closing .result-sheet__panel {
+  transform: translateY(100%);
+  transition: transform 300ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.result-sheet__panel.is-dragging {
+  transition: none;
+}
+
+.result-sheet__gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(180deg, #0e0e0e 0%, #1c1c1e 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.result-sheet__bar {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  cursor: grab;
+}
+
+.result-sheet__bar:active {
+  cursor: grabbing;
+}
+
+.result-sheet__handle {
+  width: 32px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.result-sheet__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-sheet__close img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.result-sheet__title {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  margin: 16px 0 0;
+  padding: 0 56px;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 36px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.result-sheet__subtitle {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  margin: 8px 16px 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  text-align: center;
+  color: var(--tab-inactive);
+}
+
+.result-sheet__grid-area {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  margin: 24px 32px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.result-sheet__grid {
+  width: auto;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.result-sheet__grid .grid-row {
+  gap: 3px;
+}
+
+.result-sheet__grid .cell-inner {
+  transition: none;
+}
+
+.result-sheet__grid .cell-front,
+.result-sheet__grid .cell-back {
+  border-radius: 4px;
+}
+
+.result-sheet__grid .grid-row:first-child .cell:first-child .cell-front,
+.result-sheet__grid .grid-row:first-child .cell:first-child .cell-back {
+  border-top-left-radius: var(--cell-corner-radius);
+}
+
+.result-sheet__grid .grid-row:first-child .cell:last-child .cell-front,
+.result-sheet__grid .grid-row:first-child .cell:last-child .cell-back {
+  border-top-right-radius: var(--cell-corner-radius);
+}
+
+.result-sheet__grid .grid-row:last-child .cell:first-child .cell-front,
+.result-sheet__grid .grid-row:last-child .cell:first-child .cell-back {
+  border-bottom-left-radius: var(--cell-corner-radius);
+}
+
+.result-sheet__grid .grid-row:last-child .cell:last-child .cell-front,
+.result-sheet__grid .grid-row:last-child .cell:last-child .cell-back {
+  border-bottom-right-radius: var(--cell-corner-radius);
+}
+
+.result-sheet__action {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 32px);
+  height: 56px;
+  margin: 32px auto 0;
+  border-radius: 16px;
+  background: #333335;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 22px;
+  color: #ffffff;
 }

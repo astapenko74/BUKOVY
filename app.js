@@ -7,10 +7,11 @@
   const FLIP_DURATION_MS = 750;
   const NORMAL_WORD_MS = 1000;
   const WIN_HERO_MS = 800;
-  const UNFLIP_DIAGONAL_COUNT = ROWS + COLS - 1;
-  const UNFLIP_DIAGONAL_STAGGER_MS =
-    UNFLIP_DIAGONAL_COUNT > 1
-      ? Math.floor((WIN_HERO_MS - FLIP_DURATION_MS) / (UNFLIP_DIAGONAL_COUNT - 1))
+  const MINI_UNFLIP_FLIP_MS = 360;
+  const MINI_UNFLIP_WAVE_COUNT = ROWS + COLS - 1;
+  const MINI_UNFLIP_WAVE_STAGGER_MS =
+    MINI_UNFLIP_WAVE_COUNT > 1
+      ? (WIN_HERO_MS - MINI_UNFLIP_FLIP_MS) / (MINI_UNFLIP_WAVE_COUNT - 1)
       : 0;
   const REVERSE_NORMAL_WORD_MS = 1000;
   const PROGRESS_PHASE1_MS = 280;
@@ -42,6 +43,16 @@
   const winMessageEl = document.getElementById("win-message");
   const winWordEl = document.getElementById("win-word");
   const winShareEl = document.getElementById("win-share");
+  const resultSheetEl = document.getElementById("result-sheet");
+  const resultSheetBackdropEl = document.getElementById("result-sheet-backdrop");
+  const resultSheetPanelEl = document.getElementById("result-sheet-panel");
+  const resultSheetBarEl = document.getElementById("result-sheet-bar");
+  const resultSheetCloseEl = document.getElementById("result-sheet-close");
+  const resultSheetTitleEl = document.getElementById("result-sheet-title");
+  const resultSheetSubtitleEl = document.getElementById("result-sheet-subtitle");
+  const resultSheetGridAreaEl = document.getElementById("result-sheet-grid-area");
+  const resultSheetGridEl = document.getElementById("result-sheet-grid");
+  const resultSheetActionEl = document.getElementById("result-sheet-action");
   const scenarioSelectEl = document.getElementById("scenario-select");
   const thematicWordSwitchEl = document.getElementById("thematic-word-switch");
   const raffleSectionSwitchEl = document.getElementById("raffle-section-switch");
@@ -95,6 +106,8 @@
   const PRIZE_WIGGLE_INTERVAL_MS = 7000;
   const PRIZE_PARTICLE_COLORS = ["#ffdd2d", "#ffb400", "#ffcd33", "#ffe566"];
 
+  const RESULT_SHEET_OPEN_MS = 500;
+  const RESULT_SHEET_CLOSE_MS = 300;
   const RAFFLE_CARD_COUNT = 3;
   const RAFFLE_CARD_WIDTH = 270;
   const RAFFLE_CARD_HEIGHT = 388;
@@ -725,6 +738,249 @@
     }
   }
 
+  function isResultSheetOpen() {
+    return (
+      resultSheetEl?.classList.contains("is-open") ||
+      resultSheetEl?.classList.contains("is-closing") ||
+      false
+    );
+  }
+
+  function finishResultSheetClose() {
+    resultSheetEl?.classList.remove("is-closing");
+    resultSheetBackdropEl?.classList.remove("is-closing");
+    resultSheetPanelEl?.classList.remove("is-dragging");
+    if (resultSheetPanelEl) {
+      resultSheetPanelEl.style.transform = "";
+    }
+    if (resultSheetEl) {
+      resultSheetEl.hidden = true;
+      resultSheetEl.setAttribute("aria-hidden", "true");
+    }
+    if (resultSheetBackdropEl) {
+      resultSheetBackdropEl.hidden = true;
+      resultSheetBackdropEl.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function canOpenResultSheet() {
+    const app = document.querySelector(".app");
+    if (!app?.classList.contains("scenario-normal-word")) return false;
+    if (
+      app.classList.contains("is-animating-normal-word") ||
+      app.classList.contains("is-animating-reverse-normal-word") ||
+      app.classList.contains("is-returning-to-game")
+    ) {
+      return false;
+    }
+    return !isAnimating;
+  }
+
+  function getResultSheetTitle() {
+    return isFifthWordScenario() ? "40 слово" : "37 слово";
+  }
+
+  function getResultSheetActionText() {
+    if (isWordNotGuessedScenario() && !isThematicWordEnabled()) {
+      return "Поделиться результатом";
+    }
+    return "Похвастаться";
+  }
+
+  function updateResultSheetContent() {
+    if (resultSheetTitleEl) {
+      resultSheetTitleEl.textContent = getResultSheetTitle();
+    }
+    if (resultSheetSubtitleEl && winMessageEl) {
+      resultSheetSubtitleEl.innerHTML = winMessageEl.innerHTML;
+    }
+    if (resultSheetActionEl) {
+      resultSheetActionEl.textContent = getResultSheetActionText();
+    }
+  }
+
+  function syncResultSheetGridFromBoard() {
+    if (!resultSheetGridEl || !gridEl) return;
+
+    resultSheetGridEl.innerHTML = "";
+
+    for (let row = 0; row < ROWS; row += 1) {
+      const sourceRow = getRowEl(row);
+      const rowEl = document.createElement("div");
+      rowEl.className = "grid-row";
+      rowEl.dataset.row = String(row);
+
+      for (let col = 0; col < COLS; col += 1) {
+        const sourceCell = sourceRow?.children[col];
+        const cell = document.createElement("div");
+        cell.className = sourceCell?.className || "cell";
+        cell.dataset.row = String(row);
+        cell.dataset.col = String(col);
+
+        const sourceInner = sourceCell?.querySelector(".cell-inner");
+        const sourceFront = sourceCell?.querySelector(".cell-front");
+        const sourceBack = sourceCell?.querySelector(".cell-back");
+        const flipped = sourceInner?.classList.contains("flipped");
+        const frontText = sourceFront?.textContent ?? "";
+        const backText = sourceBack?.textContent ?? "";
+        const backClass = sourceBack?.className || "cell-back";
+
+        cell.innerHTML =
+          '<div class="cell-inner' +
+          (flipped ? " flipped" : "") +
+          '"><div class="cell-front">' +
+          frontText +
+          '</div><div class="' +
+          backClass +
+          '">' +
+          backText +
+          "</div></div>";
+        rowEl.appendChild(cell);
+      }
+
+      resultSheetGridEl.appendChild(rowEl);
+    }
+  }
+
+  function layoutResultSheetGrid() {
+    if (!resultSheetGridAreaEl || !resultSheetGridEl || !isResultSheetOpen()) return;
+    if (resultSheetGridAreaEl.clientWidth <= 0 || resultSheetGridAreaEl.clientHeight <= 0) {
+      return;
+    }
+
+    const gap = 3;
+    const availW = resultSheetGridAreaEl.clientWidth;
+    const availH = resultSheetGridAreaEl.clientHeight;
+
+    let cellW = (availW - (COLS - 1) * gap) / COLS;
+    let cellH = (availH - (ROWS - 1) * gap) / ROWS;
+
+    if (cellW > cellH * 1.2) cellW = cellH * 1.2;
+    if (cellH > cellW * 1.1) cellH = cellW * 1.1;
+    if (cellW > cellH * 1.2) cellW = cellH * 1.2;
+
+    cellW = Math.floor(cellW);
+    cellH = Math.floor(cellH);
+
+    resultSheetGridEl.style.setProperty("--cell-width", cellW + "px");
+    resultSheetGridEl.style.setProperty("--cell-height", cellH + "px");
+  }
+
+  function openResultSheet() {
+    if (!resultSheetEl || !resultSheetBackdropEl || !resultSheetPanelEl || isResultSheetOpen()) {
+      return;
+    }
+
+    updateResultSheetContent();
+    syncResultSheetGridFromBoard();
+
+    resultSheetEl.hidden = false;
+    resultSheetBackdropEl.hidden = false;
+    resultSheetEl.classList.remove("is-closing");
+    resultSheetBackdropEl.classList.remove("is-closing");
+    resultSheetPanelEl?.classList.remove("is-dragging");
+    if (resultSheetPanelEl) {
+      resultSheetPanelEl.style.transform = "";
+    }
+    resultSheetEl.setAttribute("aria-hidden", "false");
+    resultSheetBackdropEl.setAttribute("aria-hidden", "false");
+    mainEl?.classList.add("result-sheet-open");
+
+    requestAnimationFrame(() => {
+      resultSheetEl.classList.add("is-open");
+      resultSheetBackdropEl.classList.add("is-visible");
+      layoutResultSheetGrid();
+      requestAnimationFrame(layoutResultSheetGrid);
+    });
+  }
+
+  function closeResultSheet(options = {}) {
+    if (!resultSheetEl || !resultSheetBackdropEl) return;
+    if (!resultSheetEl.classList.contains("is-open") && !resultSheetEl.classList.contains("is-closing")) {
+      return;
+    }
+
+    const animateClose = options.animateClose !== false;
+
+    mainEl?.classList.remove("result-sheet-open");
+    resultSheetBackdropEl.classList.remove("is-visible");
+
+    if (animateClose) {
+      resultSheetEl.classList.add("is-closing");
+      resultSheetEl.classList.remove("is-open");
+      resultSheetBackdropEl.classList.add("is-closing");
+      resultSheetPanelEl?.classList.remove("is-dragging");
+      if (resultSheetPanelEl) {
+        resultSheetPanelEl.style.transform = "";
+      }
+      window.setTimeout(finishResultSheetClose, RESULT_SHEET_CLOSE_MS);
+      return;
+    }
+
+    resultSheetEl.classList.remove("is-open", "is-closing");
+    resultSheetBackdropEl.classList.remove("is-visible", "is-closing");
+    finishResultSheetClose();
+  }
+
+  function initResultSheet() {
+    const gridArea = document.querySelector(".grid-area");
+    let dragStartY = 0;
+    let isDragging = false;
+    let activePointerId = null;
+
+    const finishDrag = (clientY) => {
+      if (!isDragging || !resultSheetPanelEl) return;
+      isDragging = false;
+      activePointerId = null;
+      resultSheetPanelEl.classList.remove("is-dragging");
+
+      const delta = Math.max(0, clientY - dragStartY);
+      if (delta > resultSheetPanelEl.offsetHeight * 0.25) {
+        resultSheetPanelEl.style.transform = "";
+        closeResultSheet({ animateClose: true });
+        return;
+      }
+
+      resultSheetPanelEl.style.transform = "";
+    };
+
+    resultSheetCloseEl?.addEventListener("click", () => {
+      closeResultSheet({ animateClose: true });
+    });
+
+    gridArea?.addEventListener("click", () => {
+      if (canOpenResultSheet()) {
+        openResultSheet();
+      }
+    });
+
+    resultSheetBarEl?.addEventListener("pointerdown", (event) => {
+      if (!isResultSheetOpen() || !resultSheetPanelEl) return;
+      isDragging = true;
+      activePointerId = event.pointerId;
+      dragStartY = event.clientY;
+      resultSheetPanelEl.classList.add("is-dragging");
+      resultSheetBarEl.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    resultSheetBarEl?.addEventListener("pointermove", (event) => {
+      if (!isDragging || event.pointerId !== activePointerId || !resultSheetPanelEl) return;
+      const offset = Math.max(0, event.clientY - dragStartY);
+      resultSheetPanelEl.style.transform = "translateY(" + offset + "px)";
+    });
+
+    resultSheetBarEl?.addEventListener("pointerup", (event) => {
+      if (event.pointerId !== activePointerId) return;
+      finishDrag(event.clientY);
+    });
+
+    resultSheetBarEl?.addEventListener("pointercancel", (event) => {
+      if (event.pointerId !== activePointerId) return;
+      finishDrag(event.clientY);
+    });
+  }
+
   function prepareWordNotGuessedProgress() {
     fifthWordPanelIndex = 0;
     resetProgressStageToDefault();
@@ -925,6 +1181,7 @@
     updateLayout();
     syncActivePrizePosition();
     layoutPrizesCarousel();
+    layoutResultSheetGrid();
   }
 
   function updateActionKeys() {
@@ -3153,8 +3410,12 @@
   function unflipAllCells() {
     clearKeyboardHighlights();
 
-    for (let d = 0; d < UNFLIP_DIAGONAL_COUNT; d += 1) {
-      const delay = d * UNFLIP_DIAGONAL_STAGGER_MS;
+    if (gridEl) {
+      gridEl.style.setProperty("--mini-unflip-ms", MINI_UNFLIP_FLIP_MS + "ms");
+    }
+
+    for (let d = 0; d < MINI_UNFLIP_WAVE_COUNT; d += 1) {
+      const delay = Math.round(d * MINI_UNFLIP_WAVE_STAGGER_MS);
 
       for (let row = 0; row < ROWS; row += 1) {
         const col = d - row;
@@ -3168,18 +3429,16 @@
           const front = cell.querySelector(".cell-front");
           const back = cell.querySelector(".cell-back");
 
+          if (front) front.textContent = "";
+          if (back) back.textContent = "";
+
           inner.classList.remove("flipped");
 
           window.setTimeout(() => {
-            if (front) front.textContent = "";
-            if (back) {
-              back.textContent = "";
-              back.className = "cell-back";
-            }
-
+            if (back) back.className = "cell-back";
             cell.classList.remove("filled", "error", "win-scale");
             cell.style.removeProperty("--win-col");
-          }, FLIP_DURATION_MS);
+          }, MINI_UNFLIP_FLIP_MS);
         }, delay);
       }
     }
@@ -3437,6 +3696,8 @@
 
       window.setTimeout(() => {
         app.classList.remove("is-animating-reverse-win-hero");
+        isAnimating = false;
+        updateActionKeys();
         resolve();
       }, WIN_HERO_MS);
     });
@@ -3444,6 +3705,7 @@
 
   function playReverseNormalWordAnimation() {
     return new Promise((resolve) => {
+      closeResultSheet({ animateClose: false });
       const app = document.querySelector(".app");
       if (!app || !kbEl) {
         resolve();
@@ -3483,6 +3745,7 @@
   }
 
   function resetGameState() {
+    closeResultSheet({ animateClose: false });
     const app = document.querySelector(".app");
     app?.classList.remove(
       "scenario-normal-word",
@@ -3702,6 +3965,7 @@
   syncActivePrizePosition();
   initPrizesCarousel();
   initRaffleCarousel();
+  initResultSheet();
   resetRaffleProgress();
   updateMainScrollFade();
 

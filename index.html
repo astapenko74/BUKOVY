@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>5 букв</title>
-    <link rel="stylesheet" href="styles.css?v=122" />
+    <link rel="stylesheet" href="styles.css?v=128" />
   </head>
   <body>
     <div class="viewport-gate" id="viewport-gate">
@@ -271,6 +271,12 @@
           </div>
 
               <div class="keyboard" id="keyboard" role="group" aria-label="Клавиатура"></div>
+              <div
+                class="result-sheet-backdrop"
+                id="result-sheet-backdrop"
+                hidden
+                aria-hidden="true"
+              ></div>
             </main>
           </div>
 
@@ -441,8 +447,33 @@
 
         <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
       </div>
+
+      <div class="result-sheet" id="result-sheet" hidden aria-hidden="true">
+        <div class="result-sheet__panel" id="result-sheet-panel">
+          <div class="result-sheet__gradient" aria-hidden="true"></div>
+          <div class="result-sheet__bar" id="result-sheet-bar">
+            <span class="result-sheet__handle" aria-hidden="true"></span>
+          </div>
+          <button
+            class="result-sheet__close"
+            id="result-sheet-close"
+            type="button"
+            aria-label="Закрыть"
+          >
+            <img src="assets/tui-button-close.svg" width="24" height="24" alt="" draggable="false" />
+          </button>
+          <h2 class="result-sheet__title" id="result-sheet-title">37 слово</h2>
+          <p class="result-sheet__subtitle" id="result-sheet-subtitle"></p>
+          <div class="result-sheet__grid-area" id="result-sheet-grid-area">
+            <div class="grid result-sheet__grid" id="result-sheet-grid" role="grid" aria-label="Игровое поле"></div>
+          </div>
+          <button class="result-sheet__action" id="result-sheet-action" type="button">
+            Похвастаться
+          </button>
+        </div>
+      </div>
     </div>
 
-    <script src="app.js?v=101"></script>
+    <script src="app.js?v=105"></script>
   </body>
 </html>
