@@ -909,9 +909,16 @@ button {
   width: 100%;
   height: 100%;
   position: relative;
+  -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
   transform-origin: center center;
   transition: transform 0.75s cubic-bezier(0.4, 0, 0.15, 1);
+}
+
+.raffle-event-card__face,
+.raffle-event-card__face * {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .raffle-event-card__face {
@@ -921,12 +928,14 @@ button {
   height: 100%;
   overflow: visible;
   background-color: #1c1c1e;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+}
+
+.raffle-event-card__flip[data-flip-mid="true"] .raffle-event-card__face {
+  overflow: hidden;
 }
 
 .raffle-event-card__face--back {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(1px);
 }
 
 .raffle-event-card__back-content {
@@ -1063,6 +1072,7 @@ button {
 }
 
 .raffle-event-card__face--front {
+  transform: rotateY(0deg) translateZ(1px);
   cursor: pointer;
 }
 

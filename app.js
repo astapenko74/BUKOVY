@@ -2183,11 +2183,44 @@
     );
   }
 
+  const raffleFlipMidTimers = new WeakMap();
+
+  function clearRaffleFlipMid(flip) {
+    delete flip.dataset.flipMid;
+    const midTimer = raffleFlipMidTimers.get(flip);
+    if (midTimer != null) {
+      window.clearTimeout(midTimer);
+      raffleFlipMidTimers.delete(flip);
+    }
+  }
+
+  function armRaffleFlipMid(flip, durationMs, toBack) {
+    clearRaffleFlipMid(flip);
+    const half = Math.round(durationMs / 2);
+
+    if (toBack) {
+      const midTimer = window.setTimeout(() => {
+        flip.dataset.flipMid = "true";
+        raffleFlipMidTimers.delete(flip);
+      }, half);
+      raffleFlipMidTimers.set(flip, midTimer);
+      return;
+    }
+
+    flip.dataset.flipMid = "true";
+    const midTimer = window.setTimeout(() => {
+      delete flip.dataset.flipMid;
+      raffleFlipMidTimers.delete(flip);
+    }, half);
+    raffleFlipMidTimers.set(flip, midTimer);
+  }
+
   function resetRaffleFlip(flip) {
     flip.style.transition = "none";
     flip.classList.remove("is-flipped");
     flip.style.transform = "";
     delete flip.dataset.rotation;
+    clearRaffleFlipMid(flip);
     delete flip.dataset.flipAnimating;
     void flip.offsetWidth;
     flip.style.transition = "";
@@ -2515,8 +2548,12 @@
         "transform " +
         RAFFLE_PARTICIPATE_FLIP_SLOW_MS +
         "ms cubic-bezier(0.4, 0, 1, 1)";
+      flip.dataset.flipAnimating = "true";
+      armRaffleFlipMid(flip, RAFFLE_PARTICIPATE_FLIP_SLOW_MS, true);
       flip.style.transform = "rotateY(" + (flipStart + 180) + "deg)";
       await waitRaffleTransition(flip, "transform", RAFFLE_PARTICIPATE_FLIP_SLOW_MS);
+      clearRaffleFlipMid(flip);
+      delete flip.dataset.flipAnimating;
 
       applyRaffleParticipatedContentToAll(cardIndex);
       raffleParticipatedIndices.add(cardIndex);
@@ -2525,8 +2562,12 @@
         "transform " +
         RAFFLE_PARTICIPATE_FLIP_FAST_MS +
         "ms cubic-bezier(0.4, 0.1, 0.2, 1)";
+      flip.dataset.flipAnimating = "true";
+      armRaffleFlipMid(flip, RAFFLE_PARTICIPATE_FLIP_FAST_MS, false);
       flip.style.transform = "rotateY(" + (flipStart + 360) + "deg)";
       await waitRaffleTransition(flip, "transform", RAFFLE_PARTICIPATE_FLIP_FAST_MS);
+      clearRaffleFlipMid(flip);
+      delete flip.dataset.flipAnimating;
 
       flip.dataset.rotation = String(flipStart + 360);
       normalizeRaffleFlipRotation(flip);
@@ -2549,6 +2590,8 @@
       setRaffleTurnoverBackToAll(cardIndex, false);
     } finally {
       setRaffleTurnoverBackToAll(cardIndex, false);
+      clearRaffleFlipMid(flip);
+      delete flip.dataset.flipAnimating;
       wrap.style.transition = "";
       flip.style.transition = "";
       delete wrap.dataset.participating;
@@ -2565,7 +2608,10 @@
     const current = Number(flip.dataset.rotation || 0);
     const next = current + 180;
 
+    const toBack = !flip.classList.contains("is-flipped");
+
     flip.dataset.flipAnimating = "true";
+    armRaffleFlipMid(flip, FLIP_DURATION_MS, toBack);
     flip.style.transform = "rotateY(" + next + "deg)";
     flip.dataset.rotation = String(next);
     flip.classList.toggle("is-flipped", (next / 180) % 2 === 1);
@@ -2578,6 +2624,7 @@
       }
       done = true;
       flip.removeEventListener("transitionend", finish);
+      clearRaffleFlipMid(flip);
       delete flip.dataset.flipAnimating;
     };
 
