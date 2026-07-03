@@ -208,6 +208,7 @@
   let curRow = 0;
   let curCol = 0;
   let gameOver = false;
+  let lastResultAttempts = null;
   let isAnimating = false;
   let board = Array.from({ length: ROWS }, () => Array(COLS).fill(""));
   const submittedWords = [];
@@ -787,12 +788,29 @@
     return "Похвастаться";
   }
 
+  function getResultSheetSubtitle() {
+    if (isWordNotGuessedScenario()) {
+      return "Не смогли отгадать";
+    }
+
+    const subtitles = {
+      1: "Отгадали с 1 попытки",
+      2: "Отгадали со 2 попытки",
+      3: "Отгадали с 3 попытки",
+      4: "Отгадали с 4 попытки",
+      5: "Отгадали с 5 попытки",
+      6: "Отгадали с 6 попытки",
+    };
+
+    return subtitles[lastResultAttempts] ?? "Не смогли отгадать";
+  }
+
   function updateResultSheetContent() {
     if (resultSheetTitleEl) {
       resultSheetTitleEl.textContent = getResultSheetTitle();
     }
-    if (resultSheetSubtitleEl && winMessageEl) {
-      resultSheetSubtitleEl.innerHTML = winMessageEl.innerHTML;
+    if (resultSheetSubtitleEl) {
+      resultSheetSubtitleEl.textContent = getResultSheetSubtitle();
     }
     if (resultSheetActionEl) {
       resultSheetActionEl.textContent = getResultSheetActionText();
@@ -3812,6 +3830,7 @@
     curCol = 0;
     gameOver = false;
     isWordNotGuessedActive = false;
+    lastResultAttempts = null;
     board = Array.from({ length: ROWS }, () => Array(COLS).fill(""));
     submittedWords.length = 0;
 
@@ -3921,6 +3940,7 @@
 
     if (won) {
       gameOver = true;
+      lastResultAttempts = curRow + 1;
       applyWinResultContent();
       await playWinScaleAnimation(curRow);
       await playNormalWordAnimation();
@@ -3936,6 +3956,7 @@
     if (curRow >= ROWS) {
       gameOver = true;
       isWordNotGuessedActive = true;
+      lastResultAttempts = null;
       prepareWordNotGuessedProgress();
       applyWinResultContent();
       await playNormalWordAnimation();
