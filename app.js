@@ -39,6 +39,7 @@
   const mainEl = document.querySelector(".main");
   const gameScreenEl = document.getElementById("game-screen");
   const raffleScreenEl = document.getElementById("raffle-screen");
+  const rafflePageEl = document.querySelector(".raffle-page");
   const profileScreenEl = document.getElementById("profile-screen");
   const winMessageEl = document.getElementById("win-message");
   const winWordEl = document.getElementById("win-word");
@@ -53,9 +54,25 @@
   const resultSheetGridAreaEl = document.getElementById("result-sheet-grid-area");
   const resultSheetGridEl = document.getElementById("result-sheet-grid");
   const resultSheetActionEl = document.getElementById("result-sheet-action");
+  const taskSheetEl = document.getElementById("task-sheet");
+  const taskSheetBackdropEl = document.getElementById("task-sheet-backdrop");
+  const taskSheetPanelEl = document.getElementById("task-sheet-panel");
+  const taskSheetBarEl = document.getElementById("task-sheet-bar");
+  const taskSheetCloseEl = document.getElementById("task-sheet-close");
+  const taskSheetBadgeEl = document.getElementById("task-sheet-badge");
+  const taskSheetBadgeIconEl = document.getElementById("task-sheet-badge-icon");
+  const taskSheetBadgeDateEl = document.getElementById("task-sheet-badge-date");
+  const taskSheetTitleEl = document.getElementById("task-sheet-title");
+  const taskSheetSubtitleEl = document.getElementById("task-sheet-subtitle");
+  const taskSheetRewardIconEl = document.getElementById("task-sheet-reward-icon");
+  const taskSheetRewardLabelEl = document.getElementById("task-sheet-reward-label");
+  const taskSheetActionEl = document.getElementById("task-sheet-action");
+  const taskExecuteStubEl = document.getElementById("task-execute-stub");
   const scenarioSelectEl = document.getElementById("scenario-select");
   const thematicWordSwitchEl = document.getElementById("thematic-word-switch");
   const raffleSectionSwitchEl = document.getElementById("raffle-section-switch");
+  const coinBadgeEl = document.getElementById("coin-badge");
+  const coinBadgeValueEl = coinBadgeEl?.querySelector(".energy-badge__value");
   const raffleResetProgressBtnEl = document.getElementById("raffle-reset-progress-btn");
   const raffleTabEl = document.querySelector('.tab[data-tab="raffle"]');
 
@@ -115,6 +132,29 @@
   const RAFFLE_SLIDE_STEP = RAFFLE_CARD_WIDTH + RAFFLE_CARD_GAP;
   const RAFFLE_CARD_SRC = "assets/raffle-event-card-inactive.svg";
   const RAFFLE_TOKEN_SRC = "assets/raffle-token.png";
+  const RAFFLE_TOKEN_INACTIVE_SRC = "assets/ic-energy-inactive.png";
+  const INITIAL_COIN_BALANCE = 0;
+  const RAFFLE_BTN_TRANSITION_MS = 400;
+  const TASK_REWARD_READY_ICON_SRC = "assets/task-reward-ready.svg";
+  const TASK_REWARD_READY_TEXT = "Заберите награду до 31 ноября";
+  const TASK_CLAIM_BUTTON_TEXT = "Забрать награду";
+  const TASK_CLOCK_ICON_SRC = "assets/clock-circle.svg";
+  const TASK_SWAP_MS = 800;
+  const TASK_BADGE_MS = 400;
+  const TASK_CLAIM_MS = 300;
+  const TASK_CLAIM_REORDER_MS = 300;
+  const TASK_COIN_BURST_MS = 350;
+  const TASK_COIN_BURST_DISTANCE = 36;
+  const TASK_COIN_COUNT_MIN = 5;
+  const TASK_COIN_COUNT_MAX = 7;
+  const TASK_REWARD_COIN_AMOUNT = 250;
+  const WORD_GUESS_COIN_REWARD = 10;
+  const COIN_FLY_SRC = "assets/badge-coin.png";
+  const COIN_FLY_SIZE = 24;
+  const COIN_COUNTER_START_PROGRESS = 0.8;
+  const TASK_STUB_FADE_MS = 300;
+  const TASK_STUB_HOLD_MS = 1200;
+  const TASK_STUB_ACTION_DELAY_MS = 300;
   const RAFFLE_CHECK_SRC = "assets/check-circle-positive.svg";
   const RAFFLE_TURNOVER_SRC = "assets/raffle-turnover.svg";
   const RAFFLE_TURNOVER_ENTRY_SRC = "assets/raffle-turnover-entry.svg";
@@ -179,6 +219,13 @@
 
   let raffleCarouselRefs = null;
   let raffleParticipateSession = null;
+  let isTask2RewardReady = false;
+  let isTask2RewardClaimed = false;
+  let isTask2ClaimAnimating = false;
+  let taskExecuteStubRunning = false;
+  let removedTask2ListItem = null;
+  let coinBalance = INITIAL_COIN_BALANCE;
+  let activeTaskSheetCard = null;
   let raffleIntroRunning = false;
   let raffleIntroLayerEl = null;
   const raffleParticipatedIndices = new Set();
@@ -295,6 +342,11 @@
     );
   }
 
+  function updateRaffleScrollFade() {
+    if (!rafflePageEl) return;
+    rafflePageEl.classList.toggle("is-scrolled", rafflePageEl.scrollTop > 0);
+  }
+
   function setMainScrollable(enabled) {
     if (!mainEl) return;
     mainEl.classList.toggle("main--scrollable", enabled);
@@ -328,7 +380,15 @@
     profileSettingsDirty = true;
   }
 
+  function setCoinBadgeVisible(visible) {
+    const badge = coinBadgeEl ?? document.getElementById("coin-badge");
+    if (!badge) return;
+    badge.hidden = !visible;
+  }
+
   function setRaffleTabVisible(visible) {
+    setCoinBadgeVisible(visible);
+
     if (!raffleTabEl) return;
 
     raffleTabEl.hidden = !visible;
@@ -344,6 +404,10 @@
     setRaffleTabVisible(Boolean(raffleSectionSwitchEl?.checked));
   }
 
+  function isRaffleSectionEnabled() {
+    return Boolean(raffleSectionSwitchEl?.checked);
+  }
+
   const TAB_SCREENS = {
     game: () => gameScreenEl,
     raffle: () => raffleScreenEl,
@@ -355,6 +419,7 @@
       skipRaffleParticipateAnimation();
       cancelRaffleIntro(false);
       cancelRaffleIntroPresentation();
+      closeTaskSheet({ animateClose: false });
     }
 
     Object.entries(TAB_SCREENS).forEach(([id, getScreen]) => {
@@ -366,6 +431,7 @@
     if (tabId === "raffle") {
       prepareRaffleIntroPresentation();
       void maybePlayRaffleIntro();
+      requestAnimationFrame(updateRaffleScrollFade);
     }
   }
 
@@ -999,6 +1065,910 @@
     });
   }
 
+  function isTaskSheetOpen() {
+    return (
+      taskSheetEl?.classList.contains("is-open") ||
+      taskSheetEl?.classList.contains("is-closing") ||
+      false
+    );
+  }
+
+  function finishTaskSheetClose() {
+    taskSheetEl?.classList.remove("is-closing");
+    taskSheetBackdropEl?.classList.remove("is-closing");
+    taskSheetPanelEl?.classList.remove("is-dragging");
+    if (taskSheetPanelEl) {
+      taskSheetPanelEl.style.transform = "";
+    }
+    if (taskSheetEl) {
+      taskSheetEl.hidden = true;
+      taskSheetEl.setAttribute("aria-hidden", "true");
+    }
+    if (taskSheetBackdropEl) {
+      taskSheetBackdropEl.hidden = true;
+      taskSheetBackdropEl.setAttribute("aria-hidden", "true");
+    }
+    activeTaskSheetCard = null;
+  }
+
+  function getTaskRewardType(cardEl) {
+    const iconSrc = cardEl.querySelector(".raffle-task-card__reward-icon")?.getAttribute("src") ?? "";
+    return iconSrc.includes("energy") ? "energy" : "coin";
+  }
+
+  function getTaskRewardAmount(cardEl) {
+    const value = cardEl.querySelector(".raffle-task-card__reward-value")?.textContent ?? "";
+    return value.replace(/^\+/, "").trim();
+  }
+
+  function formatTaskRewardLabel(amount, type) {
+    if (type === "energy") {
+      return amount + " энергии";
+    }
+    return amount + " жетонов";
+  }
+
+  function isTaskRewardReady(cardEl) {
+    return cardEl?.dataset.taskId === "2" && isTask2RewardReady;
+  }
+
+  function getTask2CardEl() {
+    return document.querySelector('.raffle-task-card[data-task-id="2"]');
+  }
+
+  function restoreRaffleTasksListOrder() {
+    const list = document.querySelector(".raffle-tasks-list");
+    if (!list) return;
+
+    [...list.children]
+      .sort((a, b) => {
+        const aRank = Number(a.querySelector("[data-task-id]")?.dataset.taskId ?? 100);
+        const bRank = Number(b.querySelector("[data-task-id]")?.dataset.taskId ?? 100);
+        return aRank - bRank;
+      })
+      .forEach((item) => {
+        list.appendChild(item);
+      });
+  }
+
+  function getTaskListItem(taskId) {
+    return document
+      .querySelector('.raffle-task-card[data-task-id="' + taskId + '"]')
+      ?.closest("li");
+  }
+
+  async function animateTaskCardsSwap(mutator) {
+    const list = document.querySelector(".raffle-tasks-list");
+    const item1 = getTaskListItem("1");
+    const item2 = getTaskListItem("2");
+    if (!list || !item1 || !item2) return;
+
+    const items = [item1, item2];
+    const firstRects = new Map(
+      items.map((item) => [item, item.getBoundingClientRect()])
+    );
+
+    mutator(list, item1, item2);
+
+    items.forEach((item) => {
+      const first = firstRects.get(item);
+      const last = item.getBoundingClientRect();
+      const deltaY = first.top - last.top;
+      if (Math.abs(deltaY) < 0.5) return;
+      item.classList.add("is-reordering");
+      item.style.transform = "translateY(" + deltaY + "px)";
+    });
+
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+
+    items.forEach((item) => {
+      if (!item.classList.contains("is-reordering")) return;
+      item.style.transform = "";
+    });
+
+    await waitRaffleDelay(TASK_SWAP_MS + 30);
+
+    items.forEach((item) => {
+      item.classList.remove("is-reordering");
+      item.style.transform = "";
+    });
+  }
+
+  function animateTaskCardsSwapToRewardOrder() {
+    return animateTaskCardsSwap((list, item1, item2) => {
+      list.insertBefore(item2, item1);
+    });
+  }
+
+  function animateTaskCardsSwapToDefaultOrder() {
+    return animateTaskCardsSwap((list, item1, item2) => {
+      if (item1.compareDocumentPosition(item2) & Node.DOCUMENT_POSITION_FOLLOWING) {
+        return;
+      }
+      list.insertBefore(item1, item2);
+    });
+  }
+
+  async function animateTaskSheetBadgeToRewardReady() {
+    if (!taskSheetBadgeEl || !taskSheetBadgeDateEl) return;
+
+    taskSheetBadgeEl.classList.add("is-badge-animating");
+
+    if (taskSheetBadgeIconEl) {
+      taskSheetBadgeIconEl.style.opacity = "0";
+    }
+    taskSheetBadgeDateEl.style.opacity = "0";
+
+    await waitRaffleDelay(TASK_BADGE_MS);
+
+    taskSheetBadgeEl.classList.add("is-reward-ready");
+    if (taskSheetBadgeIconEl) {
+      taskSheetBadgeIconEl.hidden = true;
+      taskSheetBadgeIconEl.style.opacity = "";
+    }
+    taskSheetBadgeDateEl.textContent = TASK_REWARD_READY_TEXT;
+
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    taskSheetBadgeDateEl.style.opacity = "1";
+
+    if (taskSheetActionEl) {
+      taskSheetActionEl.textContent = TASK_CLAIM_BUTTON_TEXT;
+      taskSheetActionEl.hidden = false;
+    }
+
+    await waitRaffleDelay(TASK_BADGE_MS);
+    taskSheetBadgeEl.classList.remove("is-badge-animating");
+  }
+
+  function resetTaskSheetBadgeFromRewardReady(fallbackDate) {
+    if (!taskSheetBadgeEl || !taskSheetBadgeDateEl) return;
+
+    taskSheetBadgeEl.classList.remove("is-reward-ready", "is-badge-animating");
+    if (taskSheetBadgeIconEl) {
+      taskSheetBadgeIconEl.hidden = false;
+      taskSheetBadgeIconEl.style.opacity = "";
+    }
+    taskSheetBadgeDateEl.textContent = fallbackDate;
+    taskSheetBadgeDateEl.style.opacity = "1";
+    if (taskSheetActionEl) {
+      taskSheetActionEl.textContent = "Выполнить";
+      taskSheetActionEl.hidden = false;
+    }
+  }
+
+  function applyTask2RewardReadyContent(cardEl) {
+    if (!cardEl) return;
+
+    cardEl.classList.add("is-reward-ready");
+
+    const clock = cardEl.querySelector(".raffle-task-card__clock");
+    if (clock) {
+      clock.src = TASK_REWARD_READY_ICON_SRC;
+    }
+
+    const date = cardEl.querySelector(".raffle-task-card__date");
+    if (date) {
+      date.textContent = TASK_REWARD_READY_TEXT;
+    }
+
+    const claimBtn = cardEl.querySelector(".raffle-task-card__claim");
+    if (claimBtn) {
+      claimBtn.hidden = false;
+    }
+  }
+
+  function restoreTask2RewardReadyContent(cardEl) {
+    if (!cardEl) return;
+
+    cardEl.classList.remove("is-reward-ready");
+
+    const clock = cardEl.querySelector(".raffle-task-card__clock");
+    if (clock) {
+      clock.src = TASK_CLOCK_ICON_SRC;
+    }
+
+    const date = cardEl.querySelector(".raffle-task-card__date");
+    if (date) {
+      date.textContent = cardEl.dataset.taskDeadline ?? "До 25 ноя";
+    }
+
+    const claimBtn = cardEl.querySelector(".raffle-task-card__claim");
+    if (claimBtn) {
+      claimBtn.hidden = true;
+    }
+
+    resetRewardIconStyles(cardEl.querySelector(".raffle-task-card__reward-icon"));
+  }
+
+  function resetTask2RewardReady() {
+    resetTask2RewardClaimed();
+
+    if (!isTask2RewardReady) {
+      restoreRaffleTasksListOrder();
+      return;
+    }
+
+    const cardEl = getTask2CardEl();
+    const sheetOpenOnTask2 = activeTaskSheetCard?.dataset.taskId === "2";
+    const fallbackDate = cardEl?.dataset.taskDeadline ?? "До 25 ноя";
+    isTask2RewardReady = false;
+
+    void (async () => {
+      await animateTaskCardsSwapToDefaultOrder();
+      restoreTask2RewardReadyContent(cardEl);
+      if (sheetOpenOnTask2) {
+        resetTaskSheetBadgeFromRewardReady(fallbackDate);
+      }
+    })();
+  }
+
+  function getRaffleCardButtonCost(cardIndex) {
+    return RAFFLE_CARDS[cardIndex]?.buttonCost ?? 0;
+  }
+
+  function syncCoinBadgeValue() {
+    if (coinBadgeValueEl) {
+      coinBadgeValueEl.textContent = String(coinBalance);
+    }
+  }
+
+  function setCoinBalance(value) {
+    coinBalance = value;
+    syncCoinBadgeValue();
+    updateRaffleParticipateButtonsState();
+  }
+
+  function updateRaffleParticipateButtonsState(displayBalance) {
+    const balance = displayBalance ?? coinBalance;
+
+    document.querySelectorAll(".raffle-event-card__btn").forEach((btn) => {
+      if (btn.classList.contains("is-participated")) return;
+
+      const wrap = btn.closest(".raffle-event-card-wrap");
+      if (wrap?.dataset.participating === "true") return;
+
+      const card = btn.closest(".raffle-event-card");
+      const cardIndex = Number(card?.dataset.cardIndex);
+      if (Number.isNaN(cardIndex)) return;
+
+      const cost =
+        Number(btn.dataset.participateCost) || getRaffleCardButtonCost(cardIndex);
+      const canAfford = balance >= cost;
+      const icon = btn.querySelector(".raffle-event-card__btn-icon");
+      const nextSrc = canAfford ? RAFFLE_TOKEN_SRC : RAFFLE_TOKEN_INACTIVE_SRC;
+
+      btn.disabled = !canAfford;
+      btn.classList.toggle("is-insufficient", !canAfford);
+
+      if (icon && icon.dataset.stateSrc !== nextSrc) {
+        if (icon.dataset.stateSrc) {
+          icon.style.opacity = "0";
+          window.setTimeout(() => {
+            icon.src = nextSrc;
+            icon.dataset.stateSrc = nextSrc;
+            icon.style.opacity = "1";
+          }, RAFFLE_BTN_TRANSITION_MS / 2);
+        } else {
+          icon.src = nextSrc;
+          icon.dataset.stateSrc = nextSrc;
+        }
+      }
+    });
+  }
+
+  function animateCoinBadgeValue(start, end) {
+    return new Promise((resolve) => {
+      const valueEl = coinBadgeValueEl ?? coinBadgeEl?.querySelector(".energy-badge__value");
+      if (!valueEl) {
+        updateRaffleParticipateButtonsState(end);
+        resolve();
+        return;
+      }
+
+      const duration = 800;
+      const startTime = performance.now();
+
+      function tick(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const current = Math.round(start + (end - start) * eased);
+        valueEl.textContent = String(current);
+        updateRaffleParticipateButtonsState(current);
+
+        if (t < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          valueEl.textContent = String(end);
+          updateRaffleParticipateButtonsState(end);
+          resolve();
+        }
+      }
+
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function scrollRafflePageToTop() {
+    if (!rafflePageEl) return;
+    rafflePageEl.scrollTop = 0;
+    updateRaffleScrollFade();
+  }
+
+  function hideTaskExecuteStub() {
+    if (!taskExecuteStubEl) return;
+
+    taskExecuteStubEl.classList.remove("is-visible", "is-image-visible");
+    taskExecuteStubEl.hidden = true;
+    taskExecuteStubEl.setAttribute("aria-hidden", "true");
+  }
+
+  async function runTaskExecuteStubFlow() {
+    if (
+      !taskExecuteStubEl ||
+      taskExecuteStubRunning ||
+      isTask2RewardReady ||
+      isTask2ClaimAnimating
+    ) {
+      return;
+    }
+
+    taskExecuteStubRunning = true;
+    if (taskSheetActionEl) {
+      taskSheetActionEl.disabled = true;
+    }
+
+    taskExecuteStubEl.classList.remove("is-visible", "is-image-visible");
+    taskExecuteStubEl.hidden = false;
+    taskExecuteStubEl.setAttribute("aria-hidden", "false");
+
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    taskExecuteStubEl.classList.add("is-visible");
+
+    const actionsPromise = waitRaffleDelay(TASK_STUB_ACTION_DELAY_MS).then(async () => {
+      closeTaskSheet({ animateClose: false });
+      scrollRafflePageToTop();
+      await activateTask2RewardReady();
+    });
+
+    await waitRaffleDelay(TASK_STUB_FADE_MS);
+    taskExecuteStubEl.classList.add("is-image-visible");
+
+    await waitRaffleDelay(TASK_STUB_HOLD_MS);
+
+    taskExecuteStubEl.classList.remove("is-visible", "is-image-visible");
+    await waitRaffleDelay(TASK_STUB_FADE_MS);
+
+    hideTaskExecuteStub();
+    await actionsPromise;
+
+    taskExecuteStubRunning = false;
+    if (taskSheetActionEl) {
+      taskSheetActionEl.disabled = false;
+    }
+  }
+
+  async function activateTask2RewardReady() {
+    if (isTask2RewardReady) return;
+
+    isTask2RewardReady = true;
+    const cardEl = getTask2CardEl();
+    applyTask2RewardReadyContent(cardEl);
+
+    if (taskSheetActionEl) {
+      taskSheetActionEl.disabled = true;
+    }
+
+    const animations = [animateTaskCardsSwapToRewardOrder()];
+    if (activeTaskSheetCard?.dataset.taskId === "2") {
+      animations.push(animateTaskSheetBadgeToRewardReady());
+    }
+
+    await Promise.all(animations);
+
+    if (taskSheetActionEl) {
+      taskSheetActionEl.disabled = false;
+    }
+  }
+
+  function resetRewardIconStyles(rewardIcon) {
+    if (!rewardIcon) return;
+    rewardIcon.style.visibility = "";
+    rewardIcon.style.opacity = "";
+  }
+
+  function createCoinFlyGhost(coinSize) {
+    const ghost = document.createElement("img");
+    ghost.src = COIN_FLY_SRC;
+    ghost.alt = "";
+    ghost.draggable = false;
+    ghost.classList.add("task-reward-coin-fly-ghost");
+    ghost.style.width = `${coinSize}px`;
+    ghost.style.height = `${coinSize}px`;
+    ghost.style.pointerEvents = "none";
+    ghost.style.userSelect = "none";
+    ghost.style.webkitUserDrag = "none";
+    return ghost;
+  }
+
+  function runCoinsToBadgeAnimation(sourceEl, hooks = {}) {
+    const { onTick } = hooks;
+    const flyTotalMs = TASK_COIN_BURST_MS + PRIZE_TO_TAB_MS;
+    const flyHalfwayMs = flyTotalMs * 0.5;
+    const animationStart = performance.now();
+    let firstArrivalResolved = false;
+    let halfwayResolved = false;
+
+    let resolveFirstArrival = () => {};
+    let resolveHalfway = () => {};
+    const firstArrival = new Promise((resolve) => {
+      resolveFirstArrival = resolve;
+    });
+    const halfway = new Promise((resolve) => {
+      resolveHalfway = resolve;
+    });
+
+    const finishFirstArrival = () => {
+      if (firstArrivalResolved) return;
+      firstArrivalResolved = true;
+      resolveFirstArrival();
+    };
+
+    const finishHalfway = () => {
+      if (halfwayResolved) return;
+      halfwayResolved = true;
+      resolveHalfway();
+    };
+
+    const handleTick = (now) => {
+      onTick?.(now);
+      if (!halfwayResolved && now - animationStart >= flyHalfwayMs) {
+        finishHalfway();
+      }
+    };
+
+    const targetIcon = coinBadgeEl?.querySelector(".energy-badge__icon");
+    if (!sourceEl || !targetIcon || !coinBadgeEl || coinBadgeEl.hidden) {
+      finishFirstArrival();
+      finishHalfway();
+      return { firstArrival, halfway };
+    }
+
+    const startRect = sourceEl.getBoundingClientRect();
+    if (!startRect.width && !startRect.height) {
+      finishFirstArrival();
+      finishHalfway();
+      return { firstArrival, halfway };
+    }
+
+    const startX = startRect.left + startRect.width / 2;
+    const startY = startRect.top + startRect.height / 2;
+    const coinSize = COIN_FLY_SIZE;
+    const endRect = targetIcon.getBoundingClientRect();
+    const endX = endRect.left + endRect.width / 2;
+    const endY = endRect.top + endRect.height / 2;
+
+    const coinCount =
+      TASK_COIN_COUNT_MIN +
+      Math.floor(Math.random() * (TASK_COIN_COUNT_MAX - TASK_COIN_COUNT_MIN + 1));
+
+    const coins = Array.from({ length: coinCount }, (_, index) => {
+      const baseAngle = (index / coinCount) * Math.PI * 2;
+      const jitter = (Math.random() - 0.5) * 0.55;
+      const angle = baseAngle + jitter;
+      const distance = TASK_COIN_BURST_DISTANCE * (0.85 + Math.random() * 0.35);
+      const burstX = startX + Math.cos(angle) * distance;
+      const burstY = startY + Math.sin(angle) * distance;
+      const ghost = createCoinFlyGhost(coinSize);
+
+      ghost.style.left = `${startX}px`;
+      ghost.style.top = `${startY}px`;
+      ghost.style.transform = "translate(-50%, -50%) scale(1)";
+      ghost.style.opacity = "1";
+      document.body.appendChild(ghost);
+
+      return { ghost, burstX, burstY };
+    });
+
+    const burstStartTime = performance.now();
+
+    function animateBurst(now) {
+      handleTick(now);
+
+      const rawT = Math.min(1, (now - burstStartTime) / TASK_COIN_BURST_MS);
+      const t = 1 - Math.pow(1 - rawT, 3);
+
+      coins.forEach((coin) => {
+        const x = startX + (coin.burstX - startX) * t;
+        const y = startY + (coin.burstY - startY) * t;
+        coin.ghost.style.left = `${x}px`;
+        coin.ghost.style.top = `${y}px`;
+      });
+
+      if (rawT < 1) {
+        requestAnimationFrame(animateBurst);
+      } else {
+        startFlyToBadge();
+      }
+    }
+
+    function startFlyToBadge() {
+      coins.forEach((coin, index) => {
+        const flyStartX = coin.burstX;
+        const flyStartY = coin.burstY;
+        const controlX = (flyStartX + endX) / 2;
+        const controlY =
+          Math.min(flyStartY, endY) - Math.max(48, Math.abs(endX - flyStartX) * 0.22);
+        const flyStartTime = performance.now() + index * 24;
+        const startScale = 1;
+        const endScale = 0.5;
+
+        function tickFly(now) {
+          handleTick(now);
+
+          const elapsed = now - flyStartTime;
+          if (elapsed < 0) {
+            requestAnimationFrame(tickFly);
+            return;
+          }
+
+          const rawT = Math.min(1, elapsed / PRIZE_TO_TAB_MS);
+          const t = 1 - Math.pow(1 - rawT, 3);
+          const pos = quadraticBezierPoint(
+            { x: flyStartX, y: flyStartY },
+            { x: controlX, y: controlY },
+            { x: endX, y: endY },
+            t
+          );
+          const scale = startScale + (endScale - startScale) * t;
+          const opacity = flyOpacity(rawT);
+
+          coin.ghost.style.left = `${pos.x}px`;
+          coin.ghost.style.top = `${pos.y}px`;
+          coin.ghost.style.transform = `translate(-50%, -50%) scale(${scale})`;
+          coin.ghost.style.opacity = String(opacity);
+
+          if (index === 0 && rawT >= COIN_COUNTER_START_PROGRESS) {
+            finishFirstArrival();
+          }
+
+          if (rawT < 1) {
+            requestAnimationFrame(tickFly);
+          } else {
+            coin.ghost.remove();
+          }
+        }
+
+        requestAnimationFrame(tickFly);
+      });
+    }
+
+    requestAnimationFrame(animateBurst);
+    return { firstArrival, halfway };
+  }
+
+  function flyCoinsToBadge(sourceEl) {
+    return runCoinsToBadgeAnimation(sourceEl).firstArrival;
+  }
+
+  function flyTaskCoinsToBadge(sourceIcon) {
+    if (!sourceIcon) {
+      return Promise.resolve();
+    }
+    return runCoinsToBadgeAnimation(sourceIcon).halfway;
+  }
+
+  function animateCoinBadgeCounter(amount) {
+    const start = coinBalance;
+    const end = start + amount;
+
+    return animateCoinBadgeValue(start, end).then(() => {
+      coinBalance = end;
+      syncCoinBadgeValue();
+      updateRaffleParticipateButtonsState();
+    });
+  }
+
+  async function animateTaskCardRemove(cardEl) {
+    const li = cardEl.closest("li");
+    const list = li?.parentElement;
+    if (!li || !list) return;
+
+    cardEl.classList.add("is-claim-removing");
+    await waitRaffleDelay(TASK_CLAIM_MS);
+
+    const startHeight = li.getBoundingClientRect().height;
+    const listGap = Number.parseFloat(window.getComputedStyle(list).rowGap) || 20;
+
+    li.style.height = `${startHeight}px`;
+    li.style.overflow = "hidden";
+    li.style.marginBottom = "0";
+    li.classList.add("is-claim-collapsing-out");
+
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+
+    li.style.height = "0";
+    li.style.marginBottom = `-${listGap}px`;
+
+    await waitRaffleDelay(TASK_CLAIM_REORDER_MS);
+
+    removedTask2ListItem = { el: li, nextSibling: li.nextElementSibling };
+    li.classList.remove("is-claim-collapsing-out");
+    li.style.height = "";
+    li.style.overflow = "";
+    li.style.marginBottom = "";
+    li.remove();
+
+    cardEl.classList.remove("is-reward-ready", "is-claim-removing");
+    cardEl.style.pointerEvents = "";
+  }
+
+  function resetTask2RewardClaimed() {
+    const cardEl = getTask2CardEl();
+
+    if (removedTask2ListItem) {
+      const list = document.querySelector(".raffle-tasks-list");
+      if (list) {
+        list.insertBefore(removedTask2ListItem.el, removedTask2ListItem.nextSibling);
+      }
+      removedTask2ListItem = null;
+    }
+
+    isTask2RewardClaimed = false;
+
+    if (cardEl) {
+      cardEl.style.pointerEvents = "";
+      cardEl.classList.remove("is-claiming", "is-claim-removing");
+      resetRewardIconStyles(cardEl.querySelector(".raffle-task-card__reward-icon"));
+      const li = cardEl.closest("li");
+      if (li) {
+        li.style.height = "";
+        li.style.overflow = "";
+        li.style.marginBottom = "";
+        li.classList.remove("is-claim-collapsing-out");
+      }
+    }
+  }
+
+  async function claimTask2Reward(source) {
+    if (isTask2ClaimAnimating || isTask2RewardClaimed || !isTask2RewardReady) return;
+
+    const cardEl = getTask2CardEl();
+    if (!cardEl) return;
+
+    isTask2ClaimAnimating = true;
+    cardEl.style.pointerEvents = "none";
+
+    if (source === "sheet" && isTaskSheetOpen()) {
+      await closeTaskSheet({ animateClose: true });
+    }
+
+    const rewardIcon = cardEl.querySelector(".raffle-task-card__reward-icon");
+    const coinFly = rewardIcon ? runCoinsToBadgeAnimation(rewardIcon) : null;
+
+    await (coinFly?.halfway ?? Promise.resolve());
+
+    isTask2RewardClaimed = true;
+
+    await Promise.all([
+      animateTaskCardRemove(cardEl),
+      (coinFly?.firstArrival ?? Promise.resolve()).then(() =>
+        animateCoinBadgeCounter(TASK_REWARD_COIN_AMOUNT)
+      ),
+    ]);
+
+    isTask2ClaimAnimating = false;
+  }
+
+  function updateTaskSheetContent(cardEl, options = {}) {
+    const title = cardEl.querySelector(".raffle-task-card__title")?.textContent?.trim() ?? "";
+    const date = cardEl.querySelector(".raffle-task-card__date")?.textContent?.trim() ?? "";
+    const sheetSubtitle = cardEl.dataset.taskSheetSubtitle?.trim() ?? "";
+    const showAction = cardEl.dataset.taskSheetAction === "true";
+    const rewardReady = isTaskRewardReady(cardEl);
+    const rewardType = getTaskRewardType(cardEl);
+    const rewardAmount = getTaskRewardAmount(cardEl);
+    const rewardIconSrc =
+      cardEl.querySelector(".raffle-task-card__reward-icon")?.getAttribute("src") ?? "";
+
+    if (!options.skipBadge) {
+      if (taskSheetBadgeEl) {
+        taskSheetBadgeEl.classList.toggle("is-reward-ready", rewardReady);
+      }
+      if (taskSheetBadgeIconEl) {
+        taskSheetBadgeIconEl.hidden = rewardReady;
+        taskSheetBadgeIconEl.style.opacity = "";
+      }
+      if (taskSheetBadgeDateEl) {
+        taskSheetBadgeDateEl.textContent = rewardReady ? TASK_REWARD_READY_TEXT : date;
+        taskSheetBadgeDateEl.style.opacity = "1";
+      }
+    }
+    if (taskSheetTitleEl) {
+      taskSheetTitleEl.textContent = title;
+    }
+    if (taskSheetSubtitleEl) {
+      if (sheetSubtitle) {
+        taskSheetSubtitleEl.textContent = sheetSubtitle;
+        taskSheetSubtitleEl.hidden = false;
+      } else {
+        taskSheetSubtitleEl.textContent = "";
+        taskSheetSubtitleEl.hidden = true;
+      }
+    }
+    if (taskSheetRewardIconEl && rewardIconSrc) {
+      taskSheetRewardIconEl.src = rewardIconSrc;
+    }
+    if (taskSheetRewardLabelEl) {
+      taskSheetRewardLabelEl.textContent = formatTaskRewardLabel(rewardAmount, rewardType);
+    }
+    if (taskSheetActionEl) {
+      if (rewardReady) {
+        taskSheetActionEl.hidden = false;
+        taskSheetActionEl.textContent = TASK_CLAIM_BUTTON_TEXT;
+      } else {
+        taskSheetActionEl.textContent = "Выполнить";
+        taskSheetActionEl.hidden = !showAction;
+      }
+    }
+  }
+
+  function openTaskSheet(cardEl) {
+    if (!taskSheetEl || !taskSheetBackdropEl || !taskSheetPanelEl || !cardEl || isTaskSheetOpen()) {
+      return;
+    }
+
+    activeTaskSheetCard = cardEl;
+    updateTaskSheetContent(cardEl);
+
+    taskSheetEl.hidden = false;
+    taskSheetBackdropEl.hidden = false;
+    taskSheetEl.classList.remove("is-closing");
+    taskSheetBackdropEl.classList.remove("is-closing");
+    taskSheetPanelEl.classList.remove("is-dragging");
+    taskSheetPanelEl.style.transform = "";
+    taskSheetEl.setAttribute("aria-hidden", "false");
+    taskSheetBackdropEl.setAttribute("aria-hidden", "false");
+    rafflePageEl?.classList.add("task-sheet-open");
+
+    requestAnimationFrame(() => {
+      taskSheetEl.classList.add("is-open");
+      taskSheetBackdropEl.classList.add("is-visible");
+    });
+  }
+
+  function closeTaskSheet(options = {}) {
+    if (!taskSheetEl || !taskSheetBackdropEl) {
+      return Promise.resolve();
+    }
+    if (!taskSheetEl.classList.contains("is-open") && !taskSheetEl.classList.contains("is-closing")) {
+      return Promise.resolve();
+    }
+
+    const animateClose = options.animateClose !== false;
+
+    rafflePageEl?.classList.remove("task-sheet-open");
+    taskSheetBackdropEl.classList.remove("is-visible");
+
+    if (animateClose) {
+      taskSheetEl.classList.add("is-closing");
+      taskSheetEl.classList.remove("is-open");
+      taskSheetBackdropEl.classList.add("is-closing");
+      taskSheetPanelEl?.classList.remove("is-dragging");
+      if (taskSheetPanelEl) {
+        taskSheetPanelEl.style.transform = "";
+      }
+      return new Promise((resolve) => {
+        window.setTimeout(() => {
+          finishTaskSheetClose();
+          resolve();
+        }, RESULT_SHEET_CLOSE_MS);
+      });
+    }
+
+    taskSheetEl.classList.remove("is-open", "is-closing");
+    taskSheetBackdropEl.classList.remove("is-visible", "is-closing");
+    finishTaskSheetClose();
+    return Promise.resolve();
+  }
+
+  function initTaskSheet() {
+    let dragStartY = 0;
+    let isDragging = false;
+    let activePointerId = null;
+
+    const finishDrag = (clientY) => {
+      if (!isDragging || !taskSheetPanelEl) return;
+      isDragging = false;
+      activePointerId = null;
+      taskSheetPanelEl.classList.remove("is-dragging");
+
+      const delta = Math.max(0, clientY - dragStartY);
+      if (delta > taskSheetPanelEl.offsetHeight * 0.25) {
+        taskSheetPanelEl.style.transform = "";
+        closeTaskSheet({ animateClose: true });
+        return;
+      }
+
+      taskSheetPanelEl.style.transform = "";
+    };
+
+    document.querySelectorAll(".raffle-task-card[data-task-sheet]").forEach((cardEl) => {
+      cardEl.addEventListener("click", () => {
+        openTaskSheet(cardEl);
+      });
+
+      cardEl.querySelector(".raffle-task-card__claim")?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (
+          !isTask2RewardReady ||
+          isTask2RewardClaimed ||
+          isTask2ClaimAnimating ||
+          cardEl.dataset.taskId !== "2"
+        ) {
+          return;
+        }
+        void claimTask2Reward("card");
+      });
+    });
+
+    taskSheetCloseEl?.addEventListener("click", () => {
+      closeTaskSheet({ animateClose: true });
+    });
+
+    taskSheetActionEl?.addEventListener("click", () => {
+      if (
+        !activeTaskSheetCard ||
+        activeTaskSheetCard.dataset.taskId !== "2" ||
+        taskSheetActionEl.disabled
+      ) {
+        return;
+      }
+
+      if (isTask2RewardReady && !isTask2RewardClaimed && !isTask2ClaimAnimating) {
+        void claimTask2Reward("sheet");
+        return;
+      }
+
+      if (!isTask2RewardReady) {
+        void runTaskExecuteStubFlow();
+      }
+    });
+
+    taskSheetBackdropEl?.addEventListener("click", () => {
+      closeTaskSheet({ animateClose: true });
+    });
+
+    taskSheetBarEl?.addEventListener("pointerdown", (event) => {
+      if (!isTaskSheetOpen() || !taskSheetPanelEl) return;
+      isDragging = true;
+      activePointerId = event.pointerId;
+      dragStartY = event.clientY;
+      taskSheetPanelEl.classList.add("is-dragging");
+      taskSheetBarEl.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    taskSheetBarEl?.addEventListener("pointermove", (event) => {
+      if (!isDragging || event.pointerId !== activePointerId || !taskSheetPanelEl) return;
+      const offset = Math.max(0, event.clientY - dragStartY);
+      taskSheetPanelEl.style.transform = "translateY(" + offset + "px)";
+    });
+
+    taskSheetBarEl?.addEventListener("pointerup", (event) => {
+      if (event.pointerId !== activePointerId) return;
+      finishDrag(event.clientY);
+    });
+
+    taskSheetBarEl?.addEventListener("pointercancel", (event) => {
+      if (event.pointerId !== activePointerId) return;
+      finishDrag(event.clientY);
+    });
+  }
+
   function prepareWordNotGuessedProgress() {
     fifthWordPanelIndex = 0;
     resetProgressStageToDefault();
@@ -1449,6 +2419,28 @@
     return getPrizeAnchor()?.querySelector(".win-progress__prize-anchor-fill");
   }
 
+  function getProgressBadgeFlySource(slot) {
+    const progressEl = getActiveWinProgress();
+    if (!progressEl) return null;
+
+    const cols = progressEl.querySelectorAll(".win-progress__col:not(.win-progress__col--prize)");
+    return cols[slot]?.querySelector(".win-progress__badge") ?? null;
+  }
+
+  function triggerWinProgressCoinReward(sourceEl) {
+    if (!isRaffleSectionEnabled() || !sourceEl) return;
+
+    void runCoinsToBadgeAnimation(sourceEl).firstArrival.then(() => {
+      const start = coinBalance;
+      const end = start + WORD_GUESS_COIN_REWARD;
+      void animateCoinBadgeValue(start, end).then(() => {
+        coinBalance = end;
+        syncCoinBadgeValue();
+        updateRaffleParticipateButtonsState();
+      });
+    });
+  }
+
   function setAnchorFill(scale, animate, slow) {
     const anchor = getPrizeAnchor();
     const fill = getAnchorFill();
@@ -1727,6 +2719,7 @@
 
     const runPhase2 = () => {
       setBadgeFillScale(slot, 1, true);
+      triggerWinProgressCoinReward(getProgressBadgeFlySource(slot));
       if (shouldAttachThematicSticker()) {
         attachThematicSticker(slot);
       }
@@ -2050,7 +3043,10 @@
           const anchorFillEl = getAnchorFill();
           setAnchorFill(1, true, true);
 
-          waitTransition(anchorFillEl, "transform").then(runAfterAnchorFilled);
+          waitTransition(anchorFillEl, "transform").then(() => {
+            triggerWinProgressCoinReward(getPrizeAnchor());
+            runAfterAnchorFilled();
+          });
         });
       });
     };
@@ -2129,12 +3125,16 @@
       '<p class="raffle-event-card__subtitle">' +
       card.subtitle +
       "</p>" +
-      '<button class="raffle-event-card__btn" type="button">' +
+      '<button class="raffle-event-card__btn is-insufficient" type="button" disabled data-participate-cost="' +
+      card.buttonCost +
+      '">' +
       '<span class="raffle-event-card__btn-text">Участвовать за ' +
       card.buttonCost +
       "</span>" +
       '<img class="raffle-event-card__btn-icon" src="' +
-      RAFFLE_TOKEN_SRC +
+      RAFFLE_TOKEN_INACTIVE_SRC +
+      '" data-state-src="' +
+      RAFFLE_TOKEN_INACTIVE_SRC +
       '" width="24" height="24" alt="" draggable="false" />' +
       "</button></div>" +
       '<img class="raffle-event-card__visual" src="' +
@@ -2289,6 +3289,10 @@
     track.classList.toggle("raffle-cards-track--locked", locked);
   }
 
+  function setRafflePageScrollLocked(locked) {
+    rafflePageEl?.classList.toggle("raffle-page--scroll-locked", locked);
+  }
+
   function setRaffleEntryTurnoverBack(cardEl, visible) {
     const back = cardEl.querySelector(".raffle-event-card__face--back");
     if (!back) return;
@@ -2336,14 +3340,18 @@
         subtitle.classList.remove("is-participated");
       }
       if (btn) {
-        btn.disabled = false;
         btn.classList.remove("is-participated");
+        btn.classList.add("is-insufficient");
+        btn.disabled = true;
+        btn.dataset.participateCost = String(data.buttonCost);
         btn.innerHTML =
           '<span class="raffle-event-card__btn-text">Участвовать за ' +
           data.buttonCost +
           "</span>" +
           '<img class="raffle-event-card__btn-icon" src="' +
-          RAFFLE_TOKEN_SRC +
+          RAFFLE_TOKEN_INACTIVE_SRC +
+          '" data-state-src="' +
+          RAFFLE_TOKEN_INACTIVE_SRC +
           '" width="24" height="24" alt="" draggable="false" />';
       }
     }
@@ -2365,6 +3373,9 @@
   function resetRaffleProgress() {
     skipRaffleParticipateAnimation();
     cancelRaffleIntro(false);
+    taskExecuteStubRunning = false;
+    hideTaskExecuteStub();
+    resetTask2RewardReady();
 
     raffleParticipatedIndices.clear();
     clearRaffleIntroSeen();
@@ -2394,11 +3405,13 @@
     document.getElementById("raffle-cards-carousel")?.classList.remove("is-intro-hidden");
     clearRaffleIntroPaginationStyles();
     setRaffleScrollLocked(false);
+    setRafflePageScrollLocked(false);
     raffleParticipateSession = null;
     raffleIntroRunning = false;
 
     raffleCarouselRefs?.scrollToSlide?.(1);
     raffleCarouselRefs?.updateCardTransforms?.();
+    setCoinBalance(INITIAL_COIN_BALANCE);
   }
 
   function applyRaffleParticipatedContent(cardEl, cardIndex) {
@@ -2419,6 +3432,7 @@
     }
     if (btn) {
       btn.disabled = true;
+      btn.classList.remove("is-insufficient");
       btn.classList.add("is-participated");
       btn.innerHTML =
         '<img class="raffle-event-card__btn-icon raffle-event-card__btn-icon--check" src="' +
@@ -2522,11 +3536,13 @@
     const card = wrap.querySelector(".raffle-event-card");
     const flip = wrap.querySelector(".raffle-event-card__flip");
     const carousel = raffleCarouselRefs?.carousel;
+    const participateCost = getRaffleCardButtonCost(cardIndex);
 
     if (
       !card ||
       !flip ||
       !carousel ||
+      coinBalance < participateCost ||
       raffleParticipatedIndices.has(cardIndex) ||
       wrap.dataset.participating === "true" ||
       getRaffleWrapProgress(wrap, carousel) > 0.08
@@ -2534,10 +3550,23 @@
       return;
     }
 
+    const startBalance = coinBalance;
+    const endBalance = startBalance - participateCost;
+
+    wrap.dataset.participating = "true";
+
+    const participateBtn = card.querySelector(".raffle-event-card__btn");
+    if (participateBtn) {
+      participateBtn.classList.remove("is-insufficient");
+      participateBtn.disabled = true;
+    }
+
+    coinBalance = endBalance;
+    void animateCoinBadgeValue(startBalance, endBalance);
+
     const centerRotate = RAFFLE_CENTER_ROTATIONS[cardIndex] ?? 0;
     const flipStart = Number(flip.dataset.rotation || 0);
 
-    wrap.dataset.participating = "true";
     raffleParticipateSession = { wrap, card, flip, cardIndex, centerRotate, flipStart };
     setRaffleScrollLocked(true);
     document.querySelector(".raffle-cards-block")?.classList.add("is-participate-active");
@@ -2672,7 +3701,13 @@
 
         button.addEventListener("click", (event) => {
           event.stopPropagation();
-          if (button.disabled || button.classList.contains("is-participated")) return;
+          if (
+            button.disabled ||
+            button.classList.contains("is-participated") ||
+            button.classList.contains("is-insufficient")
+          ) {
+            return;
+          }
           const cardIndex = Number(card.dataset.cardIndex);
           runRaffleParticipate(wrap, cardIndex);
         });
@@ -2743,6 +3778,7 @@
     block.classList.add("is-intro-active");
     carouselEl.classList.add("is-intro-hidden");
     setRaffleScrollLocked(true);
+    setRafflePageScrollLocked(true);
     layer.hidden = false;
 
     const pagination = document.getElementById("raffle-cards-pagination");
@@ -2783,6 +3819,7 @@
     }
     clearRaffleIntroPaginationStyles();
     setRaffleScrollLocked(false);
+    setRafflePageScrollLocked(false);
   }
 
   function ensureRaffleIntroLayer() {
@@ -2971,6 +4008,7 @@
     carouselEl?.classList.remove("is-intro-hidden");
     clearRaffleIntroPaginationStyles();
     setRaffleScrollLocked(false);
+    setRafflePageScrollLocked(false);
     raffleIntroRunning = false;
   }
 
@@ -3002,6 +4040,7 @@
       carouselEl?.classList.remove("is-intro-hidden");
       clearRaffleIntroPaginationStyles();
       setRaffleScrollLocked(false);
+      setRafflePageScrollLocked(false);
       raffleIntroRunning = false;
     }
   }
@@ -4034,10 +5073,13 @@
   initPrizesCarousel();
   initRaffleCarousel();
   initResultSheet();
+  initTaskSheet();
   resetRaffleProgress();
   updateMainScrollFade();
+  updateRaffleScrollFade();
 
   mainEl?.addEventListener("scroll", updateMainScrollFade, { passive: true });
+  rafflePageEl?.addEventListener("scroll", updateRaffleScrollFade, { passive: true });
   document.querySelector(".win-block--yellow")?.addEventListener("click", playAgain);
   window.addEventListener("resize", handleViewportChange);
   window.visualViewport?.addEventListener("resize", handleViewportChange);

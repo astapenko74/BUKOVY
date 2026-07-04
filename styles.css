@@ -214,9 +214,21 @@ button {
   margin-top: 3px;
 }
 
+.nav-row__badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+#coin-badge[hidden] {
+  display: none !important;
+}
+
 .energy-badge {
   height: 28px;
-  margin-top: 2px;
+  margin-top: 0;
   padding: 4px 8px 4px 6px;
   display: inline-flex;
   align-items: center;
@@ -787,10 +799,31 @@ button {
   min-height: 0;
   overflow-x: clip;
   overflow-y: auto;
-  padding: 0;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 0 72px;
   background: var(--bg);
   display: flex;
   flex-direction: column;
+}
+
+.raffle-page::-webkit-scrollbar {
+  display: none;
+}
+
+.raffle-page.is-scrolled .main__fade {
+  opacity: 1;
+  visibility: visible;
+}
+
+.raffle-page.raffle-page--scroll-locked {
+  overflow: hidden !important;
+}
+
+#raffle-screen {
+  position: relative;
 }
 
 .raffle-page-footer {
@@ -830,8 +863,465 @@ button {
   text-align: center;
 }
 
+.raffle-tasks-block {
+  position: relative;
+  z-index: 2;
+  margin-top: 16px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.raffle-tasks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.raffle-tasks-list > li.is-reordering {
+  position: relative;
+  z-index: 1;
+  transition: transform 800ms cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.raffle-tasks-list > li.is-claim-collapsing-out {
+  overflow: hidden;
+  transition:
+    height 300ms cubic-bezier(0.2, 0, 0.4, 0.9),
+    margin-bottom 300ms cubic-bezier(0.2, 0, 0.4, 0.9);
+}
+
+.raffle-task-card {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px;
+  border-radius: 24px;
+  background: #2c2c2e;
+  cursor: pointer;
+}
+
+.raffle-task-card__body {
+  padding: 9px 9px 12px 12px;
+}
+
+.raffle-task-card--partner .raffle-task-card__body {
+  padding-bottom: 0;
+}
+
+.raffle-task-card--partner .raffle-task-card__partner {
+  margin-top: 12px;
+}
+
+.raffle-task-card__columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.raffle-task-card__main {
+  min-width: 0;
+  padding-top: 3px;
+}
+
+.raffle-task-card__title {
+  margin: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #f6f7f8;
+}
+
+.raffle-task-card__deadline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.raffle-task-card__clock {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-task-card__date {
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.raffle-task-card.is-reward-ready .raffle-task-card__date {
+  color: #00d635;
+}
+
+.raffle-task-card__claim {
+  width: 100%;
+  height: 44px;
+  margin-top: 8px;
+  border: none;
+  border-radius: 16px;
+  background: #ffdd2d;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 44px;
+  text-align: center;
+  color: #333333;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease;
+}
+
+.raffle-task-card__claim:active {
+  background: #f2d049;
+}
+
+.raffle-task-card__claim[hidden] {
+  display: none;
+}
+
+@keyframes task-card-claim-hide {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+.raffle-task-card.is-claim-removing {
+  animation: task-card-claim-hide 300ms cubic-bezier(0.2, 0, 0.4, 0.9) forwards;
+  pointer-events: none;
+  transform-origin: center center;
+}
+
+.task-reward-coin-fly-ghost {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  will-change: left, top, transform, opacity;
+  object-fit: contain;
+}
+
+.raffle-task-card__reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 8px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.raffle-task-card__reward-value {
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  color: #f6f7f8;
+}
+
+.raffle-task-card__reward-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-task-card__partner {
+  position: relative;
+  height: 52px;
+  overflow: hidden;
+}
+
+.raffle-task-card__partner-frame {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  box-sizing: border-box;
+  padding-left: 12px;
+  display: flex;
+  align-items: center;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #f6f7f8;
+}
+
+.raffle-task-card__partner-image {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 327px;
+  max-width: 100%;
+  height: 52px;
+  object-fit: cover;
+  object-position: right bottom;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-task-card__ad-badge {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 12px;
+  border-radius: 6px;
+  background: #333335;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1;
+  color: #c2c2c2;
+  pointer-events: none;
+  user-select: none;
+}
+
+.raffle-archive-card {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px 16px 16px;
+  border-radius: 24px;
+  background: #2c2c2e;
+}
+
+.raffle-archive-card__icon {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-archive-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.raffle-archive-card__title {
+  margin: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #f6f7f8;
+}
+
+.raffle-archive-card__subtitle {
+  margin: 2px 0 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: #9299a2;
+}
+
+.raffle-archive-card__chevron {
+  display: block;
+  width: 7px;
+  height: 16px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-page-substrate {
+  position: relative;
+  z-index: 0;
+  height: 48px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.raffle-page-substrate__frame {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 96px;
+  transform: translateY(-50%);
+  background: #131313;
+  pointer-events: none;
+}
+
+.raffle-page-substrate__cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: #1c1c1e;
+}
+
+.raffle-page-substrate__cap--top {
+  top: 0;
+  border-radius: 0 0 40px 40px;
+}
+
+.raffle-page-substrate__cap--bottom {
+  bottom: 0;
+  border-radius: 40px 40px 0 0;
+}
+
+.raffle-info-block {
+  position: relative;
+  z-index: 2;
+  margin-top: 0;
+  padding: 0 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.raffle-info-card {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 24px;
+  background: #2c2c2e;
+  overflow: hidden;
+}
+
+.raffle-info-card__title {
+  margin: 0;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #f6f7f8;
+}
+
+.raffle-info-card__subtitle {
+  margin: 8px 0 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #9299a2;
+}
+
+.raffle-info-card--history {
+  overflow: visible;
+  padding: 16px 20px 14px;
+}
+
+.raffle-info-card__text {
+  position: relative;
+  z-index: 1;
+  max-width: calc(100% - 87px);
+}
+
+.raffle-info-card__prize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 87px;
+  height: 93px;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-winners-card__media {
+  padding: 8px 8px 0;
+}
+
+.raffle-winners-card__photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-winners-card__body {
+  padding: 16px 20px 20px;
+}
+
+.raffle-winners-card__body .win-prizes__all {
+  margin-top: 14px;
+}
+
+.raffle-faq-card {
+  padding: 16px 20px 26px;
+}
+
+.raffle-faq-card__list {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.raffle-faq-card__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.raffle-faq-card__question {
+  flex: 1;
+  min-width: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 22px;
+  color: #f6f7f8;
+}
+
+.raffle-faq-card__chevron {
+  display: block;
+  width: 7px;
+  height: 16px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 .raffle-cards-block {
   position: relative;
+  z-index: 1;
   width: 100%;
   height: 468px;
   padding-top: 0;
@@ -973,7 +1463,7 @@ button {
 }
 
 .raffle-cards-block.is-intro-active {
-  z-index: 5;
+  z-index: 1;
 }
 
 .raffle-cards-block.is-intro-active .raffle-cards-pagination {
@@ -1073,6 +1563,7 @@ button {
 
 .raffle-event-card__face--front {
   transform: rotateY(0deg) translateZ(1px);
+  border-radius: 32px;
   cursor: pointer;
 }
 
@@ -1191,6 +1682,10 @@ button {
   touch-action: manipulation;
 }
 
+.raffle-event-card__btn:not(.is-participated) {
+  transition: background-color 400ms cubic-bezier(0.2, 0, 0.4, 0.9);
+}
+
 .raffle-event-card__btn.is-participated {
   gap: 8px;
   pointer-events: none;
@@ -1203,6 +1698,20 @@ button {
 
 .raffle-event-card__btn.is-participated .raffle-event-card__btn-text {
   font-weight: 600;
+}
+
+.raffle-event-card__btn.is-insufficient:not(.is-participated) {
+  background: rgba(255, 255, 255, 0.1);
+  cursor: default;
+  pointer-events: none;
+}
+
+.raffle-event-card__btn.is-insufficient:not(.is-participated):active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.raffle-event-card__btn.is-insufficient:not(.is-participated) .raffle-event-card__btn-text {
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .raffle-event-card__face--front.is-shimmer::after {
@@ -1253,6 +1762,10 @@ button {
   white-space: nowrap;
 }
 
+.raffle-event-card__btn:not(.is-participated) .raffle-event-card__btn-text {
+  transition: color 400ms cubic-bezier(0.2, 0, 0.4, 0.9);
+}
+
 .raffle-event-card__btn-icon {
   display: block;
   width: 24px;
@@ -1261,6 +1774,10 @@ button {
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
+}
+
+.raffle-event-card__btn:not(.is-participated) .raffle-event-card__btn-icon {
+  transition: opacity 400ms cubic-bezier(0.2, 0, 0.4, 0.9);
 }
 
 .raffle-cards-pagination {
@@ -2613,7 +3130,6 @@ button {
 }
 
 .win-block--notifications {
-  height: 102px;
   padding: 16px 16px 18px 20px;
   box-sizing: border-box;
 }
@@ -2623,7 +3139,6 @@ button {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  height: 100%;
 }
 
 .win-notify__text {
@@ -2985,4 +3500,260 @@ button {
   font-weight: 400;
   line-height: 22px;
   color: #ffffff;
+}
+
+/* ——— Заглушка «Выполнить» ——— */
+.task-execute-stub[hidden] {
+  display: none !important;
+}
+
+.task-execute-stub {
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1c1c1e;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+
+.task-execute-stub:not([hidden]) {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.task-execute-stub.is-visible {
+  opacity: 1;
+}
+
+.task-execute-stub__image {
+  display: block;
+  width: 197px;
+  height: 145px;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity 300ms ease;
+}
+
+.task-execute-stub.is-image-visible .task-execute-stub__image {
+  opacity: 1;
+}
+
+/* ——— Штора задания ——— */
+.raffle-page.task-sheet-open {
+  overflow: hidden !important;
+}
+
+.task-sheet .result-sheet__panel {
+  height: auto;
+  max-height: calc(100% - 16px);
+}
+
+.task-sheet__body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.task-sheet__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 100px;
+  background: #2c2c2e;
+  flex-shrink: 0;
+  transition: padding 400ms ease;
+}
+
+.task-sheet__badge-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity 400ms ease;
+}
+
+.task-sheet__badge-date {
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  color: #ffffff;
+  transition:
+    opacity 400ms ease,
+    color 400ms ease;
+}
+
+.task-sheet__badge.is-badge-animating .task-sheet__badge-icon,
+.task-sheet__badge.is-badge-animating .task-sheet__badge-date {
+  transition:
+    opacity 400ms ease,
+    color 400ms ease;
+}
+
+.task-sheet__badge.is-reward-ready {
+  padding: 4px 8px;
+}
+
+.task-sheet__badge.is-reward-ready .task-sheet__badge-date {
+  color: #00d635;
+}
+
+.task-sheet__badge.is-reward-ready .task-sheet__badge-icon {
+  display: none;
+}
+
+.task-sheet__heading {
+  width: 100%;
+  margin-top: 12px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.task-sheet__title {
+  margin: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #ffffff;
+}
+
+.task-sheet__subtitle {
+  margin: 8px 0 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.task-sheet__subtitle[hidden] {
+  display: none;
+}
+
+.task-sheet__reward-section {
+  width: 100%;
+  margin-top: 20px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.task-sheet__reward-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px 20px;
+  border-radius: 24px;
+  background: #2c2c2e;
+}
+
+.task-sheet__reward-title {
+  margin: 0;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #f6f7f8;
+}
+
+.task-sheet__reward-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.task-sheet__reward-icon-frame {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+  background: #ffffff;
+}
+
+.task-sheet__reward-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.task-sheet__reward-text {
+  min-width: 0;
+}
+
+.task-sheet__reward-label {
+  margin: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #ffffff;
+}
+
+.task-sheet__reward-note {
+  margin: 4px 0 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: #9299a2;
+}
+
+.task-sheet__action {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 32px);
+  height: 56px;
+  margin: 20px auto 0;
+  border: none;
+  border-radius: 16px;
+  background: #ffdd2d;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 22px;
+  color: #333333;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease;
+}
+
+.task-sheet__action:active {
+  background: #f2d049;
+}
+
+.task-sheet__action[hidden] {
+  display: none;
+}
+
+.task-sheet__action:disabled {
+  opacity: 0.6;
+  pointer-events: none;
 }

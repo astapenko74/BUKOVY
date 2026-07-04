@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>5 букв</title>
-    <link rel="stylesheet" href="styles.css?v=130" />
+    <link rel="stylesheet" href="styles.css?v=160" />
   </head>
   <body>
     <div class="viewport-gate" id="viewport-gate">
@@ -30,16 +30,28 @@
           <div class="nav-row">
             <img class="logo" src="assets/logo 6.0.png" alt="5 букв" height="26" />
 
-            <button class="energy-badge" type="button">
-              <img
-                class="energy-badge__icon"
-                src="assets/Лого энергии для бейджа.png"
-                alt=""
-                width="16"
-                height="16"
-              />
-              <span class="energy-badge__value">17</span>
-            </button>
+            <div class="nav-row__badges">
+              <button class="energy-badge coin-badge" id="coin-badge" type="button" hidden>
+                <img
+                  class="energy-badge__icon"
+                  src="assets/badge-coin.png"
+                  alt=""
+                  width="16"
+                  height="16"
+                />
+                <span class="energy-badge__value">0</span>
+              </button>
+              <button class="energy-badge" type="button">
+                <img
+                  class="energy-badge__icon"
+                  src="assets/Лого энергии для бейджа.png"
+                  alt=""
+                  width="16"
+                  height="16"
+                />
+                <span class="energy-badge__value">17</span>
+              </button>
+            </div>
           </div>
         </header>
 
@@ -282,6 +294,7 @@
 
           <div class="app-screen" id="raffle-screen" hidden>
             <section class="raffle-page" aria-label="Розыгрыш">
+              <div class="main__fade" aria-hidden="true"></div>
               <div class="raffle-cards-block">
                 <div class="raffle-cards-carousel" id="raffle-cards-carousel">
                   <div class="raffle-cards-track" id="raffle-cards-track"></div>
@@ -292,12 +305,358 @@
                   aria-hidden="true"
                 ></div>
               </div>
-              <div class="raffle-page-footer">
-                <div class="raffle-page-footer__frame">
-                  <p class="raffle-page-footer__text">Подведём итоги 1 декабря</p>
+              <div class="raffle-tasks-block" aria-label="Задания">
+                <ul class="raffle-tasks-list">
+                  <li>
+                    <article
+                      class="raffle-task-card"
+                      data-task-sheet
+                      data-task-id="1"
+                      data-task-sheet-action="false"
+                    >
+                      <div class="raffle-task-card__body">
+                        <div class="raffle-task-card__columns">
+                          <div class="raffle-task-card__main">
+                            <p class="raffle-task-card__title">
+                              Отгадываете слова в&nbsp;течение 20&nbsp;дней без&nbsp;пропусков
+                            </p>
+                            <div class="raffle-task-card__deadline">
+                              <img
+                                class="raffle-task-card__clock"
+                                src="assets/clock-circle.svg"
+                                width="16"
+                                height="16"
+                                alt=""
+                                draggable="false"
+                              />
+                              <span class="raffle-task-card__date">До 31 ноя</span>
+                            </div>
+                          </div>
+                          <div class="raffle-task-card__reward">
+                            <span class="raffle-task-card__reward-value">+250</span>
+                            <img
+                              class="raffle-task-card__reward-icon"
+                              src="assets/badge-coin.png"
+                              width="16"
+                              height="16"
+                              alt=""
+                              draggable="false"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  </li>
+                  <li>
+                    <article
+                      class="raffle-task-card raffle-task-card--partner"
+                      data-task-sheet
+                      data-task-id="2"
+                      data-task-sheet-subtitle="Подойдет оплата на любую сумму"
+                      data-task-sheet-action="true"
+                      data-task-deadline="До 25 ноя"
+                    >
+                      <div class="raffle-task-card__body">
+                        <div class="raffle-task-card__columns">
+                          <div class="raffle-task-card__main">
+                            <p class="raffle-task-card__title">
+                              Сделайте заказ в&nbsp;Магните через&nbsp;Супермаркеты
+                            </p>
+                            <div class="raffle-task-card__deadline">
+                              <img
+                                class="raffle-task-card__clock"
+                                src="assets/clock-circle.svg"
+                                width="16"
+                                height="16"
+                                alt=""
+                                draggable="false"
+                              />
+                              <span class="raffle-task-card__date">До 25 ноя</span>
+                            </div>
+                          </div>
+                          <div class="raffle-task-card__reward">
+                            <span class="raffle-task-card__reward-value">+250</span>
+                            <img
+                              class="raffle-task-card__reward-icon"
+                              src="assets/badge-coin.png"
+                              width="16"
+                              height="16"
+                              alt=""
+                              draggable="false"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="raffle-task-card__partner">
+                        <div class="raffle-task-card__partner-frame">Задание от Магнита</div>
+                        <img
+                          class="raffle-task-card__partner-image"
+                          src="assets/magnit.png"
+                          width="327"
+                          height="52"
+                          alt=""
+                          draggable="false"
+                        />
+                        <span class="raffle-task-card__ad-badge">Реклама</span>
+                      </div>
+                      <button class="raffle-task-card__claim" type="button" hidden>
+                        Забрать награду
+                      </button>
+                    </article>
+                  </li>
+                  <li>
+                    <article
+                      class="raffle-task-card"
+                      data-task-sheet
+                      data-task-id="3"
+                      data-task-sheet-action="false"
+                    >
+                      <div class="raffle-task-card__body">
+                        <div class="raffle-task-card__columns">
+                          <div class="raffle-task-card__main">
+                            <p class="raffle-task-card__title">
+                              Оплатите покупки на&nbsp;3&nbsp;000&nbsp;₽ картой Black в&nbsp;супермаркетах
+                            </p>
+                            <div class="raffle-task-card__deadline">
+                              <img
+                                class="raffle-task-card__clock"
+                                src="assets/clock-circle.svg"
+                                width="16"
+                                height="16"
+                                alt=""
+                                draggable="false"
+                              />
+                              <span class="raffle-task-card__date">До 26 ноя</span>
+                            </div>
+                          </div>
+                          <div class="raffle-task-card__reward">
+                            <span class="raffle-task-card__reward-value">+6</span>
+                            <img
+                              class="raffle-task-card__reward-icon"
+                              src="assets/energy-icon.png"
+                              width="16"
+                              height="16"
+                              alt=""
+                              draggable="false"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  </li>
+                  <li>
+                    <article
+                      class="raffle-task-card"
+                      data-task-sheet
+                      data-task-id="4"
+                      data-task-sheet-action="false"
+                    >
+                      <div class="raffle-task-card__body">
+                        <div class="raffle-task-card__columns">
+                          <div class="raffle-task-card__main">
+                            <p class="raffle-task-card__title">
+                              Пополните накопительный счет на&nbsp;10&nbsp;000&nbsp;₽ и&nbsp;более
+                            </p>
+                            <div class="raffle-task-card__deadline">
+                              <img
+                                class="raffle-task-card__clock"
+                                src="assets/clock-circle.svg"
+                                width="16"
+                                height="16"
+                                alt=""
+                                draggable="false"
+                              />
+                              <span class="raffle-task-card__date">До 28 ноя</span>
+                            </div>
+                          </div>
+                          <div class="raffle-task-card__reward">
+                            <span class="raffle-task-card__reward-value">+3</span>
+                            <img
+                              class="raffle-task-card__reward-icon"
+                              src="assets/energy-icon.png"
+                              width="16"
+                              height="16"
+                              alt=""
+                              draggable="false"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  </li>
+                  <li>
+                    <article class="raffle-archive-card">
+                      <img
+                        class="raffle-archive-card__icon"
+                        src="assets/archive-icon.png"
+                        width="40"
+                        height="40"
+                        alt=""
+                        draggable="false"
+                      />
+                      <div class="raffle-archive-card__content">
+                        <h3 class="raffle-archive-card__title">Архив заданий</h3>
+                        <p class="raffle-archive-card__subtitle">История выполнения заданий</p>
+                      </div>
+                      <img
+                        class="raffle-archive-card__chevron"
+                        src="assets/chevron-right.svg"
+                        width="7"
+                        height="16"
+                        alt=""
+                        draggable="false"
+                      />
+                    </article>
+                  </li>
+                </ul>
+              </div>
+              <div class="raffle-page-substrate" aria-hidden="true">
+                <div class="raffle-page-substrate__frame">
+                  <div class="raffle-page-substrate__cap raffle-page-substrate__cap--top"></div>
+                  <div class="raffle-page-substrate__cap raffle-page-substrate__cap--bottom"></div>
                 </div>
               </div>
+              <div class="raffle-info-block" aria-label="Дополнительная информация">
+                <article class="raffle-info-card raffle-info-card--history">
+                  <div class="raffle-info-card__text">
+                    <h3 class="raffle-info-card__title">Итоги розыгрышей</h3>
+                    <p class="raffle-info-card__subtitle">Список полученных наград</p>
+                  </div>
+                  <img
+                    class="raffle-info-card__prize"
+                    src="assets/prize-22.png"
+                    width="87"
+                    height="93"
+                    alt=""
+                    draggable="false"
+                  />
+                </article>
+
+                <div class="win-block win-block--dark win-block--notifications">
+                  <div class="win-notify">
+                    <div class="win-notify__text">
+                      <h3 class="win-notify__title">Уведомления</h3>
+                      <p class="win-notify__subtitle">Напомним о новых розыгрышах</p>
+                    </div>
+                    <label class="win-switch">
+                      <input
+                        class="win-switch__input"
+                        type="checkbox"
+                        role="switch"
+                        aria-label="Уведомления о розыгрышах"
+                      />
+                      <span class="win-switch__track" aria-hidden="true"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <article class="raffle-info-card raffle-winners-card">
+                  <div class="raffle-winners-card__media">
+                    <img
+                      class="raffle-winners-card__photo"
+                      src="assets/winners.png"
+                      alt=""
+                      draggable="false"
+                    />
+                  </div>
+                  <div class="raffle-winners-card__body">
+                    <h3 class="raffle-info-card__title">Истории победителей</h3>
+                    <p class="raffle-info-card__subtitle">
+                      Рады за них, но не от всего сердца
+                    </p>
+                    <button class="win-prizes__all" type="button">Читать статью</button>
+                  </div>
+                </article>
+
+                <article class="raffle-info-card raffle-faq-card">
+                  <h3 class="raffle-info-card__title">Вопросы и&nbsp;ответы</h3>
+                  <ul class="raffle-faq-card__list">
+                    <li class="raffle-faq-card__item">
+                      <span class="raffle-faq-card__question">Как открыть принять участие?</span>
+                      <img
+                        class="raffle-faq-card__chevron"
+                        src="assets/chevron-right.svg"
+                        width="7"
+                        height="16"
+                        alt=""
+                        draggable="false"
+                      />
+                    </li>
+                    <li class="raffle-faq-card__item">
+                      <span class="raffle-faq-card__question">Как зарабатывать жетоны?</span>
+                      <img
+                        class="raffle-faq-card__chevron"
+                        src="assets/chevron-right.svg"
+                        width="7"
+                        height="16"
+                        alt=""
+                        draggable="false"
+                      />
+                    </li>
+                    <li class="raffle-faq-card__item">
+                      <span class="raffle-faq-card__question">Какие призы можно выиграть?</span>
+                      <img
+                        class="raffle-faq-card__chevron"
+                        src="assets/chevron-right.svg"
+                        width="7"
+                        height="16"
+                        alt=""
+                        draggable="false"
+                      />
+                    </li>
+                    <li class="raffle-faq-card__item">
+                      <span class="raffle-faq-card__question">Как определят победителей?</span>
+                      <img
+                        class="raffle-faq-card__chevron"
+                        src="assets/chevron-right.svg"
+                        width="7"
+                        height="16"
+                        alt=""
+                        draggable="false"
+                      />
+                    </li>
+                    <li class="raffle-faq-card__item">
+                      <span class="raffle-faq-card__question">Как я узнаю о победе?</span>
+                      <img
+                        class="raffle-faq-card__chevron"
+                        src="assets/chevron-right.svg"
+                        width="7"
+                        height="16"
+                        alt=""
+                        draggable="false"
+                      />
+                    </li>
+                    <li class="raffle-faq-card__item">
+                      <span class="raffle-faq-card__question">Как я получу приз?</span>
+                      <img
+                        class="raffle-faq-card__chevron"
+                        src="assets/chevron-right.svg"
+                        width="7"
+                        height="16"
+                        alt=""
+                        draggable="false"
+                      />
+                    </li>
+                    <li class="raffle-faq-card__item">
+                      <span class="raffle-faq-card__question">Сколько призов я могу выиграть?</span>
+                      <img
+                        class="raffle-faq-card__chevron"
+                        src="assets/chevron-right.svg"
+                        width="7"
+                        height="16"
+                        alt=""
+                        draggable="false"
+                      />
+                    </li>
+                  </ul>
+                </article>
+              </div>
             </section>
+            <div class="raffle-page-footer">
+              <div class="raffle-page-footer__frame">
+                <p class="raffle-page-footer__text">Подведём итоги 1 декабря</p>
+              </div>
+            </div>
           </div>
 
           <div class="app-screen" id="profile-screen" hidden>
@@ -448,6 +807,79 @@
         <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
       </div>
 
+      <div
+        class="result-sheet-backdrop"
+        id="task-sheet-backdrop"
+        hidden
+        aria-hidden="true"
+      ></div>
+
+      <div class="result-sheet task-sheet" id="task-sheet" hidden aria-hidden="true">
+        <div class="result-sheet__panel task-sheet__panel" id="task-sheet-panel">
+          <div class="result-sheet__gradient" aria-hidden="true"></div>
+          <div class="result-sheet__bar" id="task-sheet-bar">
+            <span class="result-sheet__handle" aria-hidden="true"></span>
+          </div>
+          <button
+            class="result-sheet__close"
+            id="task-sheet-close"
+            type="button"
+            aria-label="Закрыть"
+          >
+            <img
+              src="assets/tui-button-close.svg"
+              width="24"
+              height="24"
+              alt=""
+              draggable="false"
+            />
+          </button>
+          <div class="task-sheet__body">
+            <div class="task-sheet__badge" id="task-sheet-badge">
+              <img
+                class="task-sheet__badge-icon"
+                id="task-sheet-badge-icon"
+                src="assets/clock-circle.svg"
+                width="16"
+                height="16"
+                alt=""
+                draggable="false"
+              />
+              <span class="task-sheet__badge-date" id="task-sheet-badge-date"></span>
+            </div>
+            <div class="task-sheet__heading">
+              <h2 class="task-sheet__title" id="task-sheet-title"></h2>
+              <p class="task-sheet__subtitle" id="task-sheet-subtitle" hidden></p>
+            </div>
+            <div class="task-sheet__reward-section">
+              <div class="task-sheet__reward-card">
+                <h3 class="task-sheet__reward-title">Награда за задание</h3>
+                <div class="task-sheet__reward-row">
+                  <div class="task-sheet__reward-icon-frame">
+                    <img
+                      class="task-sheet__reward-icon"
+                      id="task-sheet-reward-icon"
+                      src=""
+                      width="24"
+                      height="24"
+                      alt=""
+                      draggable="false"
+                    />
+                  </div>
+                  <div class="task-sheet__reward-text">
+                    <p class="task-sheet__reward-label" id="task-sheet-reward-label"></p>
+                    <p class="task-sheet__reward-note">Зачислим течение 1 дня</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="task-sheet__action" id="task-sheet-action" type="button" hidden>
+              Выполнить
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="result-sheet" id="result-sheet" hidden aria-hidden="true">
         <div class="result-sheet__panel" id="result-sheet-panel">
           <div class="result-sheet__gradient" aria-hidden="true"></div>
@@ -472,8 +904,24 @@
           </button>
         </div>
       </div>
+
+      <div
+        class="task-execute-stub"
+        id="task-execute-stub"
+        hidden
+        aria-hidden="true"
+      >
+        <img
+          class="task-execute-stub__image"
+          src="assets/task-stub-placeholder-2.svg"
+          width="197"
+          height="145"
+          alt=""
+          draggable="false"
+        />
+      </div>
     </div>
 
-    <script src="app.js?v=108"></script>
+    <script src="app.js?v=133"></script>
   </body>
 </html>
