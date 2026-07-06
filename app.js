@@ -71,6 +71,9 @@
   const scenarioSelectEl = document.getElementById("scenario-select");
   const thematicWordSwitchEl = document.getElementById("thematic-word-switch");
   const raffleSectionSwitchEl = document.getElementById("raffle-section-switch");
+  const raffleTickerSwitchEl = document.getElementById("raffle-ticker-switch");
+  const rafflePageFooterEl = document.getElementById("raffle-page-footer");
+  const raffleCardsPaginationLabelEl = document.getElementById("raffle-cards-pagination-label");
   const coinBadgeEl = document.getElementById("coin-badge");
   const coinBadgeValueEl = coinBadgeEl?.querySelector(".energy-badge__value");
   const raffleResetProgressBtnEl = document.getElementById("raffle-reset-progress-btn");
@@ -179,39 +182,36 @@
       title: "5 000 000₽",
       subtitle: "Получите долю от суммы",
       buttonCost: 200,
-      visualSrc: "assets/raffle-prize-visual.png",
+      visualSrc: "assets/raffle-visual-money.png",
       activeBaseSrc: "assets/raffle-event-card-1-active.svg",
       participatedSubtitle: "Делят 155 456 игроков",
       backTitle: "Делим деньги",
       backSubtitle:
         "Разделим 5 000 000 рублей между всеми игроками, принявшими участие в розыгрыше этого приза",
-      backFooter: "Итоги подведём 1 декабря",
     },
     {
       badge: "Розыгрыш 1 000 призов",
       title: "Кэшбэк 50%<br>в шопинге",
       subtitle: "Участвуйте в розыгрыше",
       buttonCost: 50,
-      visualSrc: "assets/raffle-cashback-visual.png",
+      visualSrc: "assets/raffle-visual-cashback.png",
       activeBaseSrc: "assets/raffle-event-card-2-active.svg",
       participatedSubtitle: "Участвуют 564 238 игроков",
       backTitle: "Розыгрыш",
       backSubtitle:
         "Разыграем 1 000 призов с кэшбэком 50% в шопинге между всеми игроками, принявшими участие в этом розыгрыше",
-      backFooter: "Итоги подведём 1 декабря",
     },
     {
       badge: "Розыгрыш 1 приза",
       title: "Аааавтомобиль<br>от Fresh Auto",
       subtitle: "Участвуйте в розыгрыше",
       buttonCost: 500,
-      visualSrc: "assets/raffle-car-visual.png",
+      visualSrc: "assets/raffle-visual-car.png",
       activeBaseSrc: "assets/raffle-event-card-3-active.svg",
       participatedSubtitle: "Участвуют 37 174 игрока",
       backTitle: "Розыгрыш",
       backSubtitle:
         "Разыграем Jeepv X-Cross 7 от Fresh Auto в полной комплектации между всеми игроками, принявшими участие в этом розыгрыше",
-      backFooter: "Итоги подведём 1 декабря",
     },
   ];
   const RAFFLE_LOOP_SLIDE_INDICES = [2, 0, 1, 2, 0];
@@ -402,6 +402,12 @@
 
   function applyRaffleSectionVisibility() {
     setRaffleTabVisible(Boolean(raffleSectionSwitchEl?.checked));
+  }
+
+  function applyRafflePageFooterVisibility() {
+    const footer = rafflePageFooterEl ?? document.getElementById("raffle-page-footer");
+    if (!footer) return;
+    footer.hidden = !Boolean(raffleTickerSwitchEl?.checked);
   }
 
   function isRaffleSectionEnabled() {
@@ -3157,9 +3163,6 @@
       "</h3>" +
       '<p class="raffle-event-card__back-subtitle">' +
       card.backSubtitle +
-      "</p>" +
-      '<p class="raffle-event-card__back-footer">' +
-      card.backFooter +
       "</p></div></div>";
 
     return (
@@ -3751,10 +3754,42 @@
 
   function clearRaffleIntroPaginationStyles() {
     const pagination = document.getElementById("raffle-cards-pagination");
-    if (!pagination) return;
-    pagination.style.transition = "";
-    pagination.style.opacity = "";
-    pagination.style.pointerEvents = "";
+    const label = raffleCardsPaginationLabelEl ?? document.getElementById("raffle-cards-pagination-label");
+
+    [pagination, label].forEach((el) => {
+      if (!el) return;
+      el.style.transition = "";
+      el.style.opacity = "";
+      el.style.pointerEvents = "";
+    });
+  }
+
+  function setRaffleIntroPaginationHidden(hidden) {
+    const pagination = document.getElementById("raffle-cards-pagination");
+    const label = raffleCardsPaginationLabelEl ?? document.getElementById("raffle-cards-pagination-label");
+
+    [pagination, label].forEach((el) => {
+      if (!el) return;
+      el.style.transition = "none";
+      el.style.opacity = hidden ? "0" : "1";
+      el.style.pointerEvents = hidden ? "none" : "";
+    });
+  }
+
+  function revealRaffleIntroPagination(stage2Ease) {
+    const pagination = document.getElementById("raffle-cards-pagination");
+    const label = raffleCardsPaginationLabelEl ?? document.getElementById("raffle-cards-pagination-label");
+    const transition = "opacity " + RAFFLE_INTRO_STAGE2_MS + "ms " + stage2Ease;
+
+    [pagination, label].forEach((el) => {
+      if (!el) return;
+      el.style.transition = "none";
+      el.style.opacity = "0";
+      el.style.pointerEvents = "none";
+      void el.offsetWidth;
+      el.style.transition = transition;
+      el.style.opacity = "1";
+    });
   }
 
   function setRaffleIntroVisualScale(slot, scale, transition) {
@@ -3781,12 +3816,7 @@
     setRafflePageScrollLocked(true);
     layer.hidden = false;
 
-    const pagination = document.getElementById("raffle-cards-pagination");
-    if (pagination) {
-      pagination.style.transition = "none";
-      pagination.style.opacity = "0";
-      pagination.style.pointerEvents = "none";
-    }
+    setRaffleIntroPaginationHidden(true);
 
     const initial = getRaffleIntroInitialState();
     getRaffleIntroSlots(layer).forEach((slot, index) => {
@@ -4114,15 +4144,7 @@
       void slot.offsetWidth;
     });
 
-    if (pagination) {
-      pagination.style.transition = "none";
-      pagination.style.opacity = "0";
-      pagination.style.pointerEvents = "none";
-      void pagination.offsetWidth;
-      pagination.style.transition =
-        "opacity " + RAFFLE_INTRO_STAGE2_MS + "ms " + stage2Ease;
-      pagination.style.opacity = "1";
-    }
+    revealRaffleIntroPagination(stage2Ease);
 
     const stage2Promises = slots.map((slot, index) => {
       const endState = targets.stage2[index];
@@ -4144,6 +4166,10 @@
 
     if (pagination) {
       pagination.style.pointerEvents = "";
+    }
+    const label = raffleCardsPaginationLabelEl ?? document.getElementById("raffle-cards-pagination-label");
+    if (label) {
+      label.style.pointerEvents = "";
     }
 
     markRaffleIntroSeen();
@@ -4271,6 +4297,24 @@
       });
 
       updateDots(getRealCardIndex(getNearestSlideIndex()));
+      updateRafflePaginationLabelOpacity();
+    }
+
+    function updateRafflePaginationLabelOpacity() {
+      const label =
+        raffleCardsPaginationLabelEl ?? document.getElementById("raffle-cards-pagination-label");
+      if (!label) return;
+
+      const block = document.querySelector(".raffle-cards-block");
+      if (raffleIntroRunning || block?.classList.contains("is-intro-active")) {
+        return;
+      }
+
+      const scrollProgress = track.scrollLeft / RAFFLE_SLIDE_STEP;
+      const distanceFromSnap = Math.abs(scrollProgress - Math.round(scrollProgress));
+      const opacity = 1 - Math.min(1, distanceFromSnap * 2);
+
+      label.style.opacity = String(opacity);
     }
 
     function handleLoop() {
@@ -5056,12 +5100,14 @@
     resetRaffleProgress();
     applyRaffleSectionVisibility();
   });
+  raffleTickerSwitchEl?.addEventListener("change", applyRafflePageFooterVisibility);
   raffleResetProgressBtnEl?.addEventListener("click", resetRaffleProgress);
 
   buildGrid();
   buildKeyboard();
   initTabBar();
   applyRaffleSectionVisibility();
+  applyRafflePageFooterVisibility();
   preventMobileZoomGestures();
   applyWinResultContent();
   syncFrameViewportHeight();

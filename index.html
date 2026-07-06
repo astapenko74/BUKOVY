@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>5 букв</title>
-    <link rel="stylesheet" href="styles.css?v=160" />
+    <link rel="stylesheet" href="styles.css?v=165" />
   </head>
   <body>
     <div class="viewport-gate" id="viewport-gate">
@@ -299,6 +299,9 @@
                 <div class="raffle-cards-carousel" id="raffle-cards-carousel">
                   <div class="raffle-cards-track" id="raffle-cards-track"></div>
                 </div>
+                <p class="raffle-cards-pagination-label" id="raffle-cards-pagination-label">
+                  Подведём итоги 1 декабря
+                </p>
                 <div
                   class="raffle-cards-pagination"
                   id="raffle-cards-pagination"
@@ -652,7 +655,7 @@
                 </article>
               </div>
             </section>
-            <div class="raffle-page-footer">
+            <div class="raffle-page-footer" id="raffle-page-footer" hidden>
               <div class="raffle-page-footer__frame">
                 <p class="raffle-page-footer__text">Подведём итоги 1 декабря</p>
               </div>
@@ -702,6 +705,19 @@
                           role="switch"
                           aria-label="Отображение раздела «Розыгрыш»"
                           checked
+                        />
+                        <span class="win-switch__track" aria-hidden="true"></span>
+                      </label>
+                    </div>
+                    <div class="profile-field profile-field--switch">
+                      <span class="profile-field__label">Бегущая полоса</span>
+                      <label class="win-switch">
+                        <input
+                          class="win-switch__input"
+                          id="raffle-ticker-switch"
+                          type="checkbox"
+                          role="switch"
+                          aria-label="Бегущая полоса на странице розыгрыша"
                         />
                         <span class="win-switch__track" aria-hidden="true"></span>
                       </label>
@@ -922,6 +938,6 @@
       </div>
     </div>
 
-    <script src="app.js?v=133"></script>
+    <script src="app.js?v=138"></script>
   </body>
 </html>
