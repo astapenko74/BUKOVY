@@ -188,8 +188,8 @@
   const RAFFLE_CARD_GAP = 20;
   const RAFFLE_SLIDE_STEP = RAFFLE_CARD_WIDTH + RAFFLE_CARD_GAP;
   const RAFFLE_CARD_SRC = "assets/raffle-event-card-inactive.svg";
-  const RAFFLE_TOKEN_SRC = "assets/raffle-token.png";
-  const RAFFLE_TOKEN_INACTIVE_SRC = "assets/ic-energy-inactive.png";
+  const RAFFLE_TOKEN_SRC = "assets/Монетка активная.png";
+  const RAFFLE_TOKEN_INACTIVE_SRC = "assets/Монетка неактивная.png";
   const INITIAL_COIN_BALANCE = 0;
   const RAFFLE_BTN_TRANSITION_MS = 400;
   const TASK_REWARD_READY_TEXT = "Заберите до 25 ноября";
@@ -204,7 +204,7 @@
   const TASK_COIN_COUNT_MAX = 7;
   const TASK_REWARD_COIN_AMOUNT = 250;
   const WORD_GUESS_COIN_REWARD = 10;
-  const COIN_FLY_SRC = "assets/badge-coin.png";
+  const COIN_FLY_SRC = "assets/badge-coin.png?v=2";
   const COIN_FLY_SIZE = 24;
   const COIN_COUNTER_START_PROGRESS = 0.8;
   const TASK_STUB_FADE_MS = 300;
@@ -242,9 +242,9 @@
         "Разделим 5 000 000 рублей между всеми игроками, принявшими участие в розыгрыше этого приза",
     },
     {
-      badge: "Розыгрыш 1 000 призов",
+      badge: "Розыгрыш",
       title: "Кэшбэк 50%<br>в шопинге",
-      subtitle: "Участвуйте в розыгрыше",
+      subtitle: "Разыграем 1 000 призов",
       buttonCost: 50,
       visualSrc: "assets/raffle-visual-cashback.png",
       activeBaseSrc: "assets/raffle-event-card-2-active.svg",
@@ -254,9 +254,9 @@
         "Разыграем 1 000 призов с кэшбэком 50% в шопинге между всеми игроками, принявшими участие в этом розыгрыше",
     },
     {
-      badge: "Розыгрыш 1 приза",
+      badge: "Розыгрыш",
       title: "Аааавтомобиль<br>от Fresh Auto",
-      subtitle: "Участвуйте в розыгрыше",
+      subtitle: "Разыграем 1 приз",
       buttonCost: 500,
       visualSrc: "assets/raffle-visual-car.png",
       activeBaseSrc: "assets/raffle-event-card-3-active.svg",
@@ -266,7 +266,7 @@
         "Разыграем Jeepv X-Cross 7 от Fresh Auto в полной комплектации между всеми игроками, принявшими участие в этом розыгрыше",
     },
   ];
-  const RAFFLE_LOOP_SLIDE_INDICES = [2, 0, 1, 2, 0];
+  const RAFFLE_SLIDE_INDICES = [0, 1, 2];
   const RAFFLE_CENTER_ROTATIONS = [1, -2, 0];
 
   let raffleCarouselRefs = null;
@@ -3570,7 +3570,7 @@
     raffleParticipateSession = null;
     raffleIntroRunning = false;
 
-    raffleCarouselRefs?.scrollToSlide?.(1);
+    raffleCarouselRefs?.scrollToSlide?.(0);
     raffleCarouselRefs?.updateCardTransforms?.();
     setCoinBalance(INITIAL_COIN_BALANCE);
   }
@@ -3992,6 +3992,8 @@
       applyRaffleIntroSlotStyle(slot, initial);
       setRaffleIntroVisualScale(slot, initial.visualScale, "");
     });
+
+    updateRaffleParticipateButtonsState();
   }
 
   function cancelRaffleIntroPresentation() {
@@ -4033,6 +4035,7 @@
     }).join("");
     block.appendChild(layer);
     raffleIntroLayerEl = layer;
+    updateRaffleParticipateButtonsState();
     return layer;
   }
 
@@ -4130,12 +4133,12 @@
       raffleCarouselRefs ?? {};
     if (!carousel || !slides?.length) return null;
 
-    scrollToSlide(1);
+    scrollToSlide(0);
     updateCardTransforms();
 
     const carouselRect = carousel.getBoundingClientRect();
     const carouselCenterX = carouselRect.left + carouselRect.width / 2;
-    const centerAnchor = getSlideWrapAnchor(slides[1]);
+    const centerAnchor = getSlideWrapAnchor(slides[0]);
     if (!centerAnchor) return null;
 
     const stage1Center = buildIntroSlotState(
@@ -4144,15 +4147,14 @@
       1
     );
 
-    const slideByCardIndex = { 0: 1, 1: 2, 2: 0 };
     const stage2 = {};
-    Object.entries(slideByCardIndex).forEach(([cardIndex, slideIndex]) => {
-      const anchor = getSlideWrapAnchor(slides[slideIndex]);
+    slides.forEach((slide, slideIndex) => {
+      const anchor = getSlideWrapAnchor(slide);
       if (!anchor) return;
 
       const offset = anchor.centerX - carouselCenterX;
-      const transform = getRaffleCarouselWrapTransform(Number(cardIndex), offset);
-      stage2[Number(cardIndex)] = buildIntroSlotState(anchor, transform);
+      const transform = getRaffleCarouselWrapTransform(slideIndex, offset);
+      stage2[slideIndex] = buildIntroSlotState(anchor, transform);
     });
 
     return { stage1Center, stage2 };
@@ -4371,7 +4373,7 @@
     const pagination = document.getElementById("raffle-cards-pagination");
     if (!track || !carousel || !pagination) return;
 
-    track.innerHTML = RAFFLE_LOOP_SLIDE_INDICES.map((cardIndex, slideIndex) =>
+    track.innerHTML = RAFFLE_SLIDE_INDICES.map((cardIndex, slideIndex) =>
       raffleSlideMarkup(slideIndex, cardIndex)
     ).join("");
 
@@ -4389,22 +4391,17 @@
     const slides = [...track.querySelectorAll(".raffle-cards-slide")];
     const wraps = [...track.querySelectorAll(".raffle-event-card-wrap")];
     const dots = [...pagination.querySelectorAll(".raffle-cards-dot")];
-    let isRepositioning = false;
     let rafId = null;
     let scrollEndTimer = null;
 
     function scrollToSlide(slideIndex, behavior = "auto") {
-      track.scrollTo({ left: slideIndex * RAFFLE_SLIDE_STEP, behavior });
+      const maxIndex = Math.max(0, slides.length - 1);
+      const clamped = Math.max(0, Math.min(maxIndex, slideIndex));
+      track.scrollTo({ left: clamped * RAFFLE_SLIDE_STEP, behavior });
     }
 
     function getNearestSlideIndex() {
       return Math.round(track.scrollLeft / RAFFLE_SLIDE_STEP);
-    }
-
-    function getRealCardIndex(slideIndex) {
-      return (
-        ((slideIndex - 1) % RAFFLE_CARD_COUNT) + RAFFLE_CARD_COUNT
-      ) % RAFFLE_CARD_COUNT;
     }
 
     function updateDots(realIndex) {
@@ -4454,7 +4451,8 @@
         }
       });
 
-      updateDots(getRealCardIndex(getNearestSlideIndex()));
+      const nearest = Math.max(0, Math.min(slides.length - 1, getNearestSlideIndex()));
+      updateDots(nearest);
       updateRafflePaginationLabelOpacity();
     }
 
@@ -4475,21 +4473,6 @@
       label.style.opacity = String(opacity);
     }
 
-    function handleLoop() {
-      if (isRepositioning) return;
-
-      const slideIndex = getNearestSlideIndex();
-      if (slideIndex === 0) {
-        isRepositioning = true;
-        scrollToSlide(3);
-        isRepositioning = false;
-      } else if (slideIndex === slides.length - 1) {
-        isRepositioning = true;
-        scrollToSlide(1);
-        isRepositioning = false;
-      }
-    }
-
     function scheduleTransformUpdate() {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
@@ -4498,7 +4481,6 @@
     }
 
     function handleScrollEnd() {
-      handleLoop();
       updateCardTransforms();
     }
 
@@ -4509,8 +4491,7 @@
       });
 
       const currentSlide = getNearestSlideIndex();
-      const targetSlide =
-        currentSlide <= 0 || currentSlide >= slides.length - 1 ? 1 : currentSlide;
+      const targetSlide = Math.max(0, Math.min(slides.length - 1, currentSlide));
       scrollToSlide(targetSlide);
       updateCardTransforms();
     }
@@ -4541,7 +4522,7 @@
 
     requestAnimationFrame(() => {
       layoutRaffleCarousel();
-      scrollToSlide(1);
+      scrollToSlide(0);
       updateCardTransforms();
     });
     window.addEventListener("resize", layoutRaffleCarousel);

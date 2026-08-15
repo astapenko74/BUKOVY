@@ -1608,7 +1608,7 @@ button {
   scroll-padding-inline: calc(50% - 145px);
   padding-inline: calc(50% - 145px);
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
   scrollbar-width: none;
 }
 
@@ -3485,7 +3485,7 @@ button {
   left: 0;
   right: 0;
   height: 200px;
-  background: linear-gradient(180deg, #0e0e0e 0%, #1c1c1e 100%);
+  background: linear-gradient(180deg, rgba(14, 14, 14, 0.25) 0%, #1c1c1e 100%);
   pointer-events: none;
   z-index: 0;
 }
