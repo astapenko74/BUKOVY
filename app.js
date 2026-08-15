@@ -21,7 +21,8 @@
   const WIN_SPLASH_FADE_MS = 600;
   const WIN_SPLASH_CONTENT_DELAY_MS = 200;
   const WIN_SPLASH_CONTENT_MS = 700;
-  const WIN_SPLASH_TITLE_AT = 0.4;
+  const WIN_SPLASH_CONFETTI_AT = 0.4;
+  const WIN_SPLASH_TITLE_AT = 0.6;
   const WIN_SPLASH_TITLE_MS = 700;
   const WIN_SPLASH_CONTENT_OUT_MS = 700;
   const WIN_SPLASH_THEMATIC_DELAY_MS = 400;
@@ -5220,14 +5221,29 @@
       });
 
       if (
-        await raceSkip(Math.round(WIN_SPLASH_CONTENT_MS * WIN_SPLASH_TITLE_AT))
+        await raceSkip(
+          Math.round(WIN_SPLASH_CONTENT_MS * WIN_SPLASH_CONFETTI_AT)
+        )
+      ) {
+        await finishEarly(normalWordPromise);
+        return;
+      }
+
+      playSplashConfetti();
+
+      if (
+        await raceSkip(
+          Math.round(
+            WIN_SPLASH_CONTENT_MS *
+              (WIN_SPLASH_TITLE_AT - WIN_SPLASH_CONFETTI_AT)
+          )
+        )
       ) {
         await finishEarly(normalWordPromise);
         return;
       }
 
       winSplashEl.classList.add("is-title-in");
-      playSplashConfetti();
 
       if (await raceSkip(WIN_SPLASH_TITLE_MS)) {
         await finishEarly(normalWordPromise);
