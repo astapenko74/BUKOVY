@@ -2318,6 +2318,7 @@ button {
   display: block;
   width: 24px;
   height: 24px;
+  flex-shrink: 0;
   pointer-events: none;
 }
 
@@ -3672,12 +3673,12 @@ button {
 
 /* Поражение: fade всего body */
 .win-splash--lose.is-content-in .win-splash__body {
-  transition: opacity 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transition: opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   opacity: 1;
 }
 
 .win-splash--lose.is-content-out .win-splash__body {
-  transition: opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transition: opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   opacity: 0;
 }
 
@@ -3698,31 +3699,31 @@ button {
 
 .win-splash--win.is-content-in .win-splash__copy {
   transition:
-    opacity 1000ms cubic-bezier(0.45, 1.45, 0.8, 1),
-    padding-top 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+    opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9),
+    padding-top 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   opacity: 1;
 }
 
 .win-splash--win.is-content-in .win-splash__actions {
-  transition: opacity 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transition: opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   opacity: 1;
 }
 
 .win-splash--win.is-content-out .win-splash__copy {
   transition:
-    opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1),
-    padding-top 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+    opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9),
+    padding-top 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   opacity: 0;
 }
 
 .win-splash--win.is-content-in.is-content-out .win-splash__copy {
   transition:
-    opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1),
-    padding-top 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+    opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9),
+    padding-top 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
 }
 
 .win-splash--win.is-content-out .win-splash__actions {
-  transition: opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transition: opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   opacity: 0;
 }
 
@@ -3760,16 +3761,16 @@ button {
 
 .win-splash--win.is-content-in .win-splash__grid {
   transition:
-    opacity 1000ms cubic-bezier(0.45, 1.45, 0.8, 1),
-    transform 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+    opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9),
+    transform 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   opacity: 1;
   transform: scale(1);
 }
 
 .win-splash--win.is-content-out .win-splash__grid {
   transition:
-    opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1),
-    transform 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+    opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9),
+    transform 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   opacity: 0;
   transform: scale(1);
 }
@@ -3826,7 +3827,7 @@ button {
 .win-splash__grid .cell-back.correct,
 .app.scenario-normal-word .win-splash__grid .cell-back.correct {
   box-shadow: none;
-  transition: box-shadow 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transition: box-shadow 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
 }
 
 .win-splash.is-mini-glow .win-splash__grid .cell-back.correct,
@@ -3854,7 +3855,7 @@ button {
 
 .win-splash.is-title-in .win-splash__copy,
 .win-splash.is-content-out .win-splash__copy {
-  transition: padding-top 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transition: padding-top 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
 }
 
 .win-splash__title {
@@ -3886,8 +3887,8 @@ button {
 .win-splash.is-content-out .win-splash__title,
 .win-splash.is-content-out .win-splash__subtitle {
   transition:
-    opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1),
-    margin 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+    opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9),
+    margin 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
 }
 
 .win-splash.is-title-in .win-splash__title,
@@ -4037,12 +4038,12 @@ button {
 }
 
 .win-splash--thematic.is-content-in .win-splash__body--thematic {
-  transition: opacity 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transition: opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   opacity: 1;
 }
 
 .win-splash--thematic.is-content-out .win-splash__body--thematic {
-  transition: opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transition: opacity 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   opacity: 0;
 }
 
@@ -4084,7 +4085,7 @@ button {
 }
 
 .win-splash--thematic.is-content-in .win-splash__thematic-image {
-  transition: transform 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transition: transform 700ms cubic-bezier(0.2, 0, 0.4, 0.9);
   transform: scale(1);
 }
 
