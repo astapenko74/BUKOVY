@@ -335,37 +335,6 @@ button {
   z-index: 1;
 }
 
-.ad-badge {
-  position: absolute;
-  top: 20px;
-  right: 16px;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 12px;
-  border-radius: 6px;
-  background: #333335;
-  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 7px;
-  font-weight: 700;
-  line-height: 1;
-  color: #c2c2c2;
-  opacity: 0;
-  pointer-events: none;
-  user-select: none;
-}
-
-.app.scenario-thematic-word.scenario-win-hero .ad-badge {
-  opacity: 1;
-}
-
-.app.is-animating-win-hero .ad-badge,
-.app.is-animating-reverse-win-hero .ad-badge {
-  transition: opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
-}
-
 .confetti {
   position: absolute;
   top: 0;
@@ -1955,11 +1924,16 @@ button {
 
 /* ——— Сценарий «2-4 слово» ——— */
 .app.is-animating-normal-word .grid-area {
-  transition: margin-top 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transition: margin 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
   justify-content: center;
 }
 
-.app.is-animating-normal-word .grid,
+.app.is-animating-normal-word .grid {
+  transition:
+    transform 1000ms cubic-bezier(0.45, 1.45, 0.8, 1),
+    gap 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+}
+
 .app.is-animating-normal-word .grid-row {
   transition: gap 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
 }
@@ -1994,16 +1968,14 @@ button {
 }
 
 .app.is-animating-win-hero .win-word,
-.app.is-animating-win-hero .win-message,
-.app.is-animating-win-hero .win-share {
+.app.is-animating-win-hero .win-message {
   transition:
     margin-top 800ms cubic-bezier(0.45, 1.45, 0.8, 1),
     opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
 }
 
 .app.is-animating-reverse-win-hero .win-word,
-.app.is-animating-reverse-win-hero .win-message,
-.app.is-animating-reverse-win-hero .win-share {
+.app.is-animating-reverse-win-hero .win-message {
   transition:
     margin-top 800ms cubic-bezier(0.45, 1.45, 0.8, 1),
     opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
@@ -2014,11 +1986,15 @@ button {
 }
 
 .app.is-animating-reverse-normal-word .grid-area {
-  transition: margin-top 1000ms cubic-bezier(0.7, 0, 0.3, 1);
-  justify-content: center;
+  transition: margin 1000ms cubic-bezier(0.7, 0, 0.3, 1);
 }
 
-.app.is-animating-reverse-normal-word .grid,
+.app.is-animating-reverse-normal-word .grid {
+  transition:
+    transform 1000ms cubic-bezier(0.7, 0, 0.3, 1),
+    gap 1000ms cubic-bezier(0.7, 0, 0.3, 1);
+}
+
 .app.is-animating-reverse-normal-word .grid-row {
   transition: gap 1000ms cubic-bezier(0.7, 0, 0.3, 1);
 }
@@ -2039,6 +2015,10 @@ button {
 }
 
 .app.is-animating-reverse-normal-word .win-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   transition: transform 1000ms cubic-bezier(0.7, 0, 0.3, 1);
 }
 
@@ -2056,8 +2036,12 @@ button {
   overflow: hidden;
 }
 
+.app.is-animating-reverse-normal-word .main__inner {
+  padding-bottom: var(--reverse-kb-reserve, 0px);
+}
+
 .app.is-animating-reverse-normal-word.is-returning-to-game .grid-area {
-  margin-top: 8px;
+  margin: 8px var(--side-margin) var(--grid-kb-margin);
 }
 
 .app.is-animating-reverse-normal-word.is-returning-to-game .grid {
@@ -2175,26 +2159,26 @@ button {
 }
 
 .app.scenario-normal-word .grid-area {
-  flex: 0 0 auto;
+  flex: 1;
+  min-height: 0;
   margin: 24px var(--side-margin) 0;
   align-items: center;
   justify-content: center;
-  min-height: auto;
   cursor: pointer;
 }
 
 .app.scenario-normal-word .grid {
   width: auto;
-  gap: 2px;
+  gap: 4px;
 }
 
 .app.scenario-normal-word .grid-row {
-  gap: 2px;
+  gap: 4px;
 }
 
 .app.scenario-normal-word .cell {
-  width: 23px;
-  height: 22px;
+  width: var(--mini-cell-width, 23px);
+  height: var(--mini-cell-height, 22px);
 }
 
 .app.scenario-normal-word .cell-front,
@@ -2206,22 +2190,22 @@ button {
 
 .app.scenario-normal-word .grid-row:first-child .cell:first-child .cell-front,
 .app.scenario-normal-word .grid-row:first-child .cell:first-child .cell-back {
-  border-top-left-radius: 8px;
+  border-top-left-radius: 16px;
 }
 
 .app.scenario-normal-word .grid-row:first-child .cell:last-child .cell-front,
 .app.scenario-normal-word .grid-row:first-child .cell:last-child .cell-back {
-  border-top-right-radius: 8px;
+  border-top-right-radius: 16px;
 }
 
 .app.scenario-normal-word .grid-row:last-child .cell:first-child .cell-front,
 .app.scenario-normal-word .grid-row:last-child .cell:first-child .cell-back {
-  border-bottom-left-radius: 8px;
+  border-bottom-left-radius: 16px;
 }
 
 .app.scenario-normal-word .grid-row:last-child .cell:last-child .cell-front,
 .app.scenario-normal-word .grid-row:last-child .cell:last-child .cell-back {
-  border-bottom-right-radius: 8px;
+  border-bottom-right-radius: 16px;
 }
 
 .app.scenario-normal-word .cell-back.absent {
@@ -2242,18 +2226,18 @@ button {
 .win-panel {
   position: relative;
   width: 100%;
-  padding: 0 var(--side-margin);
+  padding: 0 var(--side-margin) 20px;
   box-sizing: border-box;
   flex-shrink: 0;
   transform: translateY(var(--win-panel-offset, 200px));
   pointer-events: none;
 }
 
-/* Слот под герой: фиксированная высота конечной позиции (20+36+8+40+20+30) */
+/* Слот под герой: фиксированная высота конечной позиции (24+36+8+40) */
 .win-hero-slot {
   position: relative;
   z-index: 1;
-  min-height: 154px;
+  min-height: 108px;
   flex-shrink: 0;
 }
 
@@ -2284,25 +2268,6 @@ button {
   color: var(--tab-inactive);
 }
 
-.win-share {
-  display: block;
-  margin: 0 auto;
-  width: 113px;
-  height: 30px;
-  border-radius: 15px;
-  background: #333335;
-  color: var(--primary-on-dark);
-  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 30px;
-}
-
-.app.scenario-thematic-word .win-share {
-  width: 120px;
-  background: #428bf9;
-}
-
 .win-blocks {
   position: relative;
   z-index: 2;
@@ -2323,7 +2288,43 @@ button {
   background: #333335;
 }
 
+.win-blocks__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.win-block--share {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border-radius: 16px;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease;
+}
+
+.win-block--share:active {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.win-block--share__icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
 .win-block--yellow {
+  flex: 1;
+  width: auto;
+  min-width: 0;
   height: 56px;
   border-radius: 16px;
   border: none;
@@ -2979,145 +2980,6 @@ button {
   opacity: 0;
 }
 
-.win-block--3 {
-  padding: 16px 20px 20px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  min-height: 330px;
-  overflow: hidden;
-}
-
-.win-prizes {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.win-prizes__title {
-  margin: 0;
-  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 24px;
-  color: var(--primary-on-dark);
-}
-
-.win-prizes__subtitle {
-  margin: 8px 0 0;
-  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 20px;
-  color: var(--tab-inactive);
-}
-
-.win-prizes__carousel {
-  margin: 16px -20px 0;
-  padding-left: 0;
-  width: calc(100% + 40px);
-  min-width: 0;
-  overflow: visible;
-}
-
-.win-prizes__track {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 12px;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: visible;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scroll-padding-left: 20px;
-  scroll-padding-right: 20px;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-  scrollbar-width: none;
-}
-
-.win-prizes__track::before,
-.win-prizes__track::after {
-  content: "";
-  flex: 0 0 20px;
-  flex-shrink: 0;
-}
-
-.win-prizes__track::-webkit-scrollbar {
-  display: none;
-}
-
-.win-prize-card {
-  position: relative;
-  flex: 0 0 var(--prize-card-width, calc(100% - 12px));
-  width: var(--prize-card-width, calc(100% - 12px));
-  height: 166px;
-  border-radius: 16px;
-  background: #3e3e40;
-  overflow: hidden;
-  scroll-snap-align: start;
-}
-
-.win-prize-card__content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: 100%;
-  height: 100%;
-  padding: 16px 20px 20px;
-  box-sizing: border-box;
-  text-align: left;
-}
-
-.win-prize-card__title {
-  margin: 0 40px 0 0;
-  max-width: 100%;
-  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 22px;
-  color: var(--primary-on-dark);
-}
-
-.win-prize-card__date {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  align-self: flex-start;
-  padding: 4px 8px 4px 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 16px;
-  color: var(--tab-inactive);
-}
-
-.win-prize-card__date-icon {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-  display: block;
-}
-
-.win-prize-card__image {
-  position: absolute;
-  z-index: 0;
-  right: 0;
-  bottom: 0;
-  width: auto;
-  height: 100%;
-  object-fit: contain;
-  object-position: right bottom;
-  pointer-events: none;
-}
-
 .win-prizes__all {
   margin-top: 20px;
   width: 100%;
@@ -3245,37 +3107,15 @@ button {
   opacity: 0;
 }
 
-.app.scenario-normal-word .win-share {
-  margin-top: 44px;
-  opacity: 0;
-  pointer-events: none;
-}
-
 /* Стадия 2: герой в конечной позиции */
 .app.scenario-normal-word.scenario-win-hero .win-word {
-  margin-top: 20px;
+  margin-top: 24px;
   opacity: 1;
 }
 
 .app.scenario-normal-word.scenario-win-hero .win-message {
   margin-top: 8px;
   opacity: 1;
-}
-
-.app.scenario-word-not-guessed:not(.scenario-thematic-word) .win-hero-slot {
-  min-height: 104px;
-  height: 104px;
-}
-
-.app.scenario-word-not-guessed:not(.scenario-thematic-word) .win-share {
-  display: none;
-  pointer-events: none;
-}
-
-.app.scenario-normal-word.scenario-win-hero .win-share {
-  margin-top: 20px;
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .app.scenario-normal-word.scenario-win-hero .win-panel {
@@ -3767,4 +3607,545 @@ button {
 .task-sheet__action:disabled {
   opacity: 0.6;
   pointer-events: none;
+}
+
+/* ——— Сплеш после победы ——— */
+.win-splash {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: var(--win-splash-top, 0px);
+  z-index: 105;
+  display: flex;
+  flex-direction: column;
+  background: #1c1c1e;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.win-splash[hidden] {
+  display: none !important;
+}
+
+.win-splash.is-open {
+  pointer-events: auto;
+}
+
+.win-splash.is-fading-in {
+  transition: opacity 600ms ease-in;
+  opacity: 1;
+}
+
+.win-splash.is-fading-out {
+  transition: opacity 600ms ease-in;
+  opacity: 0;
+}
+
+.win-splash__confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.win-splash__confetti canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.win-splash__body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+}
+
+/* Поражение: fade всего body */
+.win-splash--lose.is-content-in .win-splash__body {
+  transition: opacity 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  opacity: 1;
+}
+
+.win-splash--lose.is-content-out .win-splash__body {
+  transition: opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  opacity: 0;
+}
+
+/*
+  Победа: body сразу opacity 1 (иначе backdrop-filter на ячейках
+  не работает, пока у предка opacity < 1). Контент и маска сетки — отдельно.
+*/
+.win-splash--win.is-content-in .win-splash__body,
+.win-splash--win.is-content-out .win-splash__body {
+  opacity: 1;
+  transition: none;
+}
+
+.win-splash--win .win-splash__copy,
+.win-splash--win .win-splash__actions {
+  opacity: 0;
+}
+
+.win-splash--win.is-content-in .win-splash__copy {
+  transition:
+    opacity 1000ms cubic-bezier(0.45, 1.45, 0.8, 1),
+    padding-top 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  opacity: 1;
+}
+
+.win-splash--win.is-content-in .win-splash__actions {
+  transition: opacity 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  opacity: 1;
+}
+
+.win-splash--win.is-content-out .win-splash__copy {
+  transition:
+    opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1),
+    padding-top 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  opacity: 0;
+}
+
+.win-splash--win.is-content-in.is-content-out .win-splash__copy {
+  transition:
+    opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1),
+    padding-top 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+}
+
+.win-splash--win.is-content-out .win-splash__actions {
+  transition: opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  opacity: 0;
+}
+
+.win-splash__main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.win-splash__grid-area {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.win-splash__grid {
+  width: auto;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.win-splash--win .win-splash__grid {
+  opacity: 0;
+  transform: scale(1.1);
+  transform-origin: center center;
+}
+
+.win-splash--win.is-content-in .win-splash__grid {
+  transition:
+    opacity 1000ms cubic-bezier(0.45, 1.45, 0.8, 1),
+    transform 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  opacity: 1;
+  transform: scale(1);
+}
+
+.win-splash--win.is-content-out .win-splash__grid {
+  transition:
+    opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1),
+    transform 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  opacity: 0;
+  transform: scale(1);
+}
+
+.win-splash__grid .grid-row {
+  gap: 4px;
+}
+
+.win-splash__grid .cell {
+  width: var(--splash-cell-width, 23px);
+  height: var(--splash-cell-height, 22px);
+}
+
+.win-splash__grid .cell-inner {
+  transition: none;
+}
+
+.win-splash__grid .cell-front,
+.win-splash__grid .cell-back {
+  font-size: 11px;
+  border-radius: 2px;
+  color: transparent;
+}
+
+.win-splash__grid .cell-front,
+.win-splash__grid .cell-back.absent,
+.app.scenario-normal-word .win-splash__grid .cell-front,
+.app.scenario-normal-word .win-splash__grid .cell-back.absent {
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.win-splash__grid .grid-row:first-child .cell:first-child .cell-front,
+.win-splash__grid .grid-row:first-child .cell:first-child .cell-back {
+  border-top-left-radius: 16px;
+}
+
+.win-splash__grid .grid-row:first-child .cell:last-child .cell-front,
+.win-splash__grid .grid-row:first-child .cell:last-child .cell-back {
+  border-top-right-radius: 16px;
+}
+
+.win-splash__grid .grid-row:last-child .cell:first-child .cell-front,
+.win-splash__grid .grid-row:last-child .cell:first-child .cell-back {
+  border-bottom-left-radius: 16px;
+}
+
+.win-splash__grid .grid-row:last-child .cell:last-child .cell-front,
+.win-splash__grid .grid-row:last-child .cell:last-child .cell-back {
+  border-bottom-right-radius: 16px;
+}
+
+.win-splash__grid .cell-back.correct,
+.app.scenario-normal-word .win-splash__grid .cell-back.correct {
+  box-shadow: none;
+  transition: box-shadow 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+}
+
+.win-splash.is-mini-glow .win-splash__grid .cell-back.correct,
+.app.scenario-normal-word .win-splash.is-mini-glow .win-splash__grid .cell-back.correct {
+  box-shadow: 0 0 12px 0 rgba(255, 221, 45, 0.25);
+}
+
+.win-splash__copy {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 180px;
+  padding-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.win-splash.is-title-in:not(.is-content-out) .win-splash__copy {
+  padding-top: 32px;
+}
+
+.win-splash.is-title-in .win-splash__copy,
+.win-splash.is-content-out .win-splash__copy {
+  transition: padding-top 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+}
+
+.win-splash__title {
+  margin: 0;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 34px;
+  color: #f6f7f8;
+  opacity: 0;
+}
+
+.win-splash__subtitle {
+  margin: 32px 0 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #9299a2;
+  opacity: 0;
+}
+
+.win-splash.is-title-in:not(.is-content-out) .win-splash__subtitle {
+  margin-top: 8px;
+}
+
+.win-splash.is-title-in .win-splash__title,
+.win-splash.is-title-in .win-splash__subtitle,
+.win-splash.is-content-out .win-splash__title,
+.win-splash.is-content-out .win-splash__subtitle {
+  transition:
+    opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1),
+    margin 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+}
+
+.win-splash.is-title-in .win-splash__title,
+.win-splash.is-title-in .win-splash__subtitle {
+  opacity: 1;
+}
+
+.win-splash.is-content-out .win-splash__title,
+.win-splash.is-content-out .win-splash__subtitle {
+  opacity: 0;
+}
+
+.win-splash__actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 0 16px 50px;
+}
+
+.win-splash__share {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  background: var(--accent-1);
+  color: var(--primary-on-light);
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 20px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease;
+}
+
+.win-splash__share:active {
+  background: #ffcd33;
+}
+
+.win-splash__skip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  background: transparent;
+  color: #f6f7f8;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 20px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ——— Сплеш поражения ——— */
+.win-splash__body[hidden] {
+  display: none !important;
+}
+
+.win-splash--lose .win-splash__confetti {
+  display: none;
+}
+
+.win-splash__lose-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+  pointer-events: none;
+  padding-bottom: 48px;
+}
+
+.win-splash--lose .win-splash__title,
+.win-splash--lose .win-splash__subtitle {
+  opacity: 1;
+}
+
+.win-splash__subtitle--lose {
+  margin-top: 8px;
+}
+
+.win-splash__answer-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: calc(100% - 104px);
+  margin: 32px auto 0;
+  pointer-events: none;
+}
+
+.win-splash__answer-row .cell,
+.app.scenario-normal-word .win-splash__answer-row .cell {
+  width: var(--cell-width, 56px);
+  height: var(--cell-height, 56px);
+  flex-shrink: 0;
+}
+
+.win-splash__answer-row .cell-front,
+.win-splash__answer-row .cell-back,
+.app.scenario-normal-word .win-splash__answer-row .cell-front,
+.app.scenario-normal-word .win-splash__answer-row .cell-back {
+  font-size: calc(var(--cell-height, 56px) * 0.5);
+  border-radius: var(--cell-radius);
+  color: var(--primary-on-dark);
+  box-shadow: none;
+}
+
+.app.scenario-normal-word .win-splash__answer-row .cell-back.correct {
+  background: var(--accent-1);
+  color: var(--primary-on-light);
+  box-shadow: none;
+}
+
+.win-splash__actions--lose {
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 16px 50px;
+}
+
+.win-splash__tap-hint {
+  margin: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #f6f7f8;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ——— Сплеш тематического слова ——— */
+.win-splash--thematic .win-splash__confetti {
+  display: none;
+}
+
+.win-splash--thematic.is-content-in .win-splash__body--thematic {
+  transition: opacity 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  opacity: 1;
+}
+
+.win-splash--thematic.is-content-out .win-splash__body--thematic {
+  transition: opacity 800ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  opacity: 0;
+}
+
+.win-splash__thematic-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 32px 0;
+  box-sizing: border-box;
+  text-align: center;
+  pointer-events: none;
+}
+
+.win-splash__thematic-title {
+  margin: 0;
+  flex-shrink: 0;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 34px;
+  color: #f6f7f8;
+}
+
+.win-splash__thematic-image {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 200px;
+  width: auto;
+  margin-top: 4px;
+  aspect-ratio: 260 / 200;
+  object-fit: contain;
+  transform: scale(0.9);
+  transform-origin: center center;
+}
+
+.win-splash--thematic.is-content-in .win-splash__thematic-image {
+  transition: transform 1000ms cubic-bezier(0.45, 1.45, 0.8, 1);
+  transform: scale(1);
+}
+
+.win-splash--thematic.is-content-out .win-splash__thematic-image {
+  transform: scale(1);
+}
+
+.win-splash__thematic-subtitle {
+  margin: 4px 16px 0;
+  flex-shrink: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.win-splash__actions--thematic {
+  gap: 8px;
+  padding: 0 16px 50px;
+}
+
+.win-splash__thematic-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  background: var(--accent-1);
+  color: var(--primary-on-light);
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 20px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.12s ease;
+}
+
+.win-splash__thematic-cta:active {
+  background: #ffcd33;
+}
+
+.win-splash__thematic-skip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 16px;
+  padding: 0;
+  background: transparent;
+  color: #f6f7f8;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 20px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }

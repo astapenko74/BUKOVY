@@ -13,7 +13,19 @@
     MINI_UNFLIP_WAVE_COUNT > 1
       ? (WIN_HERO_MS - MINI_UNFLIP_FLIP_MS) / (MINI_UNFLIP_WAVE_COUNT - 1)
       : 0;
+  const MINI_GRID_GAP_PX = 4;
+  const MINI_CELL_RATIO_W = 23;
+  const MINI_CELL_RATIO_H = 22;
+  const MINI_GRID_MARGIN_TOP_PX = 24;
   const REVERSE_NORMAL_WORD_MS = 1000;
+  const WIN_SPLASH_FADE_MS = 600;
+  const WIN_SPLASH_CONTENT_DELAY_MS = 200;
+  const WIN_SPLASH_CONTENT_MS = 1000;
+  const WIN_SPLASH_TITLE_AT = 0.4;
+  const WIN_SPLASH_TITLE_MS = 800;
+  const WIN_SPLASH_CONTENT_OUT_MS = 800;
+  const WIN_SPLASH_THEMATIC_DELAY_MS = 400;
+  const LOSE_SPLASH_FLIP_DELAY_MS = 100;
   const PROGRESS_PHASE1_MS = 280;
   const PROGRESS_PHASE2_MS = 420;
   const PROGRESS_PHASE3_MS = 380;
@@ -31,6 +43,26 @@
   const winPanelEl = document.getElementById("win-panel");
   const frameEl = document.getElementById("game-frame");
   const confettiEl = document.getElementById("confetti");
+  const winSplashEl = document.getElementById("win-splash");
+  const winSplashConfettiEl = document.getElementById("win-splash-confetti");
+  const winSplashBodyWinEl = document.getElementById("win-splash-body-win");
+  const winSplashBodyLoseEl = document.getElementById("win-splash-body-lose");
+  const winSplashBodyThematicEl = document.getElementById(
+    "win-splash-body-thematic"
+  );
+  const winSplashGridAreaEl = document.getElementById("win-splash-grid-area");
+  const winSplashGridEl = document.getElementById("win-splash-grid");
+  const winSplashAnswerRowEl = document.getElementById("win-splash-answer-row");
+  const winSplashTitleEl = document.getElementById("win-splash-title");
+  const winSplashSubtitleEl = document.getElementById("win-splash-subtitle");
+  const winSplashShareEl = document.getElementById("win-splash-share");
+  const winSplashSkipEl = document.getElementById("win-splash-skip");
+  const winSplashThematicCtaEl = document.getElementById(
+    "win-splash-thematic-cta"
+  );
+  const winSplashThematicSkipEl = document.getElementById(
+    "win-splash-thematic-skip"
+  );
   const winProgressStageEl = document.getElementById("win-progress-stage");
   const winProgressPrizeOverlayEl = document.getElementById("win-progress-prize-overlay");
   let winProgressPanelEl = document.getElementById("win-progress-panel");
@@ -43,7 +75,6 @@
   const profileScreenEl = document.getElementById("profile-screen");
   const winMessageEl = document.getElementById("win-message");
   const winWordEl = document.getElementById("win-word");
-  const winShareEl = document.getElementById("win-share");
   const resultSheetEl = document.getElementById("result-sheet");
   const resultSheetBackdropEl = document.getElementById("result-sheet-backdrop");
   const resultSheetPanelEl = document.getElementById("result-sheet-panel");
@@ -84,20 +115,39 @@
   let profileSettingsDirty = false;
   let isWordNotGuessedActive = false;
 
-  const WIN_RESULT_DEFAULT = {
-    messageHtml:
-      "Ах вот вы как... В следующий раз<br />загадаем слово по-сложнее!",
-    shareText: "Похвастаться",
-  };
+  const WIN_MESSAGES_ATTEMPT_1 = [
+    "Этого не может быть.<br />Вы точно не робот?",
+    "Магия? Интуиция?<br />Или вы просто гений?",
+    "Ну вы даете... В следующий раз<br />загадаем слово посложнее!",
+    "Вот как выглядит умнейший человек.<br />Приятно видеть вас в игре!",
+  ];
 
-  const WIN_RESULT_THEMATIC = {
-    messageHtml: "Это надежно, стабильно,<br />а ещё и очень прибыльно",
-    shareText: "Узнать больше",
-  };
+  const WIN_MESSAGES_ATTEMPT_2_3 = [
+    "Точно в цель!<br />Ловко вы это",
+    "Отгадали на раз-два.<br />Вот это да!",
+    "Легендарно!<br />Может, сделаем победную серию?",
+    "Вот как выглядит умнейший человек.<br />Приятно видеть вас в игре!",
+  ];
 
-  const WIN_RESULT_NOT_GUESSED = {
-    messageHtml: "Не сдавайтесь, следующее<br />слово точно отгадаете",
-  };
+  const WIN_MESSAGES_ATTEMPT_4_6 = [
+    "Угаданное слово уже в кармане!<br />А мы и не сомневались",
+    "У вас отлично получается —<br />продолжайте",
+    "Не сдавались — и угадали!<br />Так играют мастера",
+    "Что-что, а гениальность<br />у вас не отнять",
+  ];
+
+  const WIN_MESSAGES_FIFTH_WORD = [
+    "Нет слов, одни эмоции<br />от вашей легендарной игры",
+    "У самурая нет цели, а у вас есть.<br />Так держать",
+    "В шоке от вашей эрудиции,<br />так держать!",
+  ];
+
+  const WIN_MESSAGES_NOT_GUESSED = [
+    "Не сошлось — но вы были близко.<br />В следующий раз точно получится",
+    "Это была тренировка.<br />Попробуем снова?",
+    "Не сомневаемся, что следующее<br />слово — точно ваше",
+    "Слово осталось загадкой. Не беда —<br />в следующий раз точно получится",
+  ];
 
   const WIN_PROGRESS_WORDS = ["АРТЕМ", null, null, null];
 
@@ -230,24 +280,9 @@
   let raffleIntroLayerEl = null;
   const raffleParticipatedIndices = new Set();
 
-  const PRIZE_CAROUSEL_ITEMS = [
-    {
-      title: "Кэшбэк 10% за оплату отеля в Т-Путешествиях",
-      date: "До 28 ноября",
-    },
-    {
-      title: "Кэшбэк 10% за оплату отеля в Т-Путешествиях",
-      date: "До 28 ноября",
-    },
-    {
-      title: "Кэшбэк 10% за оплату отеля в Т-Путешествиях",
-      date: "До 28 ноября",
-    },
-  ];
-
   let confettiRafId = null;
+  let splashConfettiRafId = null;
   let prizeAnimTimer = null;
-  let prizesCarouselTrack = null;
   let progressAnimTimers = [];
   let savedGameCellWidth = null;
   let savedGameCellHeight = null;
@@ -771,43 +806,51 @@
     syncActivePrizePosition();
   }
 
+  function pickRandomItem(items) {
+    if (!items.length) return "";
+    return items[Math.floor(Math.random() * items.length)];
+  }
+
+  function getWinMessageHtml() {
+    if (isWordNotGuessedScenario()) {
+      return pickRandomItem(WIN_MESSAGES_NOT_GUESSED);
+    }
+
+    if (isFifthWordScenario()) {
+      return pickRandomItem(WIN_MESSAGES_FIFTH_WORD);
+    }
+
+    if (lastResultAttempts === 1) {
+      return pickRandomItem(WIN_MESSAGES_ATTEMPT_1);
+    }
+
+    if (lastResultAttempts === 2 || lastResultAttempts === 3) {
+      return pickRandomItem(WIN_MESSAGES_ATTEMPT_2_3);
+    }
+
+    if (
+      lastResultAttempts === 4 ||
+      lastResultAttempts === 5 ||
+      lastResultAttempts === 6
+    ) {
+      return pickRandomItem(WIN_MESSAGES_ATTEMPT_4_6);
+    }
+
+    return WIN_MESSAGES_ATTEMPT_4_6[0];
+  }
+
   function applyWinResultContent() {
     const app = document.querySelector(".app");
     app?.classList.toggle("scenario-thematic-word", isThematicWordEnabled());
     app?.classList.toggle("scenario-word-not-guessed", isWordNotGuessedScenario());
     app?.classList.toggle("scenario-fifth-word", isFifthWordScenario());
 
-    if (isWordNotGuessedScenario()) {
-      if (winWordEl) {
-        winWordEl.textContent = ANSWER;
-      }
-      if (isThematicWordEnabled()) {
-        if (winMessageEl) {
-          winMessageEl.innerHTML = WIN_RESULT_THEMATIC.messageHtml;
-        }
-        if (winShareEl) {
-          winShareEl.textContent = WIN_RESULT_THEMATIC.shareText;
-          winShareEl.hidden = false;
-        }
-      } else {
-        if (winMessageEl) {
-          winMessageEl.innerHTML = WIN_RESULT_NOT_GUESSED.messageHtml;
-        }
-        if (winShareEl) {
-          winShareEl.hidden = true;
-        }
-      }
-      return;
+    if (isWordNotGuessedScenario() && winWordEl) {
+      winWordEl.textContent = ANSWER;
     }
-
-    const content = isThematicWordEnabled() ? WIN_RESULT_THEMATIC : WIN_RESULT_DEFAULT;
 
     if (winMessageEl) {
-      winMessageEl.innerHTML = content.messageHtml;
-    }
-    if (winShareEl) {
-      winShareEl.textContent = content.shareText;
-      winShareEl.hidden = false;
+      winMessageEl.innerHTML = getWinMessageHtml();
     }
   }
 
@@ -2047,9 +2090,50 @@
     });
   }
 
+  function layoutMiniGrid() {
+    const app = document.querySelector(".app");
+    const gridArea = document.querySelector(".grid-area");
+    const inner = document.querySelector(".main__inner");
+    if (!gridArea) return;
+
+    const sideMargin =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--side-margin")) ||
+      16;
+    const inResult = Boolean(app?.classList.contains("scenario-normal-word"));
+
+    let availW = 0;
+    let availH = 0;
+
+    if (inResult && gridArea.clientWidth > 0 && gridArea.clientHeight > 0) {
+      availW = gridArea.clientWidth;
+      availH = gridArea.clientHeight;
+    } else if (inner && winPanelEl && !winPanelEl.hidden) {
+      availW = inner.clientWidth - sideMargin * 2;
+      availH = inner.clientHeight - winPanelEl.offsetHeight - MINI_GRID_MARGIN_TOP_PX;
+    }
+
+    if (availW <= 0 || availH <= 0) return;
+
+    let cellH = (availH - (ROWS - 1) * MINI_GRID_GAP_PX) / ROWS;
+    let cellW = (cellH * MINI_CELL_RATIO_W) / MINI_CELL_RATIO_H;
+    const totalW = cellW * COLS + MINI_GRID_GAP_PX * (COLS - 1);
+
+    if (totalW > availW) {
+      cellW = (availW - MINI_GRID_GAP_PX * (COLS - 1)) / COLS;
+      cellH = (cellW * MINI_CELL_RATIO_H) / MINI_CELL_RATIO_W;
+    }
+
+    cellW = Math.max(1, Math.floor(cellW));
+    cellH = Math.max(1, Math.floor(cellH));
+
+    gridArea.style.setProperty("--mini-cell-width", `${cellW}px`);
+    gridArea.style.setProperty("--mini-cell-height", `${cellH}px`);
+  }
+
   function updateLayout(options = {}) {
     const app = document.querySelector(".app");
     if (!options.force && !options.gameMode && app?.classList.contains("scenario-normal-word")) {
+      layoutMiniGrid();
       return;
     }
 
@@ -2174,7 +2258,6 @@
     syncFrameViewportHeight();
     updateLayout();
     syncActivePrizePosition();
-    layoutPrizesCarousel();
     layoutResultSheetGrid();
   }
 
@@ -3060,53 +3143,6 @@
     requestAnimationFrame(() => {
       requestAnimationFrame(runPrizeLine);
     });
-  }
-
-  function prizeDateIconMarkup() {
-    return (
-      '<svg class="win-prize-card__date-icon" viewBox="0 0 12 12" aria-hidden="true">' +
-      '<circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.2"/>' +
-      '<path d="M6 3.2V6.2L7.8 7.4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>' +
-      "</svg>"
-    );
-  }
-
-  function prizeCardMarkup(item) {
-    return (
-      '<article class="win-prize-card">' +
-      '<img class="win-prize-card__image" src="assets/prize-card.png" alt="" />' +
-      '<div class="win-prize-card__content">' +
-      `<p class="win-prize-card__title">${item.title}</p>` +
-      `<span class="win-prize-card__date">${prizeDateIconMarkup()}${item.date}</span>` +
-      "</div>" +
-      "</article>"
-    );
-  }
-
-  function layoutPrizesCarousel() {
-    const track = prizesCarouselTrack;
-    const block = track?.closest(".win-block--3");
-    const allBtn = block?.querySelector(".win-prizes__all");
-    if (!track || !allBtn) return;
-
-    const cardWidth = allBtn.offsetWidth;
-    if (!cardWidth) return;
-
-    track.style.setProperty("--prize-card-width", `${cardWidth}px`);
-  }
-
-  function initPrizesCarousel() {
-    const track = document.getElementById("prizes-track");
-    if (!track) return;
-
-    prizesCarouselTrack = track;
-    track.innerHTML = PRIZE_CAROUSEL_ITEMS.map(prizeCardMarkup).join("");
-
-    requestAnimationFrame(() => {
-      layoutPrizesCarousel();
-      track.scrollLeft = 0;
-    });
-    window.addEventListener("resize", layoutPrizesCarousel);
   }
 
   function raffleCardMarkup(cardIndex) {
@@ -4603,43 +4639,64 @@
     }
   }
 
-  function playConfetti() {
-    const main = document.querySelector(".main");
-    const gridArea = document.querySelector(".grid-area");
-    const heroSlot = document.querySelector(".win-hero-slot");
-    if (!confettiEl || !main) return;
+  function stopSplashConfetti() {
+    if (splashConfettiRafId !== null) {
+      cancelAnimationFrame(splashConfettiRafId);
+      splashConfettiRafId = null;
+    }
+    if (winSplashConfettiEl) {
+      winSplashConfettiEl.innerHTML = "";
+    }
+  }
 
-    stopConfetti();
+  function playConfettiInContainer(containerEl, options = {}) {
+    if (!containerEl) return;
 
-    const width = main.clientWidth;
-    const height = main.clientHeight;
+    const width = containerEl.clientWidth;
+    const height = containerEl.clientHeight;
     if (!width || !height) return;
 
-    const mainRect = main.getBoundingClientRect();
-    const gridRect = gridArea?.getBoundingClientRect();
-    const heroRect = heroSlot?.getBoundingClientRect();
+    const containerRect = containerEl.getBoundingClientRect();
+    const topRect = options.topEl?.getBoundingClientRect();
+    const bottomRect = options.bottomEl?.getBoundingClientRect();
 
     let spawnYMin = height * 0.12;
     let spawnYMax = height * 0.42;
 
-    if (gridRect && heroRect) {
-      spawnYMin = Math.max(0, gridRect.bottom - mainRect.top - 16);
-      spawnYMax = Math.min(height, heroRect.top - mainRect.top + heroRect.height * 0.6);
+    if (topRect && bottomRect) {
+      spawnYMin = Math.max(0, topRect.bottom - containerRect.top - 16);
+      spawnYMax = Math.min(
+        height,
+        bottomRect.top - containerRect.top + bottomRect.height * 0.6
+      );
       if (spawnYMax <= spawnYMin) {
         spawnYMax = spawnYMin + 80;
       }
     }
 
-    confettiEl.classList.add("is-playing");
+    if (options.spawnYShiftRatio) {
+      const shift = height * options.spawnYShiftRatio;
+      spawnYMin = Math.min(height, spawnYMin + shift);
+      spawnYMax = Math.min(height, spawnYMax + shift);
+      if (spawnYMax <= spawnYMin) {
+        spawnYMax = Math.min(height, spawnYMin + 80);
+      }
+    }
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
-    confettiEl.appendChild(canvas);
+    containerEl.appendChild(canvas);
 
     const ctx = canvas.getContext("2d");
     const particles = [];
     let lastFrameTime = performance.now();
+    let localRafId = null;
+
+    function setRaf(id) {
+      localRafId = id;
+      if (options.onRaf) options.onRaf(id);
+    }
 
     function spawnParticle(side) {
       const y = spawnYMin + Math.random() * (spawnYMax - spawnYMin);
@@ -4703,13 +4760,587 @@
       }
 
       if (particles.length > 0) {
-        confettiRafId = requestAnimationFrame(tick);
-      } else {
-        stopConfetti();
+        setRaf(requestAnimationFrame(tick));
+      } else if (options.onDone) {
+        options.onDone();
       }
     }
 
-    confettiRafId = requestAnimationFrame(tick);
+    setRaf(requestAnimationFrame(tick));
+  }
+
+  function playConfetti() {
+    const main = document.querySelector(".main");
+    const gridArea = document.querySelector(".grid-area");
+    const heroSlot = document.querySelector(".win-hero-slot");
+    if (!confettiEl || !main) return;
+
+    stopConfetti();
+    confettiEl.classList.add("is-playing");
+    playConfettiInContainer(confettiEl, {
+      topEl: gridArea,
+      bottomEl: heroSlot,
+      onRaf(id) {
+        confettiRafId = id;
+      },
+      onDone() {
+        stopConfetti();
+      },
+    });
+  }
+
+  function playSplashConfetti() {
+    stopSplashConfetti();
+    playConfettiInContainer(winSplashConfettiEl, {
+      topEl: winSplashGridAreaEl,
+      bottomEl: document.querySelector(".win-splash__copy"),
+      spawnYShiftRatio: 0.2,
+      onRaf(id) {
+        splashConfettiRafId = id;
+      },
+      onDone() {
+        stopSplashConfetti();
+      },
+    });
+  }
+
+  function waitMs(ms) {
+    return new Promise((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
+  function createSkipGate() {
+    let resolveFn = null;
+    let skipped = false;
+    const promise = new Promise((resolve) => {
+      resolveFn = resolve;
+    });
+    return {
+      promise,
+      get skipped() {
+        return skipped;
+      },
+      trigger() {
+        if (skipped) return;
+        skipped = true;
+        resolveFn("skip");
+      },
+    };
+  }
+
+  function getSplashTitleHtml(attempts) {
+    const line2 = {
+      1: "с 1 попытки",
+      2: "со 2 попытки",
+      3: "с 3 попытки",
+      4: "с 4 попытки",
+      5: "с 5 попытки",
+      6: "с 6 попытки",
+    }[attempts];
+
+    return `Отгадали<br />${line2 || "с 1 попытки"}`;
+  }
+
+  function getSplashSubtitleText(attempts) {
+    const ranges = {
+      1: [85, 99],
+      2: [75, 84],
+      3: [60, 74],
+      4: [40, 59],
+      5: [25, 39],
+      6: [40, 60],
+    };
+    const range = ranges[attempts] || ranges[4];
+    const value = range[0] + Math.floor(Math.random() * (range[1] - range[0] + 1));
+
+    if (attempts === 6) {
+      return `Всего ${value}% игроков смогли отгадать это слово`;
+    }
+
+    return `Быстрее ${value}% игроков`;
+  }
+
+  function syncSplashGridFromBoard() {
+    if (!winSplashGridEl || !gridEl) return;
+
+    winSplashGridEl.innerHTML = "";
+
+    for (let row = 0; row < ROWS; row += 1) {
+      const sourceRow = getRowEl(row);
+      const rowEl = document.createElement("div");
+      rowEl.className = "grid-row";
+      rowEl.dataset.row = String(row);
+
+      for (let col = 0; col < COLS; col += 1) {
+        const sourceCell = sourceRow?.children[col];
+        const cell = document.createElement("div");
+        cell.className = sourceCell?.className || "cell";
+        cell.classList.remove("win-scale");
+        cell.dataset.row = String(row);
+        cell.dataset.col = String(col);
+
+        const sourceInner = sourceCell?.querySelector(".cell-inner");
+        const sourceFront = sourceCell?.querySelector(".cell-front");
+        const sourceBack = sourceCell?.querySelector(".cell-back");
+        const flipped = sourceInner?.classList.contains("flipped");
+        const frontText = sourceFront?.textContent ?? "";
+        const backText = sourceBack?.textContent ?? "";
+        const backClass = sourceBack?.className || "cell-back";
+
+        cell.innerHTML =
+          '<div class="cell-inner' +
+          (flipped ? " flipped" : "") +
+          '"><div class="cell-front">' +
+          frontText +
+          '</div><div class="' +
+          backClass +
+          '">' +
+          backText +
+          "</div></div>";
+        rowEl.appendChild(cell);
+      }
+
+      winSplashGridEl.appendChild(rowEl);
+    }
+  }
+
+  function layoutSplashGrid() {
+    if (!winSplashGridAreaEl || !winSplashGridEl) return;
+
+    const gap = MINI_GRID_GAP_PX;
+    const availW = winSplashGridAreaEl.clientWidth;
+    const availH = 160;
+    if (availW <= 0) return;
+
+    let cellH = (availH - (ROWS - 1) * gap) / ROWS;
+    let cellW = (cellH * MINI_CELL_RATIO_W) / MINI_CELL_RATIO_H;
+    const totalW = cellW * COLS + gap * (COLS - 1);
+
+    if (totalW > availW) {
+      cellW = (availW - gap * (COLS - 1)) / COLS;
+      cellH = (cellW * MINI_CELL_RATIO_H) / MINI_CELL_RATIO_W;
+    }
+
+    cellW = Math.max(1, Math.floor(cellW));
+    cellH = Math.max(1, Math.floor(cellH));
+
+    winSplashGridEl.style.setProperty("--splash-cell-width", `${cellW}px`);
+    winSplashGridEl.style.setProperty("--splash-cell-height", `${cellH}px`);
+  }
+
+  function positionWinSplash() {
+    if (!winSplashEl) return;
+    const app = document.querySelector(".app");
+    const navRow = document.querySelector(".nav-row");
+    if (!app || !navRow) return;
+
+    const appRect = app.getBoundingClientRect();
+    const navRect = navRow.getBoundingClientRect();
+    const top = Math.max(0, Math.round(navRect.top - appRect.top));
+    winSplashEl.style.setProperty("--win-splash-top", `${top}px`);
+  }
+
+  function resetWinSplashClasses() {
+    if (!winSplashEl) return;
+    winSplashEl.classList.remove(
+      "is-open",
+      "is-fading-in",
+      "is-fading-out",
+      "is-content-in",
+      "is-content-out",
+      "is-title-in",
+      "is-mini-glow",
+      "win-splash--win",
+      "win-splash--lose",
+      "win-splash--thematic"
+    );
+    winSplashEl.style.removeProperty("--win-splash-title-gap");
+    winSplashEl.style.removeProperty("--win-splash-subtitle-gap");
+  }
+
+  function setWinSplashMode(mode) {
+    if (!winSplashEl) return;
+    winSplashEl.classList.toggle("win-splash--win", mode === "win");
+    winSplashEl.classList.toggle("win-splash--lose", mode === "lose");
+    winSplashEl.classList.toggle("win-splash--thematic", mode === "thematic");
+    if (winSplashBodyWinEl) winSplashBodyWinEl.hidden = mode !== "win";
+    if (winSplashBodyLoseEl) winSplashBodyLoseEl.hidden = mode !== "lose";
+    if (winSplashBodyThematicEl) {
+      winSplashBodyThematicEl.hidden = mode !== "thematic";
+    }
+  }
+
+  function buildLoseAnswerCells() {
+    if (!winSplashAnswerRowEl) return;
+
+    winSplashAnswerRowEl.innerHTML = "";
+    for (let col = 0; col < COLS; col += 1) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.innerHTML =
+        '<div class="cell-inner"><div class="cell-front"></div><div class="cell-back correct">' +
+        (ANSWER[col] || "") +
+        "</div></div>";
+      winSplashAnswerRowEl.appendChild(cell);
+    }
+  }
+
+  function layoutLoseAnswerRow() {
+    if (!winSplashAnswerRowEl) return;
+
+    const gap = 6;
+    const availW = winSplashAnswerRowEl.clientWidth;
+    if (availW <= 0) return;
+
+    const cellSize = Math.max(
+      1,
+      Math.floor((availW - gap * (COLS - 1)) / COLS)
+    );
+    winSplashAnswerRowEl.style.setProperty("--cell-width", `${cellSize}px`);
+    winSplashAnswerRowEl.style.setProperty("--cell-height", `${cellSize}px`);
+  }
+
+  function flipLoseAnswerCells() {
+    if (!winSplashAnswerRowEl) {
+      return Promise.resolve();
+    }
+
+    const inners = [
+      ...winSplashAnswerRowEl.querySelectorAll(".cell-inner"),
+    ];
+    if (inners.length === 0) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      let completed = 0;
+      inners.forEach((inner, col) => {
+        window.setTimeout(() => {
+          inner.classList.add("flipped");
+          window.setTimeout(() => {
+            completed += 1;
+            if (completed === inners.length) {
+              resolve();
+            }
+          }, FLIP_DURATION_MS);
+        }, col * FLIP_STAGGER_MS);
+      });
+    });
+  }
+
+  function hideWinSplash() {
+    stopSplashConfetti();
+    resetWinSplashClasses();
+    if (winSplashEl) {
+      winSplashEl.hidden = true;
+      winSplashEl.setAttribute("aria-hidden", "true");
+    }
+    if (winSplashGridEl) {
+      winSplashGridEl.innerHTML = "";
+    }
+    if (winSplashAnswerRowEl) {
+      winSplashAnswerRowEl.innerHTML = "";
+      winSplashAnswerRowEl.style.removeProperty("--cell-width");
+      winSplashAnswerRowEl.style.removeProperty("--cell-height");
+    }
+    if (winSplashBodyWinEl) winSplashBodyWinEl.hidden = false;
+    if (winSplashBodyLoseEl) winSplashBodyLoseEl.hidden = true;
+    if (winSplashBodyThematicEl) winSplashBodyThematicEl.hidden = true;
+  }
+
+  function fadeWinSplashIn() {
+    return new Promise((resolve) => {
+      if (!winSplashEl) {
+        resolve();
+        return;
+      }
+
+      winSplashEl.classList.remove("is-fading-out");
+      winSplashEl.classList.add("is-open");
+      void winSplashEl.offsetWidth;
+      winSplashEl.classList.add("is-fading-in");
+
+      window.setTimeout(resolve, WIN_SPLASH_FADE_MS);
+    });
+  }
+
+  function fadeWinSplashOut() {
+    return new Promise((resolve) => {
+      if (!winSplashEl) {
+        resolve();
+        return;
+      }
+
+      winSplashEl.classList.remove("is-fading-in");
+      winSplashEl.classList.add("is-fading-out");
+      winSplashEl.classList.remove("is-open");
+
+      window.setTimeout(() => {
+        hideWinSplash();
+        resolve();
+      }, WIN_SPLASH_FADE_MS);
+    });
+  }
+
+  async function playThematicSplashAnimation() {
+    if (!winSplashEl) return;
+
+    const skipGate = createSkipGate();
+    const onSkip = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      skipGate.trigger();
+    };
+
+    setWinSplashMode("thematic");
+    winSplashEl.classList.remove(
+      "is-content-in",
+      "is-content-out",
+      "is-title-in",
+      "is-mini-glow"
+    );
+
+    winSplashThematicSkipEl?.addEventListener("click", onSkip);
+
+    try {
+      await waitMs(WIN_SPLASH_THEMATIC_DELAY_MS);
+
+      requestAnimationFrame(() => {
+        winSplashEl.classList.add("is-content-in");
+      });
+
+      await skipGate.promise;
+
+      winSplashEl.classList.add("is-content-out");
+      await waitMs(WIN_SPLASH_CONTENT_OUT_MS);
+    } finally {
+      winSplashThematicSkipEl?.removeEventListener("click", onSkip);
+    }
+  }
+
+  async function finishSplashTowardResult(normalWordPromise, options = {}) {
+    const { contentAlreadyOut = false } = options;
+
+    stopSplashConfetti();
+
+    if (isThematicWordEnabled()) {
+      if (
+        !contentAlreadyOut &&
+        winSplashEl?.classList.contains("is-content-in") &&
+        !winSplashEl.classList.contains("is-content-out")
+      ) {
+        winSplashEl.classList.add("is-content-out");
+        winSplashEl.classList.remove("is-mini-glow");
+        await waitMs(WIN_SPLASH_CONTENT_OUT_MS);
+      }
+
+      await playThematicSplashAnimation();
+    }
+
+    await fadeWinSplashOut();
+
+    if (normalWordPromise) {
+      await normalWordPromise;
+    } else {
+      await playNormalWordAnimation();
+    }
+  }
+
+  async function playWinSplashAnimation() {
+    if (!winSplashEl) return;
+
+    const attempts = lastResultAttempts || 1;
+    const skipGate = createSkipGate();
+    const onSkip = () => skipGate.trigger();
+    const detachSkip = () => {
+      winSplashSkipEl?.removeEventListener("click", onSkip);
+    };
+
+    isAnimating = true;
+    updateActionKeys();
+
+    positionWinSplash();
+    syncSplashGridFromBoard();
+    if (winSplashTitleEl) {
+      winSplashTitleEl.innerHTML = getSplashTitleHtml(attempts);
+    }
+    if (winSplashSubtitleEl) {
+      winSplashSubtitleEl.textContent = getSplashSubtitleText(attempts);
+    }
+
+    resetWinSplashClasses();
+    setWinSplashMode("win");
+    winSplashEl.hidden = false;
+    winSplashEl.setAttribute("aria-hidden", "false");
+    layoutSplashGrid();
+
+    winSplashSkipEl?.addEventListener("click", onSkip);
+
+    const raceSkip = async (ms) => {
+      const result = await Promise.race([
+        waitMs(ms).then(() => "done"),
+        skipGate.promise,
+      ]);
+      return result === "skip";
+    };
+
+    const finishEarly = async (normalWordPromise) => {
+      detachSkip();
+      await finishSplashTowardResult(normalWordPromise);
+    };
+
+    try {
+      const fadeInPromise = fadeWinSplashIn();
+      if (
+        (await Promise.race([
+          fadeInPromise.then(() => "done"),
+          skipGate.promise,
+        ])) === "skip"
+      ) {
+        await finishEarly(null);
+        return;
+      }
+
+      if (await raceSkip(WIN_SPLASH_CONTENT_DELAY_MS)) {
+        await finishEarly(null);
+        return;
+      }
+
+      const normalWordPromise = playNormalWordAnimation();
+
+      normalWordPromise.then(() => {
+        if (!skipGate.skipped) {
+          winSplashEl.classList.add("is-mini-glow");
+        }
+      });
+
+      requestAnimationFrame(() => {
+        winSplashEl.classList.add("is-content-in");
+      });
+
+      if (
+        await raceSkip(Math.round(WIN_SPLASH_CONTENT_MS * WIN_SPLASH_TITLE_AT))
+      ) {
+        await finishEarly(normalWordPromise);
+        return;
+      }
+
+      winSplashEl.classList.add("is-title-in");
+      playSplashConfetti();
+
+      if (await raceSkip(WIN_SPLASH_TITLE_MS)) {
+        await finishEarly(normalWordPromise);
+        return;
+      }
+
+      await skipGate.promise;
+      detachSkip();
+
+      winSplashEl.classList.add("is-content-out");
+      winSplashEl.classList.remove("is-mini-glow");
+      stopSplashConfetti();
+      await waitMs(WIN_SPLASH_CONTENT_OUT_MS);
+
+      await finishSplashTowardResult(normalWordPromise, {
+        contentAlreadyOut: true,
+      });
+    } finally {
+      detachSkip();
+    }
+  }
+
+  async function playLoseSplashAnimation() {
+    if (!winSplashEl) return;
+
+    const skipGate = createSkipGate();
+    const onSkip = () => skipGate.trigger();
+    const detachSkip = () => {
+      winSplashEl.removeEventListener("click", onSkip);
+    };
+    const flipTotalMs =
+      (COLS - 1) * FLIP_STAGGER_MS + FLIP_DURATION_MS;
+
+    isAnimating = true;
+    updateActionKeys();
+
+    positionWinSplash();
+    resetWinSplashClasses();
+    setWinSplashMode("lose");
+    buildLoseAnswerCells();
+
+    winSplashEl.hidden = false;
+    winSplashEl.setAttribute("aria-hidden", "false");
+    layoutLoseAnswerRow();
+
+    winSplashEl.addEventListener("click", onSkip);
+
+    const raceSkip = async (ms) => {
+      const result = await Promise.race([
+        waitMs(ms).then(() => "done"),
+        skipGate.promise,
+      ]);
+      return result === "skip";
+    };
+
+    const finishEarly = async (normalWordPromise) => {
+      detachSkip();
+      await finishSplashTowardResult(normalWordPromise);
+    };
+
+    try {
+      const fadeInPromise = fadeWinSplashIn();
+      if (
+        (await Promise.race([
+          fadeInPromise.then(() => "done"),
+          skipGate.promise,
+        ])) === "skip"
+      ) {
+        await finishEarly(null);
+        return;
+      }
+
+      if (await raceSkip(WIN_SPLASH_CONTENT_DELAY_MS)) {
+        await finishEarly(null);
+        return;
+      }
+
+      const normalWordPromise = playNormalWordAnimation();
+
+      requestAnimationFrame(() => {
+        layoutLoseAnswerRow();
+        winSplashEl.classList.add("is-content-in");
+      });
+
+      if (await raceSkip(WIN_SPLASH_CONTENT_MS)) {
+        await finishEarly(normalWordPromise);
+        return;
+      }
+
+      if (await raceSkip(LOSE_SPLASH_FLIP_DELAY_MS)) {
+        await finishEarly(normalWordPromise);
+        return;
+      }
+
+      flipLoseAnswerCells();
+
+      if (await raceSkip(flipTotalMs)) {
+        await finishEarly(normalWordPromise);
+        return;
+      }
+
+      await skipGate.promise;
+      detachSkip();
+
+      winSplashEl.classList.add("is-content-out");
+      await waitMs(WIN_SPLASH_CONTENT_OUT_MS);
+
+      await finishSplashTowardResult(normalWordPromise, {
+        contentAlreadyOut: true,
+      });
+    } finally {
+      detachSkip();
+    }
   }
 
   function playWinHeroAnimation(word) {
@@ -4746,6 +5377,27 @@
     });
   }
 
+  function getGridVisualRect() {
+    if (!gridEl) return null;
+    const firstCell = gridEl.querySelector(".cell");
+    const lastCell = gridEl.querySelector(".grid-row:last-child .cell:last-child");
+    if (!firstCell || !lastCell) return null;
+    const firstRect = firstCell.getBoundingClientRect();
+    const lastRect = lastCell.getBoundingClientRect();
+    return {
+      top: firstRect.top,
+      left: firstRect.left,
+      width: lastRect.right - firstRect.left,
+      height: lastRect.bottom - firstRect.top,
+    };
+  }
+
+  function clearGridFlipTransform() {
+    if (!gridEl) return;
+    gridEl.style.removeProperty("transition");
+    gridEl.style.removeProperty("transform");
+  }
+
   function playNormalWordAnimation() {
     return new Promise((resolve) => {
       const app = document.querySelector(".app");
@@ -4767,6 +5419,7 @@
       const mainRect = main.getBoundingClientRect();
       const kbRect = kbEl.getBoundingClientRect();
       const frameRect = frameEl?.getBoundingClientRect();
+      const firstGridRect = getGridVisualRect();
       const kbBottom = mainRect.bottom - kbRect.bottom;
       const kbHide = frameRect
         ? frameRect.bottom - kbRect.top + kbEl.offsetHeight
@@ -4783,32 +5436,40 @@
           startPrizeIdleAnimation();
         }
         requestAnimationFrame(() => {
-          layoutPrizesCarousel();
           syncActivePrizePosition();
         });
-        const panelRect = winPanelEl.getBoundingClientRect();
-        const panelOffset = Math.max(0, kbRect.top - panelRect.top);
+        const panelOffset = winPanelEl.offsetHeight;
         app.style.setProperty("--win-panel-offset", `${panelOffset}px`);
       }
 
       void kbEl.offsetHeight;
+      layoutMiniGrid();
+
+      const lastGridRect = getGridVisualRect();
+      if (gridEl && firstGridRect && lastGridRect) {
+        const dx = firstGridRect.left - lastGridRect.left;
+        const dy = firstGridRect.top - lastGridRect.top;
+        gridEl.style.transition = "none";
+        gridEl.style.transform = `translate(${dx}px, ${dy}px)`;
+        void gridEl.offsetWidth;
+      }
 
       app.classList.add("is-animating-normal-word");
 
-      window.setTimeout(() => {
-        if (!isWordNotGuessedScenario()) {
-          playConfetti();
-        }
-      }, NORMAL_WORD_MS * 0.2);
-
       requestAnimationFrame(() => {
+        if (gridEl) {
+          gridEl.style.removeProperty("transition");
+          gridEl.style.transform = "none";
+        }
         app.classList.add("scenario-normal-word");
       });
 
       window.setTimeout(() => {
         app.classList.remove("is-animating-normal-word");
+        clearGridFlipTransform();
         isAnimating = false;
         updateActionKeys();
+        layoutMiniGrid();
         updateMainScrollFade();
         resolve();
       }, NORMAL_WORD_MS);
@@ -4870,17 +5531,38 @@
         }
       }
 
+      const firstGridRect = getGridVisualRect();
+
+      app.style.setProperty("--reverse-kb-reserve", `${kbEl.offsetHeight}px`);
+      if (gridEl) {
+        gridEl.style.transition = "none";
+      }
       app.classList.add("is-animating-reverse-normal-word");
 
+      const lastGridRect = getGridVisualRect();
+      if (gridEl && firstGridRect && lastGridRect) {
+        const dx = firstGridRect.left - lastGridRect.left;
+        const dy = firstGridRect.top - lastGridRect.top;
+        gridEl.style.transform = `translate(${dx}px, ${dy}px)`;
+        void gridEl.offsetWidth;
+      }
+
       requestAnimationFrame(() => {
+        if (gridEl) {
+          gridEl.style.removeProperty("transition");
+          gridEl.style.transform = "none";
+        }
         app.classList.add("is-returning-to-game");
       });
 
       window.setTimeout(() => {
         app.classList.remove(
           "is-animating-reverse-normal-word",
-          "is-returning-to-game"
+          "is-returning-to-game",
+          "scenario-normal-word"
         );
+        app.style.removeProperty("--reverse-kb-reserve");
+        clearGridFlipTransform();
 
         if (winPanelEl) {
           winPanelEl.hidden = true;
@@ -4908,6 +5590,7 @@
     app?.style.removeProperty("--kb-bottom");
     app?.style.removeProperty("--kb-hide-y");
     app?.style.removeProperty("--win-panel-offset");
+    app?.style.removeProperty("--reverse-kb-reserve");
 
     curRow = 0;
     curCol = 0;
@@ -5026,8 +5709,7 @@
       lastResultAttempts = curRow + 1;
       applyWinResultContent();
       await playWinScaleAnimation(curRow);
-      await playNormalWordAnimation();
-      setMainScrollable(true);
+      await playWinSplashAnimation();
       await playWinHeroAnimation(guess);
       updateActionKeys();
       return;
@@ -5042,8 +5724,7 @@
       lastResultAttempts = null;
       prepareWordNotGuessedProgress();
       applyWinResultContent();
-      await playNormalWordAnimation();
-      setMainScrollable(true);
+      await playLoseSplashAnimation();
       await playWinHeroAnimation(null);
       updateActionKeys();
       return;
@@ -5102,6 +5783,12 @@
   });
   raffleTickerSwitchEl?.addEventListener("change", applyRafflePageFooterVisibility);
   raffleResetProgressBtnEl?.addEventListener("click", resetRaffleProgress);
+  winSplashShareEl?.addEventListener("click", (event) => {
+    event.preventDefault();
+  });
+  winSplashThematicCtaEl?.addEventListener("click", (event) => {
+    event.preventDefault();
+  });
 
   buildGrid();
   buildKeyboard();
@@ -5116,7 +5803,6 @@
   renderWinProgress();
   mountPrizeForPanel(winProgressPanelEl, { hidden: false });
   syncActivePrizePosition();
-  initPrizesCarousel();
   initRaffleCarousel();
   initResultSheet();
   initTaskSheet();

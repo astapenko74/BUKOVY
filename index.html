@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>5 букв</title>
-    <link rel="stylesheet" href="styles.css?v=165" />
+    <link rel="stylesheet" href="styles.css?v=193" />
   </head>
   <body>
     <div class="viewport-gate" id="viewport-gate">
@@ -55,6 +55,85 @@
           </div>
         </header>
 
+        <div
+          class="win-splash"
+          id="win-splash"
+          hidden
+          aria-hidden="true"
+        >
+          <div class="win-splash__confetti" id="win-splash-confetti" aria-hidden="true"></div>
+          <div class="win-splash__body" id="win-splash-body-win">
+            <div class="win-splash__main">
+              <div class="win-splash__grid-area" id="win-splash-grid-area">
+                <div
+                  class="grid win-splash__grid"
+                  id="win-splash-grid"
+                  role="grid"
+                  aria-label="Мини-поле"
+                ></div>
+              </div>
+              <div class="win-splash__copy">
+                <h2 class="win-splash__title" id="win-splash-title"></h2>
+                <p class="win-splash__subtitle" id="win-splash-subtitle"></p>
+              </div>
+            </div>
+            <div class="win-splash__actions">
+              <button class="win-splash__share" id="win-splash-share" type="button">
+                Поделиться результатом
+              </button>
+              <button class="win-splash__skip" id="win-splash-skip" type="button">
+                Пропустить
+              </button>
+            </div>
+          </div>
+          <div class="win-splash__body win-splash__body--lose" id="win-splash-body-lose" hidden>
+            <div class="win-splash__main">
+              <div class="win-splash__lose-cluster">
+                <h2 class="win-splash__title">Не отгадали слово</h2>
+                <p class="win-splash__subtitle win-splash__subtitle--lose">Мы загадали:</p>
+                <div
+                  class="win-splash__answer-row"
+                  id="win-splash-answer-row"
+                  aria-label="Загаданное слово"
+                ></div>
+              </div>
+            </div>
+            <div class="win-splash__actions win-splash__actions--lose">
+              <p class="win-splash__tap-hint">Коснитесь, чтобы продолжить</p>
+            </div>
+          </div>
+          <div
+            class="win-splash__body win-splash__body--thematic"
+            id="win-splash-body-thematic"
+            hidden
+          >
+            <div class="win-splash__main">
+              <div class="win-splash__thematic-cluster">
+                <h2 class="win-splash__thematic-title">ВКЛАД</h2>
+                <img
+                  class="win-splash__thematic-image"
+                  src="assets/thematic-mg.png"
+                  alt=""
+                  width="260"
+                  height="200"
+                />
+                <p class="win-splash__thematic-subtitle">
+                  Вклад — надежно и стабильно. С зачислением процентов ежемесячно
+                  на карту или счёт по вашему выбору
+                </p>
+              </div>
+            </div>
+            <div class="win-splash__actions win-splash__actions--thematic">
+              <button class="win-splash__thematic-cta" id="win-splash-thematic-cta" type="button">
+                Открыть вклад
+              </button>
+              <button class="win-splash__thematic-skip" id="win-splash-thematic-skip" type="button">
+                Пропустить
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="app-content">
           <div class="app-screen" id="game-screen">
             <main class="main" id="game-main">
@@ -62,7 +141,6 @@
               <div class="confetti" id="confetti" aria-hidden="true"></div>
 
               <div class="main__inner">
-                <span class="ad-badge" aria-hidden="true">Реклама</span>
           <div class="grid-area">
             <div class="grid" id="grid" role="grid" aria-label="Игровое поле"></div>
           </div>
@@ -75,7 +153,6 @@
                   Ах вот вы как... В следующий раз<br />
                   загадаем слово по-сложнее!
                 </p>
-                <button class="win-share" id="win-share" type="button">Похвастаться</button>
               </div>
             </div>
             <div class="win-blocks">
@@ -240,44 +317,27 @@
                   </div>
                 </div>
               </div>
-              <button class="win-block win-block--yellow" type="button">
-                <span class="win-block--yellow__text">Играть ещё за 3</span>
-                <img
-                  class="win-block--yellow__energy"
-                  src="assets/Лого энергии для бейджа.png"
-                  alt=""
-                  width="20"
-                  height="20"
-                />
-              </button>
-              <div class="win-block win-block--dark win-block--3">
-                <div class="win-prizes">
-                  <h3 class="win-prizes__title">Ваши призы</h3>
-                  <p class="win-prizes__subtitle">Можно использовать уже сейчас</p>
-                  <div class="win-prizes__carousel">
-                    <div class="win-prizes__track" id="prizes-track"></div>
-                  </div>
-                  <button class="win-prizes__all" type="button">Все призы</button>
-                </div>
-              </div>
-              <div class="win-block win-block--dark win-block--notifications">
-                <div class="win-notify">
-                  <div class="win-notify__text">
-                    <h3 class="win-notify__title">Уведомления</h3>
-                    <p class="win-notify__subtitle">
-                      Напомним о новых словах<br />и событиях
-                    </p>
-                  </div>
-                  <label class="win-switch">
-                    <input
-                      class="win-switch__input"
-                      type="checkbox"
-                      role="switch"
-                      aria-label="Уведомления"
-                    />
-                    <span class="win-switch__track" aria-hidden="true"></span>
-                  </label>
-                </div>
+              <div class="win-blocks__actions">
+                <button class="win-block win-block--share" type="button" aria-label="Поделиться">
+                  <img
+                    class="win-block--share__icon"
+                    src="assets/share.svg"
+                    alt=""
+                    width="24"
+                    height="24"
+                    draggable="false"
+                  />
+                </button>
+                <button class="win-block win-block--yellow" type="button">
+                  <span class="win-block--yellow__text">Играть ещё за 3</span>
+                  <img
+                    class="win-block--yellow__energy"
+                    src="assets/Лого энергии для бейджа.png"
+                    alt=""
+                    width="20"
+                    height="20"
+                  />
+                </button>
               </div>
             </div>
           </div>
@@ -938,6 +998,6 @@
       </div>
     </div>
 
-    <script src="app.js?v=138"></script>
+    <script src="app.js?v=164"></script>
   </body>
 </html>
