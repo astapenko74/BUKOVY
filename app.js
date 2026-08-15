@@ -73,6 +73,8 @@
   const gameScreenEl = document.getElementById("game-screen");
   const raffleScreenEl = document.getElementById("raffle-screen");
   const rafflePageEl = document.querySelector(".raffle-page");
+  const prizesScreenEl = document.getElementById("prizes-screen");
+  const prizesPageEl = document.querySelector(".prizes-page");
   const profileScreenEl = document.getElementById("profile-screen");
   const winMessageEl = document.getElementById("win-message");
   const winWordEl = document.getElementById("win-word");
@@ -98,6 +100,7 @@
   const taskSheetSubtitleEl = document.getElementById("task-sheet-subtitle");
   const taskSheetRewardIconEl = document.getElementById("task-sheet-reward-icon");
   const taskSheetRewardLabelEl = document.getElementById("task-sheet-reward-label");
+  const taskSheetRewardTicketEl = document.getElementById("task-sheet-reward-ticket");
   const taskSheetActionEl = document.getElementById("task-sheet-action");
   const taskExecuteStubEl = document.getElementById("task-execute-stub");
   const scenarioSelectEl = document.getElementById("scenario-select");
@@ -189,10 +192,8 @@
   const RAFFLE_TOKEN_INACTIVE_SRC = "assets/ic-energy-inactive.png";
   const INITIAL_COIN_BALANCE = 0;
   const RAFFLE_BTN_TRANSITION_MS = 400;
-  const TASK_REWARD_READY_ICON_SRC = "assets/task-reward-ready.svg";
-  const TASK_REWARD_READY_TEXT = "Заберите награду до 31 ноября";
+  const TASK_REWARD_READY_TEXT = "Заберите до 25 ноября";
   const TASK_CLAIM_BUTTON_TEXT = "Забрать награду";
-  const TASK_CLOCK_ICON_SRC = "assets/clock-circle.svg";
   const TASK_SWAP_MS = 800;
   const TASK_BADGE_MS = 400;
   const TASK_CLAIM_MS = 300;
@@ -383,6 +384,11 @@
     rafflePageEl.classList.toggle("is-scrolled", rafflePageEl.scrollTop > 0);
   }
 
+  function updatePrizesScrollFade() {
+    if (!prizesPageEl) return;
+    prizesPageEl.classList.toggle("is-scrolled", prizesPageEl.scrollTop > 0);
+  }
+
   function setMainScrollable(enabled) {
     if (!mainEl) return;
     mainEl.classList.toggle("main--scrollable", enabled);
@@ -437,7 +443,31 @@
   }
 
   function applyRaffleSectionVisibility() {
-    setRaffleTabVisible(Boolean(raffleSectionSwitchEl?.checked));
+    setCoinBadgeVisible(true);
+    if (raffleTabEl) raffleTabEl.hidden = false;
+
+    const active = isRaffleSectionEnabled();
+    const availableEl = document.querySelector(".prizes-available");
+    const cardsEl = availableEl?.querySelector(".raffle-cards-block");
+    const stubEl =
+      document.getElementById("prizes-stage-stub") ??
+      availableEl?.querySelector(".prizes-stage-stub");
+
+    if (cardsEl) cardsEl.hidden = !active;
+    if (stubEl) stubEl.hidden = active;
+    availableEl?.classList.toggle("is-stage-inactive", !active);
+
+    if (!active) {
+      skipRaffleParticipateAnimation();
+      cancelRaffleIntro(false);
+      cancelRaffleIntroPresentation();
+      return;
+    }
+
+    if (prizesScreenEl && !prizesScreenEl.hidden) {
+      prepareRaffleIntroPresentation();
+      void maybePlayRaffleIntro();
+    }
   }
 
   function applyRafflePageFooterVisibility() {
@@ -453,15 +483,19 @@
   const TAB_SCREENS = {
     game: () => gameScreenEl,
     raffle: () => raffleScreenEl,
+    prizes: () => prizesScreenEl,
     profile: () => profileScreenEl,
   };
 
   function showAppScreen(tabId) {
     if (tabId !== "raffle") {
+      closeTaskSheet({ animateClose: false });
+    }
+
+    if (tabId !== "prizes") {
       skipRaffleParticipateAnimation();
       cancelRaffleIntro(false);
       cancelRaffleIntroPresentation();
-      closeTaskSheet({ animateClose: false });
     }
 
     Object.entries(TAB_SCREENS).forEach(([id, getScreen]) => {
@@ -471,9 +505,15 @@
     });
 
     if (tabId === "raffle") {
-      prepareRaffleIntroPresentation();
-      void maybePlayRaffleIntro();
       requestAnimationFrame(updateRaffleScrollFade);
+    }
+
+    if (tabId === "prizes") {
+      if (isRaffleSectionEnabled()) {
+        prepareRaffleIntroPresentation();
+        void maybePlayRaffleIntro();
+      }
+      requestAnimationFrame(updatePrizesScrollFade);
     }
   }
 
@@ -1142,20 +1182,54 @@
   }
 
   function getTaskRewardType(cardEl) {
-    const iconSrc = cardEl.querySelector(".raffle-task-card__reward-icon")?.getAttribute("src") ?? "";
-    return iconSrc.includes("energy") ? "energy" : "coin";
+    if (cardEl.querySelector('.raffle-task-card__reward-item[data-reward="coin"]')) {
+      return "coin";
+    }
+    if (cardEl.querySelector('.raffle-task-card__reward-item[data-reward="energy"]')) {
+      return "energy";
+    }
+    if (cardEl.querySelector('.raffle-task-card__reward-item[data-reward="ticket"]')) {
+      return "ticket";
+    }
+    return "coin";
   }
 
   function getTaskRewardAmount(cardEl) {
-    const value = cardEl.querySelector(".raffle-task-card__reward-value")?.textContent ?? "";
+    const preferred =
+      cardEl.querySelector(
+        '.raffle-task-card__reward-item[data-reward="coin"] .raffle-task-card__reward-value'
+      ) ??
+      cardEl.querySelector(
+        '.raffle-task-card__reward-item[data-reward="energy"] .raffle-task-card__reward-value'
+      ) ??
+      cardEl.querySelector(".raffle-task-card__reward-value");
+    const value = preferred?.textContent ?? "";
     return value.replace(/^\+/, "").trim();
+  }
+
+  function getTaskCardRewardIcon(cardEl) {
+    return (
+      cardEl.querySelector(
+        '.raffle-task-card__reward-item[data-reward="coin"] .raffle-task-card__reward-icon'
+      ) ?? cardEl.querySelector(".raffle-task-card__reward-icon")
+    );
   }
 
   function formatTaskRewardLabel(amount, type) {
     if (type === "energy") {
       return amount + " энергии";
     }
-    return amount + " жетонов";
+    if (type === "ticket") {
+      return "Участие в розыгрыше";
+    }
+
+    const n = Number(amount);
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    let word = "монет";
+    if (mod10 === 1 && mod100 !== 11) word = "монета";
+    else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) word = "монеты";
+    return amount + " " + word;
   }
 
   function isTaskRewardReady(cardEl) {
@@ -1293,14 +1367,16 @@
 
     cardEl.classList.add("is-reward-ready");
 
-    const clock = cardEl.querySelector(".raffle-task-card__clock");
-    if (clock) {
-      clock.src = TASK_REWARD_READY_ICON_SRC;
+    const claimUntil = cardEl.querySelector(".raffle-task-card__claim-until");
+    if (claimUntil) {
+      claimUntil.textContent = TASK_REWARD_READY_TEXT;
+      claimUntil.hidden = false;
     }
 
-    const date = cardEl.querySelector(".raffle-task-card__date");
-    if (date) {
-      date.textContent = TASK_REWARD_READY_TEXT;
+    const partnerLabel = cardEl.querySelector(".raffle-task-card__partner-label");
+    if (partnerLabel) {
+      partnerLabel.textContent =
+        cardEl.dataset.taskPartnerReadyLabel ?? "Награда от Магнита";
     }
 
     const claimBtn = cardEl.querySelector(".raffle-task-card__claim");
@@ -1314,9 +1390,15 @@
 
     cardEl.classList.remove("is-reward-ready");
 
-    const clock = cardEl.querySelector(".raffle-task-card__clock");
-    if (clock) {
-      clock.src = TASK_CLOCK_ICON_SRC;
+    const claimUntil = cardEl.querySelector(".raffle-task-card__claim-until");
+    if (claimUntil) {
+      claimUntil.hidden = true;
+    }
+
+    const partnerLabel = cardEl.querySelector(".raffle-task-card__partner-label");
+    if (partnerLabel) {
+      partnerLabel.textContent =
+        cardEl.dataset.taskPartnerLabel ?? "Задание от Магнита";
     }
 
     const date = cardEl.querySelector(".raffle-task-card__date");
@@ -1329,7 +1411,7 @@
       claimBtn.hidden = true;
     }
 
-    resetRewardIconStyles(cardEl.querySelector(".raffle-task-card__reward-icon"));
+    resetRewardIconStyles(getTaskCardRewardIcon(cardEl));
   }
 
   function resetTask2RewardReady() {
@@ -1772,7 +1854,7 @@
     if (cardEl) {
       cardEl.style.pointerEvents = "";
       cardEl.classList.remove("is-claiming", "is-claim-removing");
-      resetRewardIconStyles(cardEl.querySelector(".raffle-task-card__reward-icon"));
+      resetRewardIconStyles(getTaskCardRewardIcon(cardEl));
       const li = cardEl.closest("li");
       if (li) {
         li.style.height = "";
@@ -1796,7 +1878,7 @@
       await closeTaskSheet({ animateClose: true });
     }
 
-    const rewardIcon = cardEl.querySelector(".raffle-task-card__reward-icon");
+    const rewardIcon = getTaskCardRewardIcon(cardEl);
     const coinFly = rewardIcon ? runCoinsToBadgeAnimation(rewardIcon) : null;
 
     await (coinFly?.halfway ?? Promise.resolve());
@@ -1821,8 +1903,7 @@
     const rewardReady = isTaskRewardReady(cardEl);
     const rewardType = getTaskRewardType(cardEl);
     const rewardAmount = getTaskRewardAmount(cardEl);
-    const rewardIconSrc =
-      cardEl.querySelector(".raffle-task-card__reward-icon")?.getAttribute("src") ?? "";
+    const rewardIconSrc = getTaskCardRewardIcon(cardEl)?.getAttribute("src") ?? "";
 
     if (!options.skipBadge) {
       if (taskSheetBadgeEl) {
@@ -1848,6 +1929,10 @@
         taskSheetSubtitleEl.textContent = "";
         taskSheetSubtitleEl.hidden = true;
       }
+    }
+    if (taskSheetRewardTicketEl) {
+      const showTicket = cardEl.dataset.taskId === "2";
+      taskSheetRewardTicketEl.hidden = !showTicket;
     }
     if (taskSheetRewardIconEl && rewardIconSrc) {
       taskSheetRewardIconEl.src = rewardIconSrc;
@@ -2072,8 +2157,44 @@
     sticker.classList.add("is-attaching");
   }
 
+  function initPrizesSegment() {
+    const segmentEl = document.getElementById("prizes-segment");
+    if (!segmentEl) return;
+
+    const buttons = [
+      ...segmentEl.querySelectorAll("[data-prizes-segment]"),
+    ];
+    const panels = [
+      ...document.querySelectorAll("[data-prizes-panel]"),
+    ];
+
+    const setActive = (segmentId) => {
+      segmentEl.dataset.active = segmentId;
+
+      buttons.forEach((btn) => {
+        const isActive = btn.dataset.prizesSegment === segmentId;
+        btn.classList.toggle("is-active", isActive);
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.prizesPanel !== segmentId;
+      });
+    };
+
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const segmentId = btn.dataset.prizesSegment;
+        if (!segmentId || segmentEl.dataset.active === segmentId) return;
+        setActive(segmentId);
+      });
+    });
+
+    setActive(segmentEl.dataset.active || "available");
+  }
+
   function initTabBar() {
-    const navigableTabs = new Set(["game", "raffle", "profile"]);
+    const navigableTabs = new Set(["game", "raffle", "prizes", "profile"]);
 
     document.querySelectorAll(".tab-bar .tab[data-tab]").forEach((tab) => {
       tab.addEventListener("click", () => {
@@ -2518,7 +2639,7 @@
   }
 
   function triggerWinProgressCoinReward(sourceEl) {
-    if (!isRaffleSectionEnabled() || !sourceEl) return;
+    if (!sourceEl) return;
 
     void runCoinsToBadgeAnimation(sourceEl).firstArrival.then(() => {
       const start = coinBalance;
@@ -5794,7 +5915,9 @@
   scenarioSelectEl?.addEventListener("change", markProfileSettingsDirty);
   thematicWordSwitchEl?.addEventListener("change", markProfileSettingsDirty);
   raffleSectionSwitchEl?.addEventListener("change", () => {
+    const preservedCoins = coinBalance;
     resetRaffleProgress();
+    setCoinBalance(preservedCoins);
     applyRaffleSectionVisibility();
   });
   raffleTickerSwitchEl?.addEventListener("change", applyRafflePageFooterVisibility);
@@ -5809,6 +5932,7 @@
   buildGrid();
   buildKeyboard();
   initTabBar();
+  initPrizesSegment();
   applyRaffleSectionVisibility();
   applyRafflePageFooterVisibility();
   preventMobileZoomGestures();
@@ -5828,6 +5952,10 @@
 
   mainEl?.addEventListener("scroll", updateMainScrollFade, { passive: true });
   rafflePageEl?.addEventListener("scroll", updateRaffleScrollFade, { passive: true });
+  prizesPageEl?.addEventListener("scroll", updatePrizesScrollFade, {
+    passive: true,
+  });
+  updatePrizesScrollFade();
   document.querySelector(".win-block--yellow")?.addEventListener("click", playAgain);
   window.addEventListener("resize", handleViewportChange);
   window.visualViewport?.addEventListener("resize", handleViewportChange);
