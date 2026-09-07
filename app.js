@@ -19,6 +19,17 @@
   const MINI_GRID_MARGIN_TOP_PX = 24;
   const REVERSE_NORMAL_WORD_MS = 1000;
   const WIN_SPLASH_FADE_MS = 600;
+  const ONBOARDING_LEAVE_MS = 600;
+  const ONBOARDING_ANSWER = "СЛОВО";
+  const ONBOARDING_WORD_SAHAR = "САХАР";
+  const ONBOARDING_WORD_SOVET = "СОВЕТ";
+  const ONBOARDING_TOOLTIP_MS = 3000;
+  const ONBOARDING_PLAQUE_FADE_MS = 400;
+  const ONBOARDING_TOOLTIP_IN_MS = 300;
+  const ONBOARDING_TOOLTIP_OUT_MS = 150;
+  const ONBOARDING_TOOLTIP_EDGE_PX = 16;
+  const ONBOARDING_TOOLTIP_GAP_PX = 8;
+  const ONBOARDING_SPOTLIGHT_MS = 3000;
   const WIN_SPLASH_CONTENT_DELAY_MS = 200;
   const WIN_SPLASH_CONTENT_MS = 700;
   const WIN_SPLASH_CONFETTI_AT = 0.4;
@@ -106,13 +117,47 @@
   const scenarioSelectEl = document.getElementById("scenario-select");
   const thematicWordSwitchEl = document.getElementById("thematic-word-switch");
   const raffleSectionSwitchEl = document.getElementById("raffle-section-switch");
-  const raffleTickerSwitchEl = document.getElementById("raffle-ticker-switch");
-  const rafflePageFooterEl = document.getElementById("raffle-page-footer");
   const raffleCardsPaginationLabelEl = document.getElementById("raffle-cards-pagination-label");
   const coinBadgeEl = document.getElementById("coin-badge");
   const coinBadgeValueEl = coinBadgeEl?.querySelector(".energy-badge__value");
   const raffleResetProgressBtnEl = document.getElementById("raffle-reset-progress-btn");
+  const startOnboardingBtnEl = document.getElementById("start-onboarding-btn");
+  const onboardingEl = document.getElementById("onboarding");
+  const onboardingCloseBtnEl = document.getElementById("onboarding-close-btn");
+  const onboardingInfoBtnEl = document.getElementById("onboarding-info-btn");
+  const onboardingGridAreaEl = document.getElementById("onboarding-grid-area");
+  const onboardingGridEl = document.getElementById("onboarding-grid");
+  const onboardingKbEl = document.getElementById("onboarding-keyboard");
+  const onboardingDialogTextEl = document.getElementById("onboarding-dialog-text");
+  const onboardingTooltipEl = document.getElementById("onboarding-tooltip");
+  const onboardingTooltipTextEl = document.getElementById("onboarding-tooltip-text");
+  const onboardingTooltipTailEl = onboardingTooltipEl?.querySelector(
+    ".onboarding-tooltip__tail"
+  );
+  const onboardingTooltipBodyEl = onboardingTooltipEl?.querySelector(
+    ".onboarding-tooltip__body"
+  );
   const raffleTabEl = document.querySelector('.tab[data-tab="raffle"]');
+
+  let onboardingActive = false;
+  let onboardingClosing = false;
+  let onboardingAnimating = false;
+  let onboardingDone = false;
+  let onboardingStep = "sahar";
+  let onboardingWrongCount = 0;
+  let onboardingAbsentTipShown = false;
+  let onboardingSubmitted = [];
+  let onboardingCurRow = 0;
+  let onboardingCurCol = 0;
+  let onboardingBoard = Array.from({ length: ROWS }, () => Array(COLS).fill(""));
+  let onboardingTooltipTimer = null;
+  let onboardingTooltipResolve = null;
+  let onboardingTooltipArmed = false;
+  let onboardingSpotlightTimer = null;
+  let onboardingSpotlightResolve = null;
+  let onboardingSpotlightArmed = false;
+  let onboardingSpotlightActive = false;
+  let onboardingSpotlightBaseText = null;
 
   let activeScenario = scenarioSelectEl?.value ?? "2-4-word";
   let activeThematicWord = Boolean(thematicWordSwitchEl?.checked);
@@ -468,12 +513,6 @@
       prepareRaffleIntroPresentation();
       void maybePlayRaffleIntro();
     }
-  }
-
-  function applyRafflePageFooterVisibility() {
-    const footer = rafflePageFooterEl ?? document.getElementById("raffle-page-footer");
-    if (!footer) return;
-    footer.hidden = !Boolean(raffleTickerSwitchEl?.checked);
   }
 
   function isRaffleSectionEnabled() {
@@ -2253,13 +2292,18 @@
   }
 
   function updateLayout(options = {}) {
+    if (onboardingActive) {
+      updateOnboardingLayout();
+      return;
+    }
+
     const app = document.querySelector(".app");
     if (!options.force && !options.gameMode && app?.classList.contains("scenario-normal-word")) {
       layoutMiniGrid();
       return;
     }
 
-    const gridArea = document.querySelector(".grid-area");
+    const gridArea = document.querySelector("#game-main .grid-area") ?? document.querySelector(".grid-area");
     if (!gridArea || !gridEl) return;
 
     const gap =
@@ -3424,6 +3468,925 @@
     return new Promise((resolve) => {
       window.setTimeout(resolve, durationMs);
     });
+  }
+
+  function buildOnboardingGrid() {
+    if (!onboardingGridEl || onboardingGridEl.children.length > 0) return;
+
+    for (let r = 0; r < ROWS; r++) {
+      const rowEl = document.createElement("div");
+      rowEl.className = "grid-row";
+      rowEl.dataset.row = String(r);
+
+      for (let c = 0; c < COLS; c++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.row = String(r);
+        cell.dataset.col = String(c);
+        cell.innerHTML =
+          '<div class="cell-inner"><div class="cell-front"></div><div class="cell-back"></div></div>';
+        rowEl.appendChild(cell);
+      }
+
+      onboardingGridEl.appendChild(rowEl);
+    }
+  }
+
+  function buildOnboardingKeyboard() {
+    if (!onboardingKbEl || onboardingKbEl.children.length > 0) return;
+
+    KB_ROWS.forEach((row, index) => {
+      const rowEl = document.createElement("div");
+      rowEl.className = "kb-row" + (index === 1 ? " kb-row--middle" : "");
+
+      if (index === 2) {
+        rowEl.appendChild(createOnboardingActionKey("enter", "✓"));
+      }
+
+      for (const ch of row) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "key";
+        btn.textContent = ch;
+        btn.dataset.key = ch;
+        btn.addEventListener("click", () => onboardingOnKey(ch));
+        rowEl.appendChild(btn);
+      }
+
+      if (index === 2) {
+        rowEl.appendChild(createOnboardingActionKey("backspace", "⌫"));
+      }
+
+      onboardingKbEl.appendChild(rowEl);
+    });
+  }
+
+  function createOnboardingActionKey(type, dataKey) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `key key--action key--${type} is-disabled`;
+    btn.dataset.key = dataKey;
+    btn.innerHTML = `<img src="${ACTION_ICONS[type]}" alt="" width="24" height="24" />`;
+    btn.addEventListener("click", () => onboardingOnKey(dataKey));
+    return btn;
+  }
+
+  function getOnboardingCell(row, col) {
+    return (
+      onboardingGridEl?.querySelector(
+        `.cell[data-row="${row}"][data-col="${col}"]`
+      ) ?? null
+    );
+  }
+
+  function getOnboardingRowEl(row) {
+    return (
+      onboardingGridEl?.querySelector(`.grid-row[data-row="${row}"]`) ?? null
+    );
+  }
+
+  function evaluateOnboardingGuess(guess) {
+    const answerArr = ONBOARDING_ANSWER.split("");
+    const status = Array(COLS).fill("absent");
+
+    for (let i = 0; i < COLS; i++) {
+      if (guess[i] === answerArr[i]) {
+        status[i] = "correct";
+        answerArr[i] = null;
+      }
+    }
+
+    for (let i = 0; i < COLS; i++) {
+      if (status[i] === "correct") continue;
+      const idx = answerArr.indexOf(guess[i]);
+      if (idx !== -1) {
+        status[i] = "present";
+        answerArr[idx] = null;
+      }
+    }
+
+    return status;
+  }
+
+  function updateOnboardingKeyboardKey(letter, state) {
+    const key = onboardingKbEl?.querySelector(`[data-key="${letter}"]`);
+    if (!key || key.classList.contains("key--action")) return;
+
+    const rank = { absent: 0, present: 1, correct: 2 };
+    const current = key.classList.contains("correct")
+      ? "correct"
+      : key.classList.contains("present")
+        ? "present"
+        : key.classList.contains("absent")
+          ? "absent"
+          : null;
+
+    if (!current || rank[state] > rank[current]) {
+      key.classList.remove("absent", "present", "correct");
+      key.classList.add(state);
+    }
+  }
+
+  function updateOnboardingActionKeys() {
+    const enterKey = onboardingKbEl?.querySelector(".key--enter");
+    const backspaceKey = onboardingKbEl?.querySelector(".key--backspace");
+    const locked =
+      onboardingDone ||
+      onboardingAnimating ||
+      onboardingClosing ||
+      onboardingSpotlightActive;
+    const rowFull = !locked && onboardingCurCol >= COLS;
+    const hasLetters = !locked && onboardingCurCol > 0;
+
+    enterKey?.classList.toggle("is-disabled", !rowFull);
+    enterKey?.classList.toggle("is-enabled", rowFull);
+    backspaceKey?.classList.toggle("is-disabled", !hasLetters);
+    backspaceKey?.classList.toggle("is-enabled", hasLetters);
+  }
+
+  function shakeOnboardingRow(row) {
+    const rowEl = getOnboardingRowEl(row);
+    if (!rowEl) return;
+    rowEl.classList.remove("shake");
+    void rowEl.offsetWidth;
+    rowEl.classList.add("shake");
+    rowEl.addEventListener(
+      "animationend",
+      () => rowEl.classList.remove("shake"),
+      { once: true }
+    );
+  }
+
+  function showOnboardingRowError(row) {
+    for (let c = 0; c < COLS; c++) {
+      getOnboardingCell(row, c)?.classList.add("error");
+    }
+  }
+
+  function clearOnboardingRowError(row) {
+    for (let c = 0; c < COLS; c++) {
+      getOnboardingCell(row, c)?.classList.remove("error");
+    }
+  }
+
+  async function setOnboardingPlaqueText(text) {
+    if (!onboardingDialogTextEl) return;
+    if (
+      onboardingDialogTextEl.textContent === text &&
+      onboardingDialogTextEl.style.opacity !== "0"
+    ) {
+      return;
+    }
+
+    onboardingDialogTextEl.style.opacity = "0";
+    await waitRaffleDelay(ONBOARDING_PLAQUE_FADE_MS);
+    onboardingDialogTextEl.textContent = text;
+    fitOnboardingPlaqueText();
+    void onboardingDialogTextEl.offsetWidth;
+    onboardingDialogTextEl.style.opacity = "1";
+    await waitRaffleDelay(ONBOARDING_PLAQUE_FADE_MS);
+  }
+
+  function fitOnboardingPlaqueText() {
+    if (!onboardingDialogTextEl) return;
+
+    const plaque = onboardingDialogTextEl.closest(".onboarding-dialog__plaque");
+    if (!plaque) return;
+
+    const compact = window.matchMedia("(max-width: 359px)").matches;
+    const baseSize = compact ? 13 : 15;
+    const baseLine = compact ? 16 : 20;
+
+    onboardingDialogTextEl.style.fontSize = `${baseSize}px`;
+    onboardingDialogTextEl.style.lineHeight = `${baseLine}px`;
+
+    void onboardingDialogTextEl.offsetHeight;
+
+    const plaqueStyle = getComputedStyle(plaque);
+    const padY =
+      parseFloat(plaqueStyle.paddingTop) + parseFloat(plaqueStyle.paddingBottom);
+    const maxHeight = plaque.clientHeight - padY;
+    const overflowsHeight = onboardingDialogTextEl.scrollHeight > maxHeight + 0.5;
+    const overflowsWidth =
+      onboardingDialogTextEl.scrollWidth > onboardingDialogTextEl.clientWidth + 0.5;
+
+    if (overflowsHeight || overflowsWidth) {
+      onboardingDialogTextEl.style.fontSize = `${baseSize - 1}px`;
+    }
+  }
+
+  function clearOnboardingSpotlightTargets() {
+    onboardingGridEl
+      ?.querySelectorAll(".cell.is-spotlight-target")
+      .forEach((cell) => cell.classList.remove("is-spotlight-target"));
+  }
+
+  function clearOnboardingSpotlightTimers() {
+    if (onboardingSpotlightTimer) {
+      window.clearTimeout(onboardingSpotlightTimer);
+      onboardingSpotlightTimer = null;
+    }
+    if (onboardingSpotlightArmed) {
+      onboardingEl?.removeEventListener(
+        "pointerdown",
+        handleOnboardingSpotlightDismiss,
+        true
+      );
+      document.removeEventListener(
+        "keydown",
+        handleOnboardingSpotlightDismiss,
+        true
+      );
+      onboardingSpotlightArmed = false;
+    }
+  }
+
+  function handleOnboardingSpotlightDismiss(event) {
+    if (!onboardingSpotlightArmed) return;
+    if (
+      event?.type === "keydown" &&
+      (event.ctrlKey || event.metaKey || event.altKey)
+    ) {
+      return;
+    }
+    void hideOnboardingCellSpotlight({
+      restorePlaqueText: onboardingSpotlightBaseText,
+    });
+  }
+
+  function resolveOnboardingSpotlight() {
+    if (!onboardingSpotlightResolve) return;
+    const resolve = onboardingSpotlightResolve;
+    onboardingSpotlightResolve = null;
+    resolve();
+  }
+
+  async function hideOnboardingCellSpotlight(options = {}) {
+    const { restorePlaqueText = null } = options;
+    clearOnboardingSpotlightTimers();
+
+    if (!onboardingSpotlightActive) {
+      resolveOnboardingSpotlight();
+      return;
+    }
+
+    const plaqueText = restorePlaqueText ?? onboardingSpotlightBaseText;
+    onboardingSpotlightBaseText = null;
+
+    onboardingEl?.classList.remove("is-spotlight");
+    clearOnboardingSpotlightTargets();
+    onboardingSpotlightActive = false;
+    updateOnboardingActionKeys();
+
+    if (plaqueText != null) {
+      await setOnboardingPlaqueText(plaqueText);
+    }
+
+    resolveOnboardingSpotlight();
+  }
+
+  async function showOnboardingCellSpotlight({
+    text,
+    row,
+    cols,
+    basePlaqueText,
+  }) {
+    if (!onboardingEl) return;
+
+    await hideOnboardingTooltip();
+    if (onboardingSpotlightActive) {
+      await hideOnboardingCellSpotlight();
+    }
+
+    onboardingSpotlightBaseText = basePlaqueText ?? null;
+
+    const targetCols = Array.isArray(cols) ? cols : [];
+    targetCols.forEach((col) => {
+      getOnboardingCell(row, col)?.classList.add("is-spotlight-target");
+    });
+
+    onboardingSpotlightActive = true;
+    updateOnboardingActionKeys();
+    onboardingEl.classList.add("is-spotlight");
+    await setOnboardingPlaqueText(text);
+
+    return new Promise((resolve) => {
+      onboardingSpotlightResolve = resolve;
+      onboardingSpotlightTimer = window.setTimeout(() => {
+        void hideOnboardingCellSpotlight({
+          restorePlaqueText: onboardingSpotlightBaseText,
+        });
+      }, ONBOARDING_SPOTLIGHT_MS);
+
+      window.setTimeout(() => {
+        if (!onboardingSpotlightActive) return;
+        onboardingSpotlightArmed = true;
+        onboardingEl?.addEventListener(
+          "pointerdown",
+          handleOnboardingSpotlightDismiss,
+          true
+        );
+        document.addEventListener(
+          "keydown",
+          handleOnboardingSpotlightDismiss,
+          true
+        );
+      }, 40);
+    });
+  }
+
+  function clearOnboardingTooltipTimers() {
+    if (onboardingTooltipTimer) {
+      window.clearTimeout(onboardingTooltipTimer);
+      onboardingTooltipTimer = null;
+    }
+    if (onboardingTooltipArmed) {
+      onboardingEl?.removeEventListener(
+        "pointerdown",
+        handleOnboardingTooltipDismiss,
+        true
+      );
+      document.removeEventListener(
+        "keydown",
+        handleOnboardingTooltipDismiss,
+        true
+      );
+      onboardingTooltipArmed = false;
+    }
+  }
+
+  function handleOnboardingTooltipDismiss(event) {
+    if (!onboardingTooltipArmed) return;
+    if (event?.type === "keydown" && (event.ctrlKey || event.metaKey || event.altKey)) {
+      return;
+    }
+    void hideOnboardingTooltip();
+  }
+
+  function resolveOnboardingTooltip() {
+    if (!onboardingTooltipResolve) return;
+    const resolve = onboardingTooltipResolve;
+    onboardingTooltipResolve = null;
+    resolve();
+  }
+
+  async function hideOnboardingTooltip() {
+    clearOnboardingTooltipTimers();
+    if (!onboardingTooltipEl || onboardingTooltipEl.hidden) {
+      resolveOnboardingTooltip();
+      return;
+    }
+
+    onboardingTooltipEl.classList.remove("is-visible");
+    onboardingTooltipEl.classList.add("is-hiding");
+    await waitRaffleDelay(ONBOARDING_TOOLTIP_OUT_MS);
+    onboardingTooltipEl.classList.remove("is-hiding", "is-anchored");
+    onboardingTooltipEl.hidden = true;
+    onboardingTooltipEl.setAttribute("aria-hidden", "true");
+    onboardingTooltipEl.style.left = "";
+    onboardingTooltipEl.style.top = "";
+    onboardingTooltipEl.style.width = "";
+    if (onboardingTooltipTailEl) {
+      onboardingTooltipTailEl.style.left = "";
+      onboardingTooltipTailEl.style.top = "";
+    }
+    if (onboardingTooltipBodyEl) {
+      onboardingTooltipBodyEl.style.left = "";
+      onboardingTooltipBodyEl.style.top = "";
+    }
+    resolveOnboardingTooltip();
+  }
+
+  function getOnboardingFrameRect() {
+    return onboardingEl?.getBoundingClientRect() ?? null;
+  }
+
+  function getOnboardingTooltipOriginRect() {
+    const origin = onboardingTooltipEl?.offsetParent;
+    if (origin) return origin.getBoundingClientRect();
+    return (
+      onboardingEl?.querySelector(".onboarding__body")?.getBoundingClientRect() ??
+      getOnboardingFrameRect()
+    );
+  }
+
+  function clampTooltipBodyLeft(idealLeft, bodyWidth, frameWidth) {
+    const minLeft = ONBOARDING_TOOLTIP_EDGE_PX;
+    const maxLeft = Math.max(
+      minLeft,
+      frameWidth - ONBOARDING_TOOLTIP_EDGE_PX - bodyWidth
+    );
+    return Math.min(Math.max(idealLeft, minLeft), maxLeft);
+  }
+
+  function fitTooltipBodyToTail(anchorX, bodyWidth, frameWidth) {
+    let bodyLeft = anchorX - bodyWidth / 2;
+    bodyLeft = clampTooltipBodyLeft(bodyLeft, bodyWidth, frameWidth);
+
+    if (anchorX < bodyLeft) {
+      bodyLeft = anchorX;
+    } else if (anchorX > bodyLeft + bodyWidth) {
+      bodyLeft = anchorX - bodyWidth;
+    }
+
+    return bodyLeft;
+  }
+
+  function getOnboardingRowCellsBottom(row) {
+    const rowEl = getOnboardingRowEl(row);
+    if (!rowEl) return 0;
+    const cells = rowEl.querySelectorAll(".cell");
+    let bottom = 0;
+    cells.forEach((cell) => {
+      bottom = Math.max(bottom, cell.getBoundingClientRect().bottom);
+    });
+    return bottom;
+  }
+
+  async function showOnboardingTooltip({ text, row, mode, anchorX }) {
+    if (!onboardingEl || !onboardingTooltipEl || !onboardingTooltipTextEl) {
+      return;
+    }
+
+    await hideOnboardingTooltip();
+
+    const rowEl = getOnboardingRowEl(row);
+    if (!rowEl) return;
+
+    onboardingTooltipTextEl.textContent = text;
+    onboardingTooltipEl.hidden = false;
+    onboardingTooltipEl.setAttribute("aria-hidden", "false");
+    onboardingTooltipEl.classList.remove("is-hiding", "is-visible", "is-anchored");
+
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    const originRect = getOnboardingTooltipOriginRect();
+    if (!originRect) return;
+
+    // 8px от нижнего края ячеек строки до кончика хвостика (верх тултипа)
+    const rowCellsBottom = getOnboardingRowCellsBottom(row);
+    const bodyWidth = onboardingTooltipBodyEl?.offsetWidth ?? onboardingTooltipEl.offsetWidth;
+    const top = rowCellsBottom - originRect.top + ONBOARDING_TOOLTIP_GAP_PX;
+    const rowRect = rowEl.getBoundingClientRect();
+    const rowCenter = rowRect.left + rowRect.width / 2 - originRect.left;
+
+    if (mode === "unit-center") {
+      const tipWidth = onboardingTooltipEl.offsetWidth;
+      const left = clampTooltipBodyLeft(
+        rowCenter - tipWidth / 2,
+        tipWidth,
+        originRect.width
+      );
+      onboardingTooltipEl.style.left = `${left}px`;
+      onboardingTooltipEl.style.top = `${top}px`;
+    } else {
+      const localAnchorX = (anchorX ?? 0) - originRect.left;
+      let bodyLeft;
+
+      if (mode === "edge-left") {
+        bodyLeft = ONBOARDING_TOOLTIP_EDGE_PX;
+        if (localAnchorX > bodyLeft + bodyWidth) {
+          bodyLeft = fitTooltipBodyToTail(
+            localAnchorX,
+            bodyWidth,
+            originRect.width
+          );
+        }
+      } else {
+        bodyLeft = fitTooltipBodyToTail(
+          localAnchorX,
+          bodyWidth,
+          originRect.width
+        );
+      }
+
+      onboardingTooltipEl.classList.add("is-anchored");
+      onboardingTooltipEl.style.left = "0";
+      onboardingTooltipEl.style.top = `${top}px`;
+      onboardingTooltipEl.style.width = "100%";
+      if (onboardingTooltipTailEl) {
+        onboardingTooltipTailEl.style.left = `${localAnchorX - 12}px`;
+        onboardingTooltipTailEl.style.top = "0";
+      }
+      if (onboardingTooltipBodyEl) {
+        onboardingTooltipBodyEl.style.left = `${bodyLeft}px`;
+        onboardingTooltipBodyEl.style.top = "8px";
+      }
+    }
+
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    onboardingTooltipEl.classList.add("is-visible");
+
+    return new Promise((resolve) => {
+      onboardingTooltipResolve = resolve;
+      onboardingTooltipTimer = window.setTimeout(() => {
+        void hideOnboardingTooltip();
+      }, ONBOARDING_TOOLTIP_MS);
+
+      window.setTimeout(() => {
+        if (!onboardingTooltipEl || onboardingTooltipEl.hidden) return;
+        onboardingTooltipArmed = true;
+        onboardingEl?.addEventListener(
+          "pointerdown",
+          handleOnboardingTooltipDismiss,
+          true
+        );
+        document.addEventListener(
+          "keydown",
+          handleOnboardingTooltipDismiss,
+          true
+        );
+      }, 40);
+    });
+  }
+
+  function resetOnboardingPlayfield() {
+    void hideOnboardingTooltip();
+    clearOnboardingSpotlightTimers();
+    onboardingEl?.classList.remove("is-spotlight");
+    clearOnboardingSpotlightTargets();
+    onboardingSpotlightActive = false;
+    onboardingSpotlightBaseText = null;
+    resolveOnboardingSpotlight();
+    onboardingCurRow = 0;
+    onboardingCurCol = 0;
+    onboardingAnimating = false;
+    onboardingDone = false;
+    onboardingStep = "sahar";
+    onboardingWrongCount = 0;
+    onboardingAbsentTipShown = false;
+    onboardingSubmitted = [];
+    onboardingBoard = Array.from({ length: ROWS }, () => Array(COLS).fill(""));
+    onboardingSpotlightBaseText = null;
+
+    if (onboardingDialogTextEl) {
+      onboardingDialogTextEl.style.opacity = "1";
+      onboardingDialogTextEl.textContent = "Для начала введите слово «САХАР»";
+      fitOnboardingPlaqueText();
+    }
+
+    onboardingGridEl?.querySelectorAll(".cell").forEach((cell) => {
+      cell.classList.remove(
+        "filled",
+        "error",
+        "correct",
+        "present",
+        "absent"
+      );
+      const front = cell.querySelector(".cell-front");
+      const back = cell.querySelector(".cell-back");
+      if (front) front.textContent = "";
+      if (back) {
+        back.textContent = "";
+        back.className = "cell-back";
+      }
+      cell.querySelector(".cell-inner")?.classList.remove("flipped");
+    });
+
+    onboardingKbEl?.querySelectorAll(".key").forEach((key) => {
+      key.classList.remove("correct", "present", "absent");
+    });
+
+    updateOnboardingActionKeys();
+  }
+
+  function revealOnboardingRow(row) {
+    const guess = onboardingBoard[row].join("");
+    const status = evaluateOnboardingGuess(guess);
+    onboardingAnimating = true;
+    updateOnboardingActionKeys();
+
+    return new Promise((resolve) => {
+      let completed = 0;
+
+      status.forEach((state, col) => {
+        const cell = getOnboardingCell(row, col);
+        if (!cell) return;
+
+        const back = cell.querySelector(".cell-back");
+        const inner = cell.querySelector(".cell-inner");
+
+        if (back) {
+          back.textContent = guess[col];
+          back.className = `cell-back ${state}`;
+        }
+
+        window.setTimeout(() => {
+          inner?.classList.add("flipped");
+
+          window.setTimeout(() => {
+            completed += 1;
+            if (completed === COLS) {
+              for (let c = 0; c < COLS; c++) {
+                updateOnboardingKeyboardKey(guess[c], status[c]);
+              }
+              window.setTimeout(() => {
+                onboardingAnimating = false;
+                updateOnboardingActionKeys();
+                resolve({ won: guess === ONBOARDING_ANSWER, status });
+              }, 120);
+            }
+          }, FLIP_DURATION_MS);
+        }, col * FLIP_STAGGER_MS);
+      });
+    });
+  }
+
+  async function onboardingSubmitRow() {
+    if (
+      !onboardingActive ||
+      onboardingClosing ||
+      onboardingDone ||
+      onboardingAnimating ||
+      onboardingCurCol < COLS
+    ) {
+      return;
+    }
+
+    const guess = onboardingBoard[onboardingCurRow].join("");
+    const row = onboardingCurRow;
+
+    if (onboardingStep === "sahar") {
+      if (guess !== ONBOARDING_WORD_SAHAR) {
+        onboardingWrongCount += 1;
+        shakeOnboardingRow(row);
+        const tipText =
+          onboardingWrongCount === 1
+            ? "Введите слово из подсказки"
+            : onboardingWrongCount === 2
+              ? "Проверяете, что будет дальше? 🤓"
+              : "И снова не то слово 🤔";
+        void showOnboardingTooltip({
+          text: tipText,
+          row,
+          mode: "unit-center",
+        });
+        return;
+      }
+
+      await revealOnboardingRow(row);
+      onboardingSubmitted.push(guess);
+      onboardingStep = "sovet";
+      onboardingWrongCount = 0;
+      onboardingCurRow += 1;
+      onboardingCurCol = 0;
+      updateOnboardingActionKeys();
+      await showOnboardingCellSpotlight({
+        text: "Буква на своем месте",
+        row,
+        cols: [0],
+        basePlaqueText: "Теперь попробуйте слово «СОВЕТ»",
+      });
+      return;
+    }
+
+    if (onboardingStep === "sovet") {
+      if (guess !== ONBOARDING_WORD_SOVET) {
+        onboardingWrongCount += 1;
+        shakeOnboardingRow(row);
+        const tipText =
+          onboardingWrongCount === 1
+            ? "Почти!\nНо мы загадали другое слово"
+            : "А вам нравится\nисследовать границы 👀";
+        void showOnboardingTooltip({
+          text: tipText,
+          row,
+          mode: "unit-center",
+        });
+        return;
+      }
+
+      await revealOnboardingRow(row);
+      onboardingSubmitted.push(guess);
+      onboardingStep = "free";
+      onboardingWrongCount = 0;
+      onboardingCurRow += 1;
+      onboardingCurCol = 0;
+      updateOnboardingActionKeys();
+      await showOnboardingCellSpotlight({
+        text: "Эти буквы есть в слове, но стоят не здесь",
+        row,
+        cols: [1, 2],
+        basePlaqueText: "Теперь попробуйте сами угадать слово",
+      });
+      return;
+    }
+
+    if (onboardingStep === "free") {
+      if (onboardingSubmitted.includes(guess)) {
+        shakeOnboardingRow(row);
+        showOnboardingRowError(row);
+        window.setTimeout(() => clearOnboardingRowError(row), 600);
+        if (row >= 2) {
+          await waitRaffleDelay(600);
+          void showOnboardingTooltip({
+            text: "Это слово уже было 🤔",
+            row,
+            mode: "unit-center",
+          });
+        }
+        return;
+      }
+
+      onboardingSubmitted.push(guess);
+
+      const { won, status } = await revealOnboardingRow(row);
+
+      const attemptPlaqueText =
+        row === 2
+          ? "Что же это за слово?"
+          : row === 4
+            ? "Ну не могли же мы загадать «СЛОВО»"
+            : null;
+
+      if (won) {
+        onboardingDone = true;
+        updateOnboardingActionKeys();
+        if (attemptPlaqueText) {
+          await setOnboardingPlaqueText(attemptPlaqueText);
+        }
+        return;
+      }
+
+      onboardingCurRow += 1;
+      onboardingCurCol = 0;
+
+      if (onboardingCurRow >= ROWS) {
+        onboardingDone = true;
+      }
+      updateOnboardingActionKeys();
+
+      let showedAbsentTip = false;
+      if (row >= 2 && !onboardingAbsentTipShown) {
+        const absentCols = status
+          .map((state, col) => (state === "absent" ? col : -1))
+          .filter((col) => col >= 0);
+
+        if (absentCols.length > 0) {
+          onboardingAbsentTipShown = true;
+          showedAbsentTip = true;
+          const basePlaqueText =
+            attemptPlaqueText ||
+            onboardingDialogTextEl?.textContent ||
+            "Теперь попробуйте сами угадать слово";
+          await showOnboardingCellSpotlight({
+            text:
+              absentCols.length === 1
+                ? "Этой буквы нет в слове"
+                : "Этих букв нет в слове",
+            row,
+            cols: absentCols,
+            basePlaqueText,
+          });
+        }
+      }
+
+      if (attemptPlaqueText && !showedAbsentTip) {
+        await setOnboardingPlaqueText(attemptPlaqueText);
+      }
+    }
+  }
+
+  function onboardingOnKey(ch) {
+    if (
+      !onboardingActive ||
+      onboardingClosing ||
+      onboardingDone ||
+      onboardingAnimating ||
+      onboardingSpotlightActive ||
+      onboardingCurRow >= ROWS
+    ) {
+      return;
+    }
+
+    if (ch === "⌫") {
+      if (onboardingCurCol > 0) {
+        onboardingCurCol -= 1;
+        onboardingBoard[onboardingCurRow][onboardingCurCol] = "";
+        const cell = getOnboardingCell(onboardingCurRow, onboardingCurCol);
+        const front = cell?.querySelector(".cell-front");
+        if (front) front.textContent = "";
+        cell?.classList.remove("filled", "error");
+      }
+      updateOnboardingActionKeys();
+      return;
+    }
+
+    if (ch === "✓") {
+      void onboardingSubmitRow();
+      return;
+    }
+
+    if (onboardingCurCol < COLS && /^[А-ЯЁ]$/.test(ch)) {
+      onboardingBoard[onboardingCurRow][onboardingCurCol] = ch;
+      const cell = getOnboardingCell(onboardingCurRow, onboardingCurCol);
+      const front = cell?.querySelector(".cell-front");
+      if (front) front.textContent = ch;
+      cell?.classList.add("filled");
+      cell?.classList.remove("error");
+      onboardingCurCol += 1;
+      updateOnboardingActionKeys();
+    }
+  }
+
+  function updateOnboardingLayout() {
+    if (!onboardingGridAreaEl || !onboardingGridEl) return;
+
+    const gap =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--grid-gap")) || 6;
+
+    let availW = onboardingGridAreaEl.clientWidth;
+    let availH = onboardingGridAreaEl.clientHeight;
+
+    if ((availW <= 0 || availH <= 0) && onboardingEl && onboardingKbEl) {
+      const styles = getComputedStyle(document.documentElement);
+      const sideMargin = parseFloat(styles.getPropertyValue("--side-margin")) || 20;
+      const gridKbMargin = parseFloat(styles.getPropertyValue("--grid-kb-margin")) || 24;
+      const playEl = onboardingEl.querySelector(".onboarding__play");
+
+      if (playEl) {
+        availW = playEl.clientWidth - sideMargin * 2;
+        availH =
+          playEl.clientHeight -
+          onboardingKbEl.offsetHeight -
+          8 -
+          gridKbMargin -
+          parseFloat(getComputedStyle(onboardingKbEl).paddingBottom || "0");
+      }
+    }
+
+    let cellW = (availW - (COLS - 1) * gap) / COLS;
+    let cellH = (availH - (ROWS - 1) * gap) / ROWS;
+
+    if (cellW > cellH * 1.2) cellW = cellH * 1.2;
+    if (cellH > cellW * 1.1) cellH = cellW * 1.1;
+    if (cellW > cellH * 1.2) cellW = cellH * 1.2;
+
+    cellW = Math.floor(cellW);
+    cellH = Math.floor(cellH);
+
+    onboardingGridAreaEl.style.setProperty("--cell-width", `${cellW}px`);
+    onboardingGridAreaEl.style.setProperty("--cell-height", `${cellH}px`);
+
+    const row1 = onboardingKbEl?.querySelector(".kb-row");
+    if (row1 && onboardingKbEl) {
+      const keyW = (row1.clientWidth - 11 * 3) / 12;
+      onboardingKbEl.style.setProperty("--kb-mid-pad", `${(keyW + 3) / 2}px`);
+    }
+  }
+
+  async function startOnboarding() {
+    if (onboardingActive || onboardingClosing || !onboardingEl) return;
+
+    const app = document.querySelector(".app");
+    if (!app) return;
+
+    onboardingActive = true;
+    if (startOnboardingBtnEl) startOnboardingBtnEl.disabled = true;
+
+    app.classList.add("is-onboarding-transition", "is-onboarding-leave");
+    await waitRaffleDelay(ONBOARDING_LEAVE_MS);
+
+    app.setAttribute("aria-hidden", "true");
+    resetOnboardingPlayfield();
+
+    onboardingEl.hidden = false;
+    onboardingEl.setAttribute("aria-hidden", "false");
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    onboardingEl.classList.add("is-open");
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    updateOnboardingLayout();
+    fitOnboardingPlaqueText();
+  }
+
+  async function closeOnboarding() {
+    if (!onboardingActive || onboardingClosing || !onboardingEl) return;
+
+    const app = document.querySelector(".app");
+    if (!app) return;
+
+    onboardingClosing = true;
+    await hideOnboardingTooltip();
+    await hideOnboardingCellSpotlight();
+
+    onboardingEl.classList.remove("is-open");
+    await waitRaffleDelay(ONBOARDING_LEAVE_MS);
+
+    resetOnboardingPlayfield();
+    onboardingEl.hidden = true;
+    onboardingEl.setAttribute("aria-hidden", "true");
+
+    activateTab("profile");
+    showAppScreen("profile");
+    app.removeAttribute("aria-hidden");
+    app.classList.remove("is-onboarding-leave");
+    await waitRaffleDelay(ONBOARDING_LEAVE_MS);
+    app.classList.remove("is-onboarding-transition");
+
+    onboardingActive = false;
+    onboardingClosing = false;
+    if (startOnboardingBtnEl) startOnboardingBtnEl.disabled = false;
+    updateLayout({ force: true });
   }
 
   function waitRaffleTransition(element, propertyName, durationMs) {
@@ -5852,6 +6815,7 @@
   }
 
   function onKey(ch) {
+    if (onboardingActive) return;
     if (gameOver || isAnimating || curRow >= ROWS) return;
 
     if (ch === "⌫") {
@@ -5888,6 +6852,13 @@
     if (event.ctrlKey || event.metaKey || event.altKey) return;
 
     const key = event.key.toUpperCase();
+    if (onboardingActive) {
+      if (key === "ENTER") onboardingOnKey("✓");
+      else if (key === "BACKSPACE") onboardingOnKey("⌫");
+      else if (/^[А-ЯЁ]$/.test(key)) onboardingOnKey(key);
+      return;
+    }
+
     if (key === "ENTER") onKey("✓");
     else if (key === "BACKSPACE") onKey("⌫");
     else if (/^[А-ЯЁ]$/.test(key)) onKey(key);
@@ -5901,8 +6872,16 @@
     setCoinBalance(preservedCoins);
     applyRaffleSectionVisibility();
   });
-  raffleTickerSwitchEl?.addEventListener("change", applyRafflePageFooterVisibility);
   raffleResetProgressBtnEl?.addEventListener("click", resetRaffleProgress);
+  startOnboardingBtnEl?.addEventListener("click", () => {
+    void startOnboarding();
+  });
+  onboardingCloseBtnEl?.addEventListener("click", () => {
+    void closeOnboarding();
+  });
+  onboardingInfoBtnEl?.addEventListener("click", (event) => {
+    event.preventDefault();
+  });
   winSplashShareEl?.addEventListener("click", (event) => {
     event.preventDefault();
   });
@@ -5912,10 +6891,12 @@
 
   buildGrid();
   buildKeyboard();
+  buildOnboardingGrid();
+  buildOnboardingKeyboard();
+  updateOnboardingActionKeys();
   initTabBar();
   initPrizesSegment();
   applyRaffleSectionVisibility();
-  applyRafflePageFooterVisibility();
   preventMobileZoomGestures();
   applyWinResultContent();
   syncFrameViewportHeight();

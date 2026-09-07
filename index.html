@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>5 букв</title>
-    <link rel="stylesheet" href="styles.css?v=220" />
+    <link rel="stylesheet" href="styles.css?v=239" />
   </head>
   <body>
     <div class="viewport-gate" id="viewport-gate">
@@ -544,11 +544,6 @@
                 </ul>
               </div>
             </section>
-            <div class="raffle-page-footer" id="raffle-page-footer" hidden>
-              <div class="raffle-page-footer__frame">
-                <p class="raffle-page-footer__text">Подведём итоги 1 декабря</p>
-              </div>
-            </div>
           </div>
 
           <div class="app-screen" id="prizes-screen" hidden>
@@ -850,25 +845,19 @@
                         <span class="win-switch__track" aria-hidden="true"></span>
                       </label>
                     </div>
-                    <div class="profile-field profile-field--switch">
-                      <span class="profile-field__label">Бегущая полоса</span>
-                      <label class="win-switch">
-                        <input
-                          class="win-switch__input"
-                          id="raffle-ticker-switch"
-                          type="checkbox"
-                          role="switch"
-                          aria-label="Бегущая полоса на странице розыгрыша"
-                        />
-                        <span class="win-switch__track" aria-hidden="true"></span>
-                      </label>
-                    </div>
                     <button
                       class="profile-reset-btn"
                       id="raffle-reset-progress-btn"
                       type="button"
                     >
                       Сбросить прогресс
+                    </button>
+                    <button
+                      class="profile-reset-btn"
+                      id="start-onboarding-btn"
+                      type="button"
+                    >
+                      Запустить онбординг
                     </button>
                   </div>
                 </div>
@@ -1105,8 +1094,101 @@
           draggable="false"
         />
       </div>
+
+      <div class="onboarding" id="onboarding" hidden aria-hidden="true">
+        <header class="header">
+          <img
+            class="status-bar-image"
+            src="assets/status-bar-1.png"
+            alt=""
+            width="375"
+            height="68"
+          />
+
+          <button class="close-btn" id="onboarding-close-btn" type="button">
+            Закрыть
+          </button>
+
+          <div class="nav-row">
+            <img class="logo" src="assets/logo 6.0.png" alt="5 букв" height="26" />
+
+            <button
+              class="onboarding-info-btn"
+              id="onboarding-info-btn"
+              type="button"
+              aria-label="Информация"
+            >
+              <img src="assets/info.svg" width="22" height="22" alt="" draggable="false" />
+            </button>
+          </div>
+        </header>
+
+        <div class="onboarding__body">
+          <div class="onboarding-dialog" id="onboarding-dialog">
+            <div class="onboarding-dialog__bubble">
+              <div class="onboarding-dialog__plaque">
+                <p class="onboarding-dialog__text" id="onboarding-dialog-text">
+                  Для начала введите слово «САХАР»
+                </p>
+              </div>
+              <img
+                class="onboarding-dialog__tail"
+                src="assets/tail.svg"
+                width="16"
+                height="24"
+                alt=""
+                draggable="false"
+              />
+            </div>
+            <img
+              class="onboarding-dialog__mascot"
+              src="assets/Пингвин.png"
+              width="92"
+              height="92"
+              alt=""
+              draggable="false"
+            />
+          </div>
+
+          <div class="onboarding__play">
+            <div class="grid-area" id="onboarding-grid-area">
+              <div
+                class="grid"
+                id="onboarding-grid"
+                role="grid"
+                aria-label="Онбординг: игровое поле"
+              ></div>
+            </div>
+            <div
+              class="keyboard"
+              id="onboarding-keyboard"
+              role="group"
+              aria-label="Онбординг: клавиатура"
+            ></div>
+          </div>
+
+          <div
+            class="onboarding-tooltip"
+            id="onboarding-tooltip"
+            hidden
+            aria-hidden="true"
+          >
+            <img
+              class="onboarding-tooltip__tail"
+              src="assets/tail_tooltip.svg"
+              width="24"
+              height="8"
+              alt=""
+              draggable="false"
+            />
+            <div class="onboarding-tooltip__body">
+              <p class="onboarding-tooltip__text" id="onboarding-tooltip-text"></p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <script src="app.js?v=182"></script>
+    <script src="app.js?v=195"></script>
   </body>
 </html>

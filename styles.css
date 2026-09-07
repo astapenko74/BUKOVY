@@ -1037,51 +1037,6 @@ button {
   overflow: hidden !important;
 }
 
-#raffle-screen {
-  position: relative;
-}
-
-.raffle-page-footer {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow-x: clip;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(28, 28, 30, 0) 0%, #1c1c1e 60%);
-}
-
-.raffle-page-footer[hidden] {
-  display: none !important;
-}
-
-.raffle-page-footer__frame {
-  width: 105%;
-  height: 34px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #ffffff;
-  transform: rotate(-2deg);
-  transform-origin: center center;
-}
-
-.raffle-page-footer__text {
-  margin: 0;
-  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 20px;
-  color: #333333;
-  text-align: center;
-}
-
 .raffle-tasks-block {
   position: relative;
   z-index: 2;
@@ -2128,6 +2083,272 @@ button {
 
 .profile-reset-btn:active {
   background: #3a3a3c;
+}
+
+/* ——— Онбординг ——— */
+.onboarding {
+  position: absolute;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transition: opacity 600ms ease;
+}
+
+.onboarding[hidden] {
+  display: none !important;
+}
+
+.onboarding.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.app.is-onboarding-transition {
+  transition: opacity 600ms ease;
+}
+
+.app.is-onboarding-leave {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.onboarding-info-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.onboarding-info-btn img {
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+.onboarding__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  position: relative;
+  z-index: 110;
+}
+
+.onboarding > .header {
+  z-index: 100;
+}
+
+.onboarding-dialog {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 32px 8px var(--side-margin);
+  box-sizing: border-box;
+  position: relative;
+  z-index: 110;
+  margin-top: -20px;
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+.onboarding-dialog__bubble {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.onboarding-dialog__plaque {
+  flex: 1;
+  min-width: 0;
+  height: 70px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.onboarding-dialog__text {
+  margin: 0;
+  width: 100%;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #1c1c1e;
+  white-space: pre-line;
+  overflow: visible;
+  transition: opacity 400ms cubic-bezier(0.2, 0, 0.4, 0.9);
+}
+
+.onboarding-dialog__tail {
+  display: block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 24px;
+  margin-left: 0;
+}
+
+.onboarding-dialog__mascot {
+  display: block;
+  flex-shrink: 0;
+  width: 92px;
+  height: 92px;
+  margin-left: 4px;
+  object-fit: contain;
+  overflow: visible;
+}
+
+.onboarding__play {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.onboarding__play .grid-area {
+  flex: 1;
+  min-height: 0;
+}
+
+.onboarding .header,
+.onboarding .onboarding__play .keyboard,
+.onboarding .onboarding__play .cell {
+  transition: opacity 300ms ease;
+}
+
+.onboarding.is-spotlight .header,
+.onboarding.is-spotlight .onboarding__play .keyboard,
+.onboarding.is-spotlight .onboarding__play .cell:not(.is-spotlight-target) {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.onboarding.is-spotlight .onboarding-dialog {
+  position: relative;
+  z-index: 120;
+}
+
+.onboarding.is-spotlight .cell.is-spotlight-target {
+  position: relative;
+  z-index: 121;
+  opacity: 1;
+}
+
+.onboarding-tooltip {
+  position: absolute;
+  z-index: 420;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.onboarding-tooltip[hidden] {
+  display: none !important;
+}
+
+.onboarding-tooltip.is-visible {
+  opacity: 1;
+}
+
+.onboarding-tooltip.is-hiding {
+  transition: opacity 150ms cubic-bezier(0.4, 0, 1, 1);
+  opacity: 0;
+}
+
+.onboarding-tooltip.is-anchored {
+  left: 0;
+  right: 0;
+  width: auto;
+  max-width: none;
+  align-items: stretch;
+  pointer-events: none;
+}
+
+.onboarding-tooltip.is-anchored .onboarding-tooltip__tail,
+.onboarding-tooltip.is-anchored .onboarding-tooltip__body {
+  position: absolute;
+}
+
+.onboarding-tooltip__tail {
+  display: block;
+  width: 24px;
+  height: 8px;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+}
+
+.onboarding-tooltip__body {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #ffffff;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(100%, calc(100vw - 32px));
+}
+
+.onboarding-tooltip.is-anchored .onboarding-tooltip__body {
+  max-width: calc(100% - 32px);
+}
+
+.onboarding-tooltip__text {
+  margin: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #1c1c1e;
+  text-align: center;
+  white-space: pre-line;
+}
+
+@media (max-width: 359px) {
+  .onboarding-dialog {
+    margin-top: 0;
+  }
+
+  .onboarding-dialog__plaque {
+    height: 44px;
+    padding: 8px 12px;
+  }
+
+  .onboarding-dialog__text {
+    font-size: 13px;
+    line-height: 16px;
+  }
+
+  .onboarding-dialog__tail,
+  .onboarding-dialog__mascot {
+    display: none;
+  }
 }
 
 .profile-field__label {
