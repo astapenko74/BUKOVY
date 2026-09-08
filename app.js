@@ -4357,6 +4357,9 @@
     await new Promise((resolve) => requestAnimationFrame(resolve));
     updateOnboardingLayout();
     fitOnboardingPlaqueText();
+    await waitRaffleDelay(ONBOARDING_LEAVE_MS);
+    // iOS keeps a low-res bitmap after opacity fade — force a crisp re-composite.
+    onboardingEl.classList.add("is-settled");
   }
 
   async function closeOnboarding() {
@@ -4369,7 +4372,7 @@
     await hideOnboardingTooltip();
     await hideOnboardingCellSpotlight();
 
-    onboardingEl.classList.remove("is-open");
+    onboardingEl.classList.remove("is-settled", "is-open");
     await waitRaffleDelay(ONBOARDING_LEAVE_MS);
 
     resetOnboardingPlayfield();

@@ -2108,6 +2108,19 @@ button {
   pointer-events: auto;
 }
 
+/* After fade-in: drop translucent-layer rasterization (blurry SVG/PNG on iOS). */
+.onboarding.is-settled {
+  transform: translateZ(0);
+}
+
+.onboarding-info-btn img,
+.onboarding-dialog__tail,
+.onboarding-dialog__mascot,
+.onboarding-tooltip__tail {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 .app.is-onboarding-transition {
   transition: opacity 600ms ease;
 }
