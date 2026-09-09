@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>5 букв</title>
-    <link rel="stylesheet" href="styles.css?v=240" />
+    <link rel="stylesheet" href="styles.css?v=271" />
   </head>
   <body>
     <div class="viewport-gate" id="viewport-gate">
@@ -374,6 +374,47 @@
                   </p>
                 </header>
                 <ul class="raffle-tasks-list">
+                  <li hidden>
+                    <article
+                      class="raffle-task-card raffle-task-card--partner is-reward-ready"
+                      data-task-sheet
+                      data-task-id="onboarding"
+                      data-task-sheet-action="true"
+                      data-task-sheet-claim="Забрать"
+                    >
+                      <div class="raffle-task-card__info">
+                        <p class="raffle-task-card__claim-until">Заберите до 30 ноября</p>
+                        <p class="raffle-task-card__title">Пройдите обучение</p>
+                        <button class="raffle-task-card__claim" type="button">
+                          Забрать награду
+                        </button>
+                      </div>
+                      <div class="raffle-task-card__rewards">
+                        <div class="raffle-task-card__reward-item" data-reward="energy">
+                          <img
+                            class="raffle-task-card__reward-icon"
+                            src="assets/Энергия.png"
+                            width="36"
+                            height="36"
+                            alt=""
+                            draggable="false"
+                          />
+                          <span class="raffle-task-card__reward-value">+1</span>
+                        </div>
+                        <div class="raffle-task-card__reward-item" data-reward="gift">
+                          <img
+                            class="raffle-task-card__reward-icon"
+                            src="assets/icon-gift.png"
+                            width="36"
+                            height="36"
+                            alt=""
+                            draggable="false"
+                          />
+                          <span class="raffle-task-card__reward-value">+1</span>
+                        </div>
+                      </div>
+                    </article>
+                  </li>
                   <li>
                     <article
                       class="raffle-task-card"
@@ -825,6 +866,13 @@
                         <span class="win-switch__track" aria-hidden="true"></span>
                       </label>
                     </div>
+                    <button
+                      class="profile-reset-btn"
+                      id="start-onboarding-btn"
+                      type="button"
+                    >
+                      Запустить онбординг
+                    </button>
                   </div>
                 </div>
 
@@ -851,13 +899,6 @@
                       type="button"
                     >
                       Сбросить прогресс
-                    </button>
-                    <button
-                      class="profile-reset-btn"
-                      id="start-onboarding-btn"
-                      type="button"
-                    >
-                      Запустить онбординг
                     </button>
                   </div>
                 </div>
@@ -960,6 +1001,56 @@
       </div>
 
       <div
+        class="onboarding-task-tooltip"
+        id="onboarding-task-tooltip"
+        hidden
+        aria-hidden="true"
+      >
+        <div class="onboarding-task-tooltip__body">
+          <img
+            class="onboarding-task-tooltip__image"
+            src="assets/accessory-tt.png"
+            width="40"
+            height="40"
+            alt=""
+            draggable="false"
+          />
+          <p class="onboarding-task-tooltip__text">
+            Первое задание выполнено,<br />пора забрать награду
+          </p>
+        </div>
+        <img
+          class="onboarding-task-tooltip__tail"
+          src="assets/tail_2.svg"
+          width="30"
+          height="12"
+          alt=""
+          draggable="false"
+        />
+      </div>
+
+      <div
+        class="onboarding-energy-tooltip"
+        id="onboarding-energy-tooltip"
+        hidden
+        aria-hidden="true"
+      >
+        <img
+          class="onboarding-energy-tooltip__tail"
+          src="assets/tail_tooltip.svg?v=2"
+          width="24"
+          height="8"
+          alt=""
+          draggable="false"
+        />
+        <div class="onboarding-energy-tooltip__body">
+          <p class="onboarding-energy-tooltip__text">
+            Энергия нужна, чтобы играть чаще
+          </p>
+        </div>
+      </div>
+
+      <div
         class="result-sheet-backdrop"
         id="task-sheet-backdrop"
         hidden
@@ -1007,6 +1098,26 @@
               <div class="task-sheet__reward-card">
                 <h3 class="task-sheet__reward-title">Награда за задание</h3>
                 <div
+                  class="task-sheet__reward-row"
+                  id="task-sheet-reward-onboarding-prize"
+                  hidden
+                >
+                  <div class="task-sheet__reward-icon-frame">
+                    <img
+                      class="task-sheet__reward-icon"
+                      src="assets/icon-gift.png"
+                      width="24"
+                      height="24"
+                      alt=""
+                      draggable="false"
+                    />
+                  </div>
+                  <div class="task-sheet__reward-text">
+                    <p class="task-sheet__reward-label">Приз</p>
+                    <p class="task-sheet__reward-note">Выдадим сразу</p>
+                  </div>
+                </div>
+                <div
                   class="task-sheet__reward-row task-sheet__reward-row--ticket"
                   id="task-sheet-reward-ticket"
                   hidden
@@ -1042,7 +1153,7 @@
                   </div>
                   <div class="task-sheet__reward-text">
                     <p class="task-sheet__reward-label" id="task-sheet-reward-label"></p>
-                    <p class="task-sheet__reward-note">Зачислим сразу</p>
+                    <p class="task-sheet__reward-note" id="task-sheet-reward-note">Зачислим сразу</p>
                   </div>
                 </div>
               </div>
@@ -1076,6 +1187,74 @@
           <button class="result-sheet__action" id="result-sheet-action" type="button">
             Похвастаться
           </button>
+        </div>
+      </div>
+
+      <div
+        class="result-sheet-backdrop"
+        id="onboarding-notify-backdrop"
+        hidden
+        aria-hidden="true"
+      ></div>
+
+      <div
+        class="result-sheet onboarding-notify-sheet"
+        id="onboarding-notify-sheet"
+        hidden
+        aria-hidden="true"
+      >
+        <div
+          class="result-sheet__panel onboarding-notify-sheet__panel"
+          id="onboarding-notify-panel"
+        >
+          <div class="result-sheet__gradient" aria-hidden="true"></div>
+          <div class="result-sheet__bar" id="onboarding-notify-bar">
+            <span class="result-sheet__handle" aria-hidden="true"></span>
+          </div>
+          <button
+            class="result-sheet__close"
+            id="onboarding-notify-close"
+            type="button"
+            aria-label="Закрыть"
+          >
+            <img
+              src="assets/tui-button-close.svg"
+              width="24"
+              height="24"
+              alt=""
+              draggable="false"
+            />
+          </button>
+          <div class="onboarding-notify-sheet__body">
+            <img
+              class="onboarding-notify-sheet__image"
+              src="assets/mas_03.png"
+              width="200"
+              height="120"
+              alt=""
+              draggable="false"
+            />
+            <h2 class="onboarding-notify-sheet__title">
+              Хотите включить уведомления?
+            </h2>
+            <p class="onboarding-notify-sheet__subtitle">
+              Сможете узнавать о новых словах<br />и выигрывать больше призов
+            </p>
+            <button
+              class="onboarding-notify-sheet__enable"
+              id="onboarding-notify-enable"
+              type="button"
+            >
+              Включить
+            </button>
+            <button
+              class="onboarding-notify-sheet__later"
+              id="onboarding-notify-later"
+              type="button"
+            >
+              Позже
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1120,6 +1299,28 @@
             >
               <img src="assets/info.svg?v=2" width="22" height="22" alt="" draggable="false" />
             </button>
+            <div class="nav-row__badges onboarding-nav-badges" id="onboarding-nav-badges">
+              <button class="energy-badge coin-badge" type="button" tabindex="-1">
+                <img
+                  class="energy-badge__icon"
+                  src="assets/badge-coin.png?v=2"
+                  alt=""
+                  width="16"
+                  height="16"
+                />
+                <span class="energy-badge__value">0</span>
+              </button>
+              <button class="energy-badge" type="button" tabindex="-1">
+                <img
+                  class="energy-badge__icon"
+                  src="assets/Лого энергии для бейджа.png"
+                  alt=""
+                  width="16"
+                  height="16"
+                />
+                <span class="energy-badge__value">0</span>
+              </button>
+            </div>
           </div>
         </header>
 
@@ -1186,9 +1387,273 @@
             </div>
           </div>
         </div>
+
+        <div
+          class="onboarding-intro"
+          id="onboarding-intro"
+          hidden
+          aria-hidden="true"
+        >
+          <div class="onboarding-intro__panel">
+            <div class="onboarding-intro__media">
+              <button
+                class="onboarding-intro__back"
+                id="onboarding-intro-back"
+                type="button"
+                aria-label="Назад"
+                hidden
+              >
+                <img
+                  src="assets/back-ios-alt.svg"
+                  width="12"
+                  height="24"
+                  alt=""
+                  draggable="false"
+                />
+              </button>
+              <div
+                class="onboarding-intro__progress"
+                aria-hidden="true"
+              >
+                <div
+                  class="onboarding-intro__progress-fill"
+                  id="onboarding-intro-progress-fill"
+                ></div>
+              </div>
+              <div class="onboarding-intro__media-viewport">
+                <div
+                  class="onboarding-intro__media-track"
+                  id="onboarding-intro-media-track"
+                >
+                  <div class="onboarding-intro__media-slide">
+                    <img
+                      src="assets/Onbording_IMG_1.png"
+                      alt=""
+                      draggable="false"
+                    />
+                  </div>
+                  <div class="onboarding-intro__media-slide">
+                    <img
+                      src="assets/Onbording_IMG_2.png"
+                      alt=""
+                      draggable="false"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="onboarding-intro__frame">
+              <div class="onboarding-intro__copy-viewport">
+                <div
+                  class="onboarding-intro__copy-track"
+                  id="onboarding-intro-copy-track"
+                >
+                  <div class="onboarding-intro__copy-slide">
+                    <h2 class="onboarding-intro__title">
+                      Попробуйте<br />отгадать слово
+                    </h2>
+                    <p class="onboarding-intro__subtitle">
+                      Не только увлекательно проведете время, но еще и сможете
+                      выиграть призы
+                    </p>
+                  </div>
+                  <div class="onboarding-intro__copy-slide">
+                    <h2 class="onboarding-intro__title">
+                      Давайте начнем<br />с&nbsp;пробной игры
+                    </h2>
+                    <p class="onboarding-intro__subtitle">
+                      Объясним правила<br />и&nbsp;подарим первый приз
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="onboarding-intro__action-wrap">
+                <button
+                  class="onboarding-intro__action"
+                  id="onboarding-intro-action"
+                  type="button"
+                >
+                  <span
+                    class="onboarding-intro__action-label is-active"
+                    data-step="0"
+                    >Звучит интересно</span
+                  >
+                  <span class="onboarding-intro__action-label" data-step="1"
+                    >Поехали</span
+                  >
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="result-sheet-backdrop"
+          id="onboarding-rules-backdrop"
+          hidden
+          aria-hidden="true"
+        ></div>
+
+        <div
+          class="result-sheet onboarding-rules-sheet"
+          id="onboarding-rules-sheet"
+          hidden
+          aria-hidden="true"
+        >
+          <div
+            class="result-sheet__panel onboarding-rules-sheet__panel"
+            id="onboarding-rules-panel"
+          >
+            <div class="result-sheet__gradient" aria-hidden="true"></div>
+            <div class="result-sheet__bar" id="onboarding-rules-bar">
+              <span class="result-sheet__handle" aria-hidden="true"></span>
+            </div>
+            <button
+              class="result-sheet__close"
+              id="onboarding-rules-close"
+              type="button"
+              aria-label="Закрыть"
+            >
+              <img
+                src="assets/tui-button-close.svg"
+                width="24"
+                height="24"
+                alt=""
+                draggable="false"
+              />
+            </button>
+            <div class="onboarding-rules-sheet__body" id="onboarding-rules-body">
+              <h2 class="onboarding-rules-sheet__title" id="onboarding-rules-title">
+                Правила игры «5 букв»
+              </h2>
+              <p class="onboarding-rules-sheet__text">
+                Каждый день мы загадываем существительное из пяти букв<br />в единственном числе.
+              </p>
+              <p class="onboarding-rules-sheet__text">
+                На разгадку у вас 6&nbsp;попыток. Если получится, подарим призы: за первое<br />отгаданное слово, а потом — за каждые 5&nbsp;побед.
+              </p>
+              <p class="onboarding-rules-sheet__text">
+                После каждой попытки цвет букв меняется. Вот&nbsp;что означают цвета:
+              </p>
+              <div class="grid onboarding-rules-sheet__grid" aria-hidden="true">
+                <div class="grid-row">
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">М</div>
+                      <div class="cell-back present">М</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">Ы</div>
+                      <div class="cell-back absent">Ы</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">С</div>
+                      <div class="cell-back absent">С</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">Л</div>
+                      <div class="cell-back present">Л</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">Ь</div>
+                      <div class="cell-back present">Ь</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="onboarding-rules-sheet__text">
+                Если буква белая, она есть в загаданном слове, но стоят не на своем месте.<br />Если буква серая, ее в слове нет.
+              </p>
+              <div class="grid onboarding-rules-sheet__grid" aria-hidden="true">
+                <div class="grid-row">
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">Ф</div>
+                      <div class="cell-back correct">Ф</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">И</div>
+                      <div class="cell-back correct">И</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">К</div>
+                      <div class="cell-back absent">К</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">У</div>
+                      <div class="cell-back absent">У</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">С</div>
+                      <div class="cell-back absent">С</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="onboarding-rules-sheet__text">
+                Если буква желтая, она есть в загаданном слове и стоит на нужных местах.
+              </p>
+              <div class="grid onboarding-rules-sheet__grid" aria-hidden="true">
+                <div class="grid-row">
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">Ф</div>
+                      <div class="cell-back correct">Ф</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">И</div>
+                      <div class="cell-back correct">И</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">Л</div>
+                      <div class="cell-back correct">Л</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">Ь</div>
+                      <div class="cell-back correct">Ь</div>
+                    </div>
+                  </div>
+                  <div class="cell">
+                    <div class="cell-inner flipped">
+                      <div class="cell-front">М</div>
+                      <div class="cell-back correct">М</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="onboarding-rules-sheet__text">
+                Когда вы угадаете слово,<br />все буквы окрасятся в желтый.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <script src="app.js?v=196"></script>
+    <script src="app.js?v=232"></script>
   </body>
 </html>

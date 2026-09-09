@@ -30,6 +30,21 @@
   const ONBOARDING_TOOLTIP_EDGE_PX = 16;
   const ONBOARDING_TOOLTIP_GAP_PX = 8;
   const ONBOARDING_SPOTLIGHT_MS = 3000;
+  const ONBOARDING_HELP_PAUSE_MS = 600;
+  const ONBOARDING_INTRO_MS = 300;
+  const ONBOARDING_INTRO_CLOSE_MS = 300;
+  const ONBOARDING_DIALOG_EXIT_MS = 600;
+  const ONBOARDING_CHROME_MS = 400;
+  const ONBOARDING_TAB_BAR_MS = 600;
+  const ONBOARDING_FLIP_TO_SCALE_MS = 400;
+  const ONBOARDING_NOTIFY_SHEET_DELAY_MS = 600;
+  const ONBOARDING_TASK_TOOLTIP_DELAY_MS = 500;
+  const ONBOARDING_ENERGY_HINT_DIM_MS = 300;
+  const ONBOARDING_ENERGY_TOOLTIP_MS = 300;
+  const ONBOARDING_PROGRESS_BADGES = [1, 2, 3, 4];
+  const ONBOARDING_RESULT_MESSAGE = "Первое слово — и сразу в яблочко!";
+  const ONBOARDING_RESULT_YELLOW_TEXT = "Новое слово через 12:37";
+  const DEFAULT_YELLOW_BUTTON_TEXT = "Играть ещё за 3";
   const WIN_SPLASH_CONTENT_DELAY_MS = 200;
   const WIN_SPLASH_CONTENT_MS = 700;
   const WIN_SPLASH_CONFETTI_AT = 0.4;
@@ -112,7 +127,34 @@
   const taskSheetRewardIconEl = document.getElementById("task-sheet-reward-icon");
   const taskSheetRewardLabelEl = document.getElementById("task-sheet-reward-label");
   const taskSheetRewardTicketEl = document.getElementById("task-sheet-reward-ticket");
+  const taskSheetRewardOnboardingPrizeEl = document.getElementById(
+    "task-sheet-reward-onboarding-prize"
+  );
+  const taskSheetRewardNoteEl = document.getElementById("task-sheet-reward-note");
   const taskSheetActionEl = document.getElementById("task-sheet-action");
+  const onboardingNotifySheetEl = document.getElementById("onboarding-notify-sheet");
+  const onboardingNotifyBackdropEl = document.getElementById(
+    "onboarding-notify-backdrop"
+  );
+  const onboardingNotifyPanelEl = document.getElementById("onboarding-notify-panel");
+  const onboardingNotifyBarEl = document.getElementById("onboarding-notify-bar");
+  const onboardingNotifyCloseEl = document.getElementById("onboarding-notify-close");
+  const onboardingNotifyEnableEl = document.getElementById(
+    "onboarding-notify-enable"
+  );
+  const onboardingNotifyLaterEl = document.getElementById("onboarding-notify-later");
+  const onboardingRulesSheetEl = document.getElementById("onboarding-rules-sheet");
+  const onboardingRulesBackdropEl = document.getElementById(
+    "onboarding-rules-backdrop"
+  );
+  const onboardingRulesPanelEl = document.getElementById("onboarding-rules-panel");
+  const onboardingRulesBarEl = document.getElementById("onboarding-rules-bar");
+  const onboardingRulesCloseEl = document.getElementById("onboarding-rules-close");
+  const onboardingRulesBodyEl = document.getElementById("onboarding-rules-body");
+  const onboardingTaskTooltipEl = document.getElementById("onboarding-task-tooltip");
+  const onboardingEnergyTooltipEl = document.getElementById(
+    "onboarding-energy-tooltip"
+  );
   const taskExecuteStubEl = document.getElementById("task-execute-stub");
   const scenarioSelectEl = document.getElementById("scenario-select");
   const thematicWordSwitchEl = document.getElementById("thematic-word-switch");
@@ -120,6 +162,10 @@
   const raffleCardsPaginationLabelEl = document.getElementById("raffle-cards-pagination-label");
   const coinBadgeEl = document.getElementById("coin-badge");
   const coinBadgeValueEl = coinBadgeEl?.querySelector(".energy-badge__value");
+  const energyBadgeEl = document.querySelector(
+    ".app > .header .nav-row__badges .energy-badge:not(.coin-badge)"
+  );
+  const energyBadgeValueEl = energyBadgeEl?.querySelector(".energy-badge__value");
   const raffleResetProgressBtnEl = document.getElementById("raffle-reset-progress-btn");
   const startOnboardingBtnEl = document.getElementById("start-onboarding-btn");
   const onboardingEl = document.getElementById("onboarding");
@@ -137,12 +183,23 @@
   const onboardingTooltipBodyEl = onboardingTooltipEl?.querySelector(
     ".onboarding-tooltip__body"
   );
+  const onboardingIntroEl = document.getElementById("onboarding-intro");
+  const onboardingIntroBackEl = document.getElementById("onboarding-intro-back");
+  const onboardingIntroActionEl = document.getElementById(
+    "onboarding-intro-action"
+  );
+  const onboardingIntroActionLabels = onboardingIntroActionEl
+    ? Array.from(
+        onboardingIntroActionEl.querySelectorAll(".onboarding-intro__action-label")
+      )
+    : [];
   const raffleTabEl = document.querySelector('.tab[data-tab="raffle"]');
 
   let onboardingActive = false;
   let onboardingClosing = false;
   let onboardingAnimating = false;
   let onboardingDone = false;
+  let mainGameChromeSnapshot = null;
   let onboardingStep = "sahar";
   let onboardingWrongCount = 0;
   let onboardingAbsentTipShown = false;
@@ -158,6 +215,9 @@
   let onboardingSpotlightArmed = false;
   let onboardingSpotlightActive = false;
   let onboardingSpotlightBaseText = null;
+  let onboardingIntroStep = 0;
+  let onboardingIntroOpen = false;
+  let onboardingIntroAnimating = false;
 
   let activeScenario = scenarioSelectEl?.value ?? "2-4-word";
   let activeThematicWord = Boolean(thematicWordSwitchEl?.checked);
@@ -239,6 +299,10 @@
   const RAFFLE_BTN_TRANSITION_MS = 400;
   const TASK_REWARD_READY_TEXT = "Заберите до 25 ноября";
   const TASK_CLAIM_BUTTON_TEXT = "Забрать награду";
+  const ONBOARDING_TASK_SHEET_CLAIM_TEXT = "Забрать";
+  const ONBOARDING_TASK_ENERGY_AMOUNT = 6;
+  const ONBOARDING_TASK_GIFT_SRC = "assets/icon-gift.png";
+  const ENERGY_FLY_SRC = "assets/Энергия.png";
   const TASK_SWAP_MS = 800;
   const TASK_BADGE_MS = 400;
   const TASK_CLAIM_MS = 300;
@@ -319,6 +383,11 @@
   let isTask2RewardReady = false;
   let isTask2RewardClaimed = false;
   let isTask2ClaimAnimating = false;
+  let isOnboardingTrainingTaskClaimed = false;
+  let isOnboardingTrainingTaskClaiming = false;
+  let removedOnboardingTaskListItem = null;
+  let onboardingEnergyHintTimer = null;
+  let onboardingEnergyHintHiding = false;
   let taskExecuteStubRunning = false;
   let removedTask2ListItem = null;
   let coinBalance = INITIAL_COIN_BALANCE;
@@ -346,6 +415,21 @@
     enter: "assets/key-enter.svg",
     backspace: "assets/key-backspace.svg",
   };
+
+  const HAPTIC_KEY_MS = 12;
+  const HAPTIC_TICK_MS = 8;
+  const HAPTIC_SELECTION_MS = 10;
+
+  function triggerHaptic(durationMs) {
+    if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") {
+      return;
+    }
+    try {
+      navigator.vibrate(durationMs);
+    } catch (_) {
+      /* Vibration API may throw if blocked */
+    }
+  }
 
   function buildGrid() {
     if (!gridEl) return;
@@ -427,6 +511,28 @@
   function updateRaffleScrollFade() {
     if (!rafflePageEl) return;
     rafflePageEl.classList.toggle("is-scrolled", rafflePageEl.scrollTop > 0);
+  }
+
+  function syncRafflePageOverflow() {
+    if (!rafflePageEl) return;
+    if (rafflePageEl.classList.contains("raffle-page--scroll-locked")) return;
+    if (document.getElementById("raffle-screen")?.hidden) return;
+
+    rafflePageEl.classList.remove("raffle-page--fit");
+    const paddingBottom =
+      Number.parseFloat(window.getComputedStyle(rafflePageEl).paddingBottom) || 0;
+    const paddingSlack = Math.max(0, paddingBottom - 24);
+    const overflows =
+      rafflePageEl.scrollHeight - paddingSlack > rafflePageEl.clientHeight + 0.5;
+
+    if (!overflows) {
+      rafflePageEl.scrollTop = 0;
+      rafflePageEl.classList.add("raffle-page--fit");
+      rafflePageEl.classList.remove("is-scrolled");
+      return;
+    }
+
+    updateRaffleScrollFade();
   }
 
   function updatePrizesScrollFade() {
@@ -544,10 +650,12 @@
     });
 
     if (tabId === "raffle") {
-      requestAnimationFrame(updateRaffleScrollFade);
+      syncOnboardingTrainingTask();
+      requestAnimationFrame(syncRafflePageOverflow);
     }
 
     if (tabId === "prizes") {
+      setPrizesTabDot(false);
       if (isRaffleSectionEnabled()) {
         prepareRaffleIntroPresentation();
         void maybePlayRaffleIntro();
@@ -925,7 +1033,7 @@
     app?.classList.toggle("scenario-word-not-guessed", isWordNotGuessedScenario());
     app?.classList.toggle("scenario-fifth-word", isFifthWordScenario());
 
-    if (isWordNotGuessedScenario() && winWordEl) {
+    if (winWordEl && !app?.classList.contains("scenario-onboarding-result")) {
       winWordEl.textContent = ANSWER;
     }
 
@@ -1079,6 +1187,28 @@
     resultSheetGridEl.style.setProperty("--cell-height", cellH + "px");
   }
 
+  function setAppSheetChrome(open, animateClose) {
+    const app = document.querySelector(".app");
+    if (!app) return;
+
+    if (open) {
+      app.classList.add("is-sheet-open");
+      app.classList.remove("is-sheet-closing");
+      return;
+    }
+
+    app.classList.remove("is-sheet-open");
+    if (animateClose) {
+      app.classList.add("is-sheet-closing");
+      window.setTimeout(() => {
+        app.classList.remove("is-sheet-closing");
+      }, RESULT_SHEET_CLOSE_MS);
+      return;
+    }
+
+    app.classList.remove("is-sheet-closing");
+  }
+
   function openResultSheet() {
     if (!resultSheetEl || !resultSheetBackdropEl || !resultSheetPanelEl || isResultSheetOpen()) {
       return;
@@ -1098,6 +1228,7 @@
     resultSheetEl.setAttribute("aria-hidden", "false");
     resultSheetBackdropEl.setAttribute("aria-hidden", "false");
     mainEl?.classList.add("result-sheet-open");
+    setAppSheetChrome(true);
 
     requestAnimationFrame(() => {
       resultSheetEl.classList.add("is-open");
@@ -1117,6 +1248,7 @@
 
     mainEl?.classList.remove("result-sheet-open");
     resultSheetBackdropEl.classList.remove("is-visible");
+    setAppSheetChrome(false, animateClose);
 
     if (animateClose) {
       resultSheetEl.classList.add("is-closing");
@@ -1272,7 +1404,28 @@
   }
 
   function isTaskRewardReady(cardEl) {
-    return cardEl?.dataset.taskId === "2" && isTask2RewardReady;
+    if (!cardEl) return false;
+    if (cardEl.dataset.taskId === "onboarding") {
+      return !isOnboardingTrainingTaskClaimed;
+    }
+    return cardEl.dataset.taskId === "2" && isTask2RewardReady;
+  }
+
+  function getOnboardingTrainingCardEl() {
+    return document.querySelector('.raffle-task-card[data-task-id="onboarding"]');
+  }
+
+  function syncOnboardingTrainingTask() {
+    const cardEl = getOnboardingTrainingCardEl();
+    const li = cardEl?.closest("li");
+    if (!li) return;
+    const visible =
+      !isOnboardingTrainingTaskClaimed &&
+      Boolean(
+        document.querySelector(".app")?.classList.contains("scenario-onboarding-result")
+      );
+    li.hidden = !visible;
+    syncRafflePageOverflow();
   }
 
   function getTask2CardEl() {
@@ -1540,6 +1693,7 @@
 
       const duration = 800;
       const startTime = performance.now();
+      let lastHapticValue = start;
 
       function tick(now) {
         const t = Math.min(1, (now - startTime) / duration);
@@ -1547,6 +1701,10 @@
         const current = Math.round(start + (end - start) * eased);
         valueEl.textContent = String(current);
         updateRaffleParticipateButtonsState(current);
+        if (current !== lastHapticValue) {
+          lastHapticValue = current;
+          triggerHaptic(HAPTIC_TICK_MS);
+        }
 
         if (t < 1) {
           requestAnimationFrame(tick);
@@ -1649,9 +1807,9 @@
     rewardIcon.style.opacity = "";
   }
 
-  function createCoinFlyGhost(coinSize) {
+  function createCoinFlyGhost(coinSize, src = COIN_FLY_SRC) {
     const ghost = document.createElement("img");
-    ghost.src = COIN_FLY_SRC;
+    ghost.src = src;
     ghost.alt = "";
     ghost.draggable = false;
     ghost.classList.add("task-reward-coin-fly-ghost");
@@ -1664,7 +1822,8 @@
   }
 
   function runCoinsToBadgeAnimation(sourceEl, hooks = {}) {
-    const { onTick } = hooks;
+    const { onTick, targetIcon: customTarget, src = COIN_FLY_SRC, size = COIN_FLY_SIZE, count } =
+      hooks;
     const flyTotalMs = TASK_COIN_BURST_MS + PRIZE_TO_TAB_MS;
     const flyHalfwayMs = flyTotalMs * 0.5;
     const animationStart = performance.now();
@@ -1699,8 +1858,12 @@
       }
     };
 
-    const targetIcon = coinBadgeEl?.querySelector(".energy-badge__icon");
-    if (!sourceEl || !targetIcon || !coinBadgeEl || coinBadgeEl.hidden) {
+    const targetIcon =
+      customTarget ??
+      (coinBadgeEl && !coinBadgeEl.hidden
+        ? coinBadgeEl.querySelector(".energy-badge__icon")
+        : null);
+    if (!sourceEl || !targetIcon) {
       finishFirstArrival();
       finishHalfway();
       return { firstArrival, halfway };
@@ -1715,14 +1878,15 @@
 
     const startX = startRect.left + startRect.width / 2;
     const startY = startRect.top + startRect.height / 2;
-    const coinSize = COIN_FLY_SIZE;
+    const coinSize = size;
     const endRect = targetIcon.getBoundingClientRect();
     const endX = endRect.left + endRect.width / 2;
     const endY = endRect.top + endRect.height / 2;
 
     const coinCount =
+      count ??
       TASK_COIN_COUNT_MIN +
-      Math.floor(Math.random() * (TASK_COIN_COUNT_MAX - TASK_COIN_COUNT_MIN + 1));
+        Math.floor(Math.random() * (TASK_COIN_COUNT_MAX - TASK_COIN_COUNT_MIN + 1));
 
     const coins = Array.from({ length: coinCount }, (_, index) => {
       const baseAngle = (index / coinCount) * Math.PI * 2;
@@ -1731,7 +1895,7 @@
       const distance = TASK_COIN_BURST_DISTANCE * (0.85 + Math.random() * 0.35);
       const burstX = startX + Math.cos(angle) * distance;
       const burstY = startY + Math.sin(angle) * distance;
-      const ghost = createCoinFlyGhost(coinSize);
+      const ghost = createCoinFlyGhost(coinSize, src);
 
       ghost.style.left = `${startX}px`;
       ghost.style.top = `${startY}px`;
@@ -1866,7 +2030,11 @@
 
     await waitRaffleDelay(TASK_CLAIM_REORDER_MS);
 
-    removedTask2ListItem = { el: li, nextSibling: li.nextElementSibling };
+    if (cardEl.dataset.taskId === "onboarding") {
+      removedOnboardingTaskListItem = { el: li, nextSibling: li.nextElementSibling };
+    } else if (cardEl.dataset.taskId === "2") {
+      removedTask2ListItem = { el: li, nextSibling: li.nextElementSibling };
+    }
     li.classList.remove("is-claim-collapsing-out");
     li.style.height = "";
     li.style.overflow = "";
@@ -1875,6 +2043,12 @@
 
     cardEl.classList.remove("is-reward-ready", "is-claim-removing");
     cardEl.style.pointerEvents = "";
+    if (rafflePageEl) {
+      rafflePageEl.style.webkitOverflowScrolling = "auto";
+      void rafflePageEl.offsetHeight;
+      rafflePageEl.style.webkitOverflowScrolling = "";
+    }
+    syncRafflePageOverflow();
   }
 
   function resetTask2RewardClaimed() {
@@ -1934,6 +2108,271 @@
     isTask2ClaimAnimating = false;
   }
 
+  function setPrizesTabDot(visible) {
+    const prizesTab = document.querySelector('.tab[data-tab="prizes"]');
+    prizesTab?.classList.toggle("has-prize-dot", Boolean(visible));
+  }
+
+  function animateEnergyBadgeTo(end) {
+    return new Promise((resolve) => {
+      const valueEl = energyBadgeValueEl;
+      if (!valueEl) {
+        resolve();
+        return;
+      }
+
+      const start = Number.parseInt(valueEl.textContent, 10) || 0;
+      const duration = 800;
+      const startTime = performance.now();
+
+      function tick(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const current = Math.round(start + (end - start) * eased);
+        valueEl.textContent = String(current);
+
+        if (t < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          valueEl.textContent = String(end);
+          resolve();
+        }
+      }
+
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function resetOnboardingTrainingTask() {
+    const cardEl = getOnboardingTrainingCardEl();
+
+    if (removedOnboardingTaskListItem) {
+      const list = document.querySelector(".raffle-tasks-list");
+      if (list) {
+        list.insertBefore(
+          removedOnboardingTaskListItem.el,
+          list.firstElementChild
+        );
+      }
+      removedOnboardingTaskListItem = null;
+    }
+
+    isOnboardingTrainingTaskClaimed = false;
+    isOnboardingTrainingTaskClaiming = false;
+    setPrizesTabDot(false);
+
+    if (cardEl) {
+      cardEl.style.pointerEvents = "";
+      cardEl.classList.remove("is-claiming", "is-claim-removing");
+      cardEl.classList.add("is-reward-ready");
+      const claimBtn = cardEl.querySelector(".raffle-task-card__claim");
+      if (claimBtn) claimBtn.hidden = false;
+      const li = cardEl.closest("li");
+      if (li) {
+        li.style.height = "";
+        li.style.overflow = "";
+        li.style.marginBottom = "";
+        li.classList.remove("is-claim-collapsing-out");
+      }
+    }
+
+    hideOnboardingEnergyHint({ animate: false });
+    document.querySelector(".app")?.classList.remove("is-onboarding-play-again");
+    syncOnboardingTrainingTask();
+  }
+
+  function isOnboardingEnergyHintActive() {
+    return Boolean(
+      document.querySelector(".app")?.classList.contains("is-onboarding-energy-hint")
+    );
+  }
+
+  function isOnboardingEnergyHintBlocking() {
+    const app = document.querySelector(".app");
+    return Boolean(
+      app?.classList.contains("is-onboarding-energy-hint") ||
+        app?.classList.contains("is-onboarding-energy-hint-out")
+    );
+  }
+
+  function enableOnboardingPlayAgainButton() {
+    const app = document.querySelector(".app");
+    app?.classList.add("is-onboarding-play-again");
+    const yellowText = document.querySelector(".win-block--yellow__text");
+    const yellowEnergy = document.querySelector(".win-block--yellow__energy");
+    if (yellowText) yellowText.textContent = DEFAULT_YELLOW_BUTTON_TEXT;
+    if (yellowEnergy) yellowEnergy.hidden = false;
+  }
+
+  function layoutOnboardingEnergyTooltip() {
+    const tooltip = onboardingEnergyTooltipEl;
+    const tail = tooltip?.querySelector(".onboarding-energy-tooltip__tail");
+    const body = tooltip?.querySelector(".onboarding-energy-tooltip__body");
+    if (!tooltip || !tail || !body || tooltip.hidden || !energyBadgeEl || !frameEl) {
+      return;
+    }
+
+    const frameRect = frameEl.getBoundingClientRect();
+    const badgeRect = energyBadgeEl.getBoundingClientRect();
+    const tailWidth = tail.offsetWidth || 24;
+    const tailHeight = tail.offsetHeight || 8;
+
+    tooltip.style.top = `${badgeRect.bottom - frameRect.top + 8}px`;
+    tail.style.left = `${
+      badgeRect.left + badgeRect.width / 2 - frameRect.left - tailWidth / 2
+    }px`;
+
+    const bodyWidth = body.offsetWidth;
+    const bodyHeight = body.offsetHeight;
+    const tailLeft = parseFloat(tail.style.left) || 0;
+    const bodyLeft = frameRect.width - 16 - bodyWidth;
+    const minX = Math.min(bodyLeft, tailLeft);
+    const maxX = Math.max(bodyLeft + bodyWidth, tailLeft + tailWidth);
+    tooltip.style.transformOrigin = `${(minX + maxX) / 2}px ${
+      (bodyHeight + tailHeight) / 2
+    }px`;
+  }
+
+  function revealOnboardingEnergyTooltip() {
+    if (!isOnboardingEnergyHintActive() || !onboardingEnergyTooltipEl) return;
+    onboardingEnergyTooltipEl.classList.remove("is-visible");
+    onboardingEnergyTooltipEl.hidden = false;
+    onboardingEnergyTooltipEl.setAttribute("aria-hidden", "false");
+    layoutOnboardingEnergyTooltip();
+    requestAnimationFrame(() => {
+      layoutOnboardingEnergyTooltip();
+      requestAnimationFrame(() => {
+        if (!isOnboardingEnergyHintActive() || !onboardingEnergyTooltipEl) return;
+        onboardingEnergyTooltipEl.classList.add("is-visible");
+      });
+    });
+  }
+
+  function startOnboardingEnergyHint() {
+    const app = document.querySelector(".app");
+    if (!app) return;
+
+    enableOnboardingPlayAgainButton();
+    app.classList.remove("is-onboarding-energy-hint-out");
+    app.classList.add("is-onboarding-energy-hint");
+    window.clearTimeout(onboardingEnergyHintTimer);
+    onboardingEnergyHintTimer = window.setTimeout(() => {
+      onboardingEnergyHintTimer = null;
+      if (!isOnboardingEnergyHintActive()) return;
+      revealOnboardingEnergyTooltip();
+    }, ONBOARDING_ENERGY_HINT_DIM_MS);
+  }
+
+  async function hideOnboardingEnergyHint(options = {}) {
+    const animate = options.animate !== false;
+    const app = document.querySelector(".app");
+    const tooltip = onboardingEnergyTooltipEl;
+    const hintActive = Boolean(
+      app?.classList.contains("is-onboarding-energy-hint") ||
+        app?.classList.contains("is-onboarding-energy-hint-out")
+    );
+    const tooltipVisible = Boolean(tooltip && !tooltip.hidden);
+
+    window.clearTimeout(onboardingEnergyHintTimer);
+    onboardingEnergyHintTimer = null;
+
+    if (!hintActive && !tooltipVisible) return;
+    if (onboardingEnergyHintHiding && animate) return;
+
+    if (!animate) {
+      onboardingEnergyHintHiding = false;
+      app?.classList.remove(
+        "is-onboarding-energy-hint",
+        "is-onboarding-energy-hint-out"
+      );
+      if (tooltip) {
+        tooltip.classList.remove("is-visible");
+        tooltip.hidden = true;
+        tooltip.setAttribute("aria-hidden", "true");
+      }
+      return;
+    }
+
+    onboardingEnergyHintHiding = true;
+    tooltip?.classList.remove("is-visible");
+    app?.classList.add("is-onboarding-energy-hint-out");
+    app?.classList.remove("is-onboarding-energy-hint");
+    await waitRaffleDelay(ONBOARDING_ENERGY_TOOLTIP_MS);
+    app?.classList.remove("is-onboarding-energy-hint-out");
+    if (tooltip) {
+      tooltip.hidden = true;
+      tooltip.setAttribute("aria-hidden", "true");
+    }
+    onboardingEnergyHintHiding = false;
+  }
+
+  function handleEnergyHintPointerDown(event) {
+    if (!isOnboardingEnergyHintBlocking()) return;
+    if (event.target.closest(".app > .header .close-btn")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    void hideOnboardingEnergyHint();
+  }
+
+  async function claimOnboardingTrainingReward(source) {
+    if (isOnboardingTrainingTaskClaiming || isOnboardingTrainingTaskClaimed) return;
+
+    const cardEl = getOnboardingTrainingCardEl();
+    if (!cardEl) return;
+
+    isOnboardingTrainingTaskClaiming = true;
+    cardEl.style.pointerEvents = "none";
+
+    if (source === "sheet" && isTaskSheetOpen()) {
+      await closeTaskSheet({ animateClose: true });
+    }
+
+    const giftIcon = cardEl.querySelector(
+      '.raffle-task-card__reward-item[data-reward="gift"] .raffle-task-card__reward-icon'
+    );
+    const energyIcon = cardEl.querySelector(
+      '.raffle-task-card__reward-item[data-reward="energy"] .raffle-task-card__reward-icon'
+    );
+    const prizesIcon = getGiftIconEl();
+    const energyTarget = energyBadgeEl?.querySelector(".energy-badge__icon");
+
+    const giftFly = giftIcon
+      ? runCoinsToBadgeAnimation(giftIcon, {
+          targetIcon: prizesIcon,
+          src: ONBOARDING_TASK_GIFT_SRC,
+          count: 1,
+        })
+      : null;
+    const energyFly = energyIcon
+      ? runCoinsToBadgeAnimation(energyIcon, {
+          targetIcon: energyTarget,
+          src: ENERGY_FLY_SRC,
+          count: ONBOARDING_TASK_ENERGY_AMOUNT,
+        })
+      : null;
+
+    await Promise.all([
+      giftFly?.halfway ?? Promise.resolve(),
+      energyFly?.halfway ?? Promise.resolve(),
+    ]);
+
+    isOnboardingTrainingTaskClaimed = true;
+
+    await Promise.all([
+      animateTaskCardRemove(cardEl),
+      (energyFly?.firstArrival ?? Promise.resolve()).then(() =>
+        animateEnergyBadgeTo(ONBOARDING_TASK_ENERGY_AMOUNT)
+      ),
+      (giftFly?.firstArrival ?? Promise.resolve()).then(() => {
+        setPrizesTabDot(true);
+      }),
+    ]);
+
+    isOnboardingTrainingTaskClaiming = false;
+    syncOnboardingTrainingTask();
+    startOnboardingEnergyHint();
+  }
+
   function updateTaskSheetContent(cardEl, options = {}) {
     const title = cardEl.querySelector(".raffle-task-card__title")?.textContent?.trim() ?? "";
     const date = cardEl.querySelector(".raffle-task-card__date")?.textContent?.trim() ?? "";
@@ -1953,7 +2392,14 @@
         taskSheetBadgeIconEl.style.opacity = "";
       }
       if (taskSheetBadgeDateEl) {
-        taskSheetBadgeDateEl.textContent = rewardReady ? TASK_REWARD_READY_TEXT : date;
+        if (cardEl.dataset.taskId === "onboarding") {
+          const claimUntil = cardEl
+            .querySelector(".raffle-task-card__claim-until")
+            ?.textContent?.trim();
+          taskSheetBadgeDateEl.textContent = claimUntil || "Заберите до 30 ноября";
+        } else {
+          taskSheetBadgeDateEl.textContent = rewardReady ? TASK_REWARD_READY_TEXT : date;
+        }
         taskSheetBadgeDateEl.style.opacity = "1";
       }
     }
@@ -1973,16 +2419,38 @@
       const showTicket = cardEl.dataset.taskId === "2";
       taskSheetRewardTicketEl.hidden = !showTicket;
     }
+    if (taskSheetRewardOnboardingPrizeEl) {
+      taskSheetRewardOnboardingPrizeEl.hidden = cardEl.dataset.taskId !== "onboarding";
+    }
     if (taskSheetRewardIconEl && rewardIconSrc) {
       taskSheetRewardIconEl.src = rewardIconSrc;
     }
-    if (taskSheetRewardLabelEl) {
-      taskSheetRewardLabelEl.textContent = formatTaskRewardLabel(rewardAmount, rewardType);
+    if (cardEl.dataset.taskId === "onboarding") {
+      const energyIcon = cardEl.querySelector(
+        '.raffle-task-card__reward-item[data-reward="energy"] .raffle-task-card__reward-icon'
+      );
+      if (taskSheetRewardIconEl) {
+        taskSheetRewardIconEl.src = energyIcon?.getAttribute("src") || ENERGY_FLY_SRC;
+      }
+      if (taskSheetRewardLabelEl) {
+        taskSheetRewardLabelEl.textContent = ONBOARDING_TASK_ENERGY_AMOUNT + " энергий";
+      }
+      if (taskSheetRewardNoteEl) {
+        taskSheetRewardNoteEl.textContent = "Выдадим сразу";
+      }
+    } else {
+      if (taskSheetRewardLabelEl) {
+        taskSheetRewardLabelEl.textContent = formatTaskRewardLabel(rewardAmount, rewardType);
+      }
+      if (taskSheetRewardNoteEl) {
+        taskSheetRewardNoteEl.textContent = "Зачислим сразу";
+      }
     }
     if (taskSheetActionEl) {
       if (rewardReady) {
         taskSheetActionEl.hidden = false;
-        taskSheetActionEl.textContent = TASK_CLAIM_BUTTON_TEXT;
+        taskSheetActionEl.textContent =
+          cardEl.dataset.taskSheetClaim || TASK_CLAIM_BUTTON_TEXT;
       } else {
         taskSheetActionEl.textContent = "Выполнить";
         taskSheetActionEl.hidden = !showAction;
@@ -2007,6 +2475,7 @@
     taskSheetEl.setAttribute("aria-hidden", "false");
     taskSheetBackdropEl.setAttribute("aria-hidden", "false");
     rafflePageEl?.classList.add("task-sheet-open");
+    setAppSheetChrome(true);
 
     requestAnimationFrame(() => {
       taskSheetEl.classList.add("is-open");
@@ -2026,6 +2495,7 @@
 
     rafflePageEl?.classList.remove("task-sheet-open");
     taskSheetBackdropEl.classList.remove("is-visible");
+    setAppSheetChrome(false, animateClose);
 
     if (animateClose) {
       taskSheetEl.classList.add("is-closing");
@@ -2077,6 +2547,11 @@
 
       cardEl.querySelector(".raffle-task-card__claim")?.addEventListener("click", (event) => {
         event.stopPropagation();
+        if (cardEl.dataset.taskId === "onboarding") {
+          if (isOnboardingTrainingTaskClaimed || isOnboardingTrainingTaskClaiming) return;
+          void claimOnboardingTrainingReward("card");
+          return;
+        }
         if (
           !isTask2RewardReady ||
           isTask2RewardClaimed ||
@@ -2094,11 +2569,18 @@
     });
 
     taskSheetActionEl?.addEventListener("click", () => {
-      if (
-        !activeTaskSheetCard ||
-        activeTaskSheetCard.dataset.taskId !== "2" ||
-        taskSheetActionEl.disabled
-      ) {
+      if (!activeTaskSheetCard || taskSheetActionEl.disabled) {
+        return;
+      }
+
+      if (activeTaskSheetCard.dataset.taskId === "onboarding") {
+        if (!isOnboardingTrainingTaskClaimed && !isOnboardingTrainingTaskClaiming) {
+          void claimOnboardingTrainingReward("sheet");
+        }
+        return;
+      }
+
+      if (activeTaskSheetCard.dataset.taskId !== "2") {
         return;
       }
 
@@ -2141,6 +2623,388 @@
       if (event.pointerId !== activePointerId) return;
       finishDrag(event.clientY);
     });
+  }
+
+  function isOnboardingNotifySheetOpen() {
+    return (
+      onboardingNotifySheetEl?.classList.contains("is-open") ||
+      onboardingNotifySheetEl?.classList.contains("is-closing") ||
+      false
+    );
+  }
+
+  function finishOnboardingNotifySheetClose() {
+    const app = document.querySelector(".app");
+    app?.classList.remove("onboarding-notify-sheet-open");
+    onboardingNotifySheetEl?.classList.remove("is-closing");
+    onboardingNotifyPanelEl?.classList.remove("is-dragging");
+    if (onboardingNotifyPanelEl) {
+      onboardingNotifyPanelEl.style.transform = "";
+    }
+    if (onboardingNotifySheetEl) {
+      onboardingNotifySheetEl.hidden = true;
+      onboardingNotifySheetEl.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function openOnboardingNotifySheet() {
+    if (!onboardingNotifySheetEl || !onboardingNotifyPanelEl || isOnboardingNotifySheetOpen()) {
+      return;
+    }
+
+    const app = document.querySelector(".app");
+    onboardingNotifySheetEl.hidden = false;
+    onboardingNotifySheetEl.classList.remove("is-closing");
+    onboardingNotifyPanelEl.classList.remove("is-dragging");
+    onboardingNotifyPanelEl.style.transform = "";
+    onboardingNotifySheetEl.setAttribute("aria-hidden", "false");
+    app?.classList.add("onboarding-notify-sheet-open");
+
+    void onboardingNotifyPanelEl.offsetWidth;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        prepareOnboardingNotifyDim();
+        onboardingNotifySheetEl.classList.add("is-open");
+      });
+    });
+  }
+
+  function closeOnboardingNotifySheet(options = {}) {
+    if (!onboardingNotifySheetEl) {
+      return Promise.resolve();
+    }
+    if (
+      !onboardingNotifySheetEl.classList.contains("is-open") &&
+      !onboardingNotifySheetEl.classList.contains("is-closing")
+    ) {
+      finishOnboardingNotifySheetClose();
+      return Promise.resolve();
+    }
+
+    const animateClose = options.animateClose !== false;
+    const revealTaskHint = options.revealTaskHint === true && !onboardingClosing;
+    const app = document.querySelector(".app");
+    app?.classList.remove("onboarding-notify-sheet-open");
+    if (revealTaskHint) {
+      prepareOnboardingTaskHint();
+    }
+
+    if (animateClose) {
+      onboardingNotifySheetEl.classList.add("is-closing");
+      onboardingNotifySheetEl.classList.remove("is-open");
+      onboardingNotifyPanelEl?.classList.remove("is-dragging");
+      if (onboardingNotifyPanelEl) {
+        onboardingNotifyPanelEl.style.transform = "";
+      }
+      return new Promise((resolve) => {
+        window.setTimeout(() => {
+          finishOnboardingNotifySheetClose();
+          if (revealTaskHint) revealOnboardingTaskTooltip();
+          resolve();
+        }, RESULT_SHEET_CLOSE_MS);
+      });
+    }
+
+    onboardingNotifySheetEl.classList.remove("is-open", "is-closing");
+    finishOnboardingNotifySheetClose();
+    if (revealTaskHint) revealOnboardingTaskTooltip();
+    return Promise.resolve();
+  }
+
+  function initOnboardingNotifySheet() {
+    let dragStartY = 0;
+    let isDragging = false;
+    let activePointerId = null;
+
+    const finishDrag = (clientY) => {
+      if (!isDragging || !onboardingNotifyPanelEl) return;
+      isDragging = false;
+      activePointerId = null;
+      onboardingNotifyPanelEl.classList.remove("is-dragging");
+
+      const delta = Math.max(0, clientY - dragStartY);
+      if (delta > onboardingNotifyPanelEl.offsetHeight * 0.25) {
+        onboardingNotifyPanelEl.style.transform = "";
+        closeOnboardingNotifySheet({ animateClose: true, revealTaskHint: true });
+        return;
+      }
+
+      onboardingNotifyPanelEl.style.transform = "";
+    };
+
+    const closeAnimated = () => {
+      closeOnboardingNotifySheet({ animateClose: true, revealTaskHint: true });
+    };
+
+    onboardingNotifyCloseEl?.addEventListener("click", closeAnimated);
+    onboardingNotifyEnableEl?.addEventListener("click", closeAnimated);
+    onboardingNotifyLaterEl?.addEventListener("click", closeAnimated);
+    onboardingNotifyBackdropEl?.addEventListener("click", closeAnimated);
+
+    onboardingNotifyBarEl?.addEventListener("pointerdown", (event) => {
+      if (!isOnboardingNotifySheetOpen() || !onboardingNotifyPanelEl) return;
+      isDragging = true;
+      activePointerId = event.pointerId;
+      dragStartY = event.clientY;
+      onboardingNotifyPanelEl.classList.add("is-dragging");
+      onboardingNotifyBarEl.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    onboardingNotifyBarEl?.addEventListener("pointermove", (event) => {
+      if (
+        !isDragging ||
+        event.pointerId !== activePointerId ||
+        !onboardingNotifyPanelEl
+      ) {
+        return;
+      }
+      const offset = Math.max(0, event.clientY - dragStartY);
+      onboardingNotifyPanelEl.style.transform = "translateY(" + offset + "px)";
+    });
+
+    onboardingNotifyBarEl?.addEventListener("pointerup", (event) => {
+      if (event.pointerId !== activePointerId) return;
+      finishDrag(event.clientY);
+    });
+
+    onboardingNotifyBarEl?.addEventListener("pointercancel", (event) => {
+      if (event.pointerId !== activePointerId) return;
+      finishDrag(event.clientY);
+    });
+  }
+
+  function isOnboardingRulesSheetOpen() {
+    return (
+      onboardingRulesSheetEl?.classList.contains("is-open") ||
+      onboardingRulesSheetEl?.classList.contains("is-closing") ||
+      false
+    );
+  }
+
+  function finishOnboardingRulesSheetClose() {
+    onboardingRulesSheetEl?.classList.remove("is-closing");
+    onboardingRulesBackdropEl?.classList.remove("is-closing");
+    onboardingRulesPanelEl?.classList.remove("is-dragging");
+    if (onboardingRulesPanelEl) {
+      onboardingRulesPanelEl.style.transform = "";
+    }
+    if (onboardingRulesSheetEl) {
+      onboardingRulesSheetEl.hidden = true;
+      onboardingRulesSheetEl.setAttribute("aria-hidden", "true");
+    }
+    if (onboardingRulesBackdropEl) {
+      onboardingRulesBackdropEl.hidden = true;
+      onboardingRulesBackdropEl.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function openOnboardingRulesSheet() {
+    if (
+      !onboardingRulesSheetEl ||
+      !onboardingRulesBackdropEl ||
+      !onboardingRulesPanelEl ||
+      isOnboardingRulesSheetOpen()
+    ) {
+      return;
+    }
+
+    if (onboardingRulesBodyEl) {
+      onboardingRulesBodyEl.scrollTop = 0;
+    }
+
+    onboardingRulesSheetEl.hidden = false;
+    onboardingRulesBackdropEl.hidden = false;
+    onboardingRulesSheetEl.classList.remove("is-closing");
+    onboardingRulesBackdropEl.classList.remove("is-closing");
+    onboardingRulesPanelEl.classList.remove("is-dragging");
+    onboardingRulesPanelEl.style.transform = "";
+    onboardingRulesSheetEl.setAttribute("aria-hidden", "false");
+    onboardingRulesBackdropEl.setAttribute("aria-hidden", "false");
+
+    requestAnimationFrame(() => {
+      onboardingRulesSheetEl.classList.add("is-open");
+      onboardingRulesBackdropEl.classList.add("is-visible");
+    });
+  }
+
+  function closeOnboardingRulesSheet(options = {}) {
+    if (!onboardingRulesSheetEl || !onboardingRulesBackdropEl) {
+      return;
+    }
+    if (
+      !onboardingRulesSheetEl.classList.contains("is-open") &&
+      !onboardingRulesSheetEl.classList.contains("is-closing")
+    ) {
+      return;
+    }
+
+    const animateClose = options.animateClose !== false;
+
+    onboardingRulesBackdropEl.classList.remove("is-visible");
+
+    if (animateClose) {
+      onboardingRulesSheetEl.classList.add("is-closing");
+      onboardingRulesSheetEl.classList.remove("is-open");
+      onboardingRulesBackdropEl.classList.add("is-closing");
+      onboardingRulesPanelEl?.classList.remove("is-dragging");
+      if (onboardingRulesPanelEl) {
+        onboardingRulesPanelEl.style.transform = "";
+      }
+      window.setTimeout(finishOnboardingRulesSheetClose, RESULT_SHEET_CLOSE_MS);
+      return;
+    }
+
+    onboardingRulesSheetEl.classList.remove("is-open", "is-closing");
+    onboardingRulesBackdropEl.classList.remove("is-visible", "is-closing");
+    finishOnboardingRulesSheetClose();
+  }
+
+  function initOnboardingRulesSheet() {
+    let dragStartY = 0;
+    let isDragging = false;
+    let activePointerId = null;
+
+    const finishDrag = (clientY) => {
+      if (!isDragging || !onboardingRulesPanelEl) return;
+      isDragging = false;
+      activePointerId = null;
+      onboardingRulesPanelEl.classList.remove("is-dragging");
+
+      const delta = Math.max(0, clientY - dragStartY);
+      if (delta > onboardingRulesPanelEl.offsetHeight * 0.25) {
+        onboardingRulesPanelEl.style.transform = "";
+        closeOnboardingRulesSheet({ animateClose: true });
+        return;
+      }
+
+      onboardingRulesPanelEl.style.transform = "";
+    };
+
+    onboardingRulesCloseEl?.addEventListener("click", () => {
+      closeOnboardingRulesSheet({ animateClose: true });
+    });
+
+    onboardingRulesBackdropEl?.addEventListener("click", () => {
+      closeOnboardingRulesSheet({ animateClose: true });
+    });
+
+    onboardingRulesBarEl?.addEventListener("pointerdown", (event) => {
+      if (!isOnboardingRulesSheetOpen() || !onboardingRulesPanelEl) return;
+      isDragging = true;
+      activePointerId = event.pointerId;
+      dragStartY = event.clientY;
+      onboardingRulesPanelEl.classList.add("is-dragging");
+      onboardingRulesBarEl.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    onboardingRulesBarEl?.addEventListener("pointermove", (event) => {
+      if (
+        !isDragging ||
+        event.pointerId !== activePointerId ||
+        !onboardingRulesPanelEl
+      ) {
+        return;
+      }
+      const offset = Math.max(0, event.clientY - dragStartY);
+      onboardingRulesPanelEl.style.transform = "translateY(" + offset + "px)";
+    });
+
+    onboardingRulesBarEl?.addEventListener("pointerup", (event) => {
+      if (event.pointerId !== activePointerId) return;
+      finishDrag(event.clientY);
+    });
+
+    onboardingRulesBarEl?.addEventListener("pointercancel", (event) => {
+      if (event.pointerId !== activePointerId) return;
+      finishDrag(event.clientY);
+    });
+  }
+
+  let onboardingTaskTooltipTimer = null;
+
+  function prepareOnboardingNotifyDim() {
+    document.querySelector(".app")?.classList.add("is-onboarding-notify-dim");
+  }
+
+  function isOnboardingTaskHintActive() {
+    return Boolean(
+      document.querySelector(".app")?.classList.contains("is-onboarding-task-hint")
+    );
+  }
+
+  function layoutOnboardingTaskTooltip() {
+    const tooltip = onboardingTaskTooltipEl;
+    const tail = tooltip?.querySelector(".onboarding-task-tooltip__tail");
+    const body = tooltip?.querySelector(".onboarding-task-tooltip__body");
+    if (!tooltip || !tail || tooltip.hidden || !raffleTabEl || !frameEl) return;
+
+    const frameRect = frameEl.getBoundingClientRect();
+    const tabRect = raffleTabEl.getBoundingClientRect();
+    const tailWidth = tail.offsetWidth || 30;
+    const tailHeight = tail.offsetHeight || 12;
+    tooltip.style.bottom = `${frameRect.bottom - tabRect.top + 8}px`;
+    tail.style.left = `${
+      tabRect.left + tabRect.width / 2 - frameRect.left - tailWidth / 2
+    }px`;
+
+    if (body) {
+      const bodyLeft = 16;
+      const bodyWidth = body.offsetWidth;
+      const bodyHeight = body.offsetHeight;
+      const tailLeft = parseFloat(tail.style.left) || 0;
+      const minX = Math.min(bodyLeft, tailLeft);
+      const maxX = Math.max(bodyLeft + bodyWidth, tailLeft + tailWidth);
+      tooltip.style.transformOrigin = `${(minX + maxX) / 2}px ${
+        -(bodyHeight + tailHeight) / 2
+      }px`;
+    }
+  }
+
+  function prepareOnboardingTaskHint() {
+    prepareOnboardingNotifyDim();
+    const app = document.querySelector(".app");
+    app?.classList.add("is-onboarding-task-hint");
+    window.clearTimeout(onboardingTaskTooltipTimer);
+    onboardingTaskTooltipTimer = null;
+    if (onboardingTaskTooltipEl) {
+      onboardingTaskTooltipEl.classList.remove("is-visible");
+      onboardingTaskTooltipEl.hidden = true;
+      onboardingTaskTooltipEl.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function revealOnboardingTaskTooltip() {
+    if (!isOnboardingTaskHintActive() || !onboardingTaskTooltipEl) return;
+    window.clearTimeout(onboardingTaskTooltipTimer);
+    onboardingTaskTooltipTimer = window.setTimeout(() => {
+      onboardingTaskTooltipTimer = null;
+      if (!isOnboardingTaskHintActive() || !onboardingTaskTooltipEl) return;
+      onboardingTaskTooltipEl.classList.remove("is-visible");
+      onboardingTaskTooltipEl.hidden = false;
+      onboardingTaskTooltipEl.setAttribute("aria-hidden", "false");
+      layoutOnboardingTaskTooltip();
+      requestAnimationFrame(() => {
+        layoutOnboardingTaskTooltip();
+        requestAnimationFrame(() => {
+          if (!isOnboardingTaskHintActive() || !onboardingTaskTooltipEl) return;
+          onboardingTaskTooltipEl.classList.add("is-visible");
+        });
+      });
+    }, ONBOARDING_TASK_TOOLTIP_DELAY_MS);
+  }
+
+  function hideOnboardingTaskHint() {
+    window.clearTimeout(onboardingTaskTooltipTimer);
+    onboardingTaskTooltipTimer = null;
+    const app = document.querySelector(".app");
+    app?.classList.remove("is-onboarding-task-hint", "is-onboarding-notify-dim");
+    if (onboardingTaskTooltipEl) {
+      onboardingTaskTooltipEl.classList.remove("is-visible");
+      onboardingTaskTooltipEl.hidden = true;
+      onboardingTaskTooltipEl.setAttribute("aria-hidden", "true");
+    }
   }
 
   function prepareWordNotGuessedProgress() {
@@ -2239,7 +3103,13 @@
       tab.addEventListener("click", () => {
         const tabId = tab.dataset.tab;
         if (!navigableTabs.has(tabId)) return;
+        if (isOnboardingTaskHintActive() && tabId !== "raffle") return;
+        if (isOnboardingEnergyHintBlocking()) return;
         if (tabId === "raffle" && raffleTabEl?.hidden) return;
+
+        if (tabId === "raffle") {
+          hideOnboardingTaskHint();
+        }
 
         activateTab(tabId);
         showAppScreen(tabId);
@@ -2270,7 +3140,8 @@
       availH = gridArea.clientHeight;
     } else if (inner && winPanelEl && !winPanelEl.hidden) {
       availW = inner.clientWidth - sideMargin * 2;
-      availH = inner.clientHeight - winPanelEl.offsetHeight - MINI_GRID_MARGIN_TOP_PX;
+      availH =
+        inner.clientHeight - winPanelEl.offsetHeight - MINI_GRID_MARGIN_TOP_PX;
     }
 
     if (availW <= 0 || availH <= 0) return;
@@ -2425,6 +3296,8 @@
     updateLayout();
     syncActivePrizePosition();
     layoutResultSheetGrid();
+    layoutOnboardingTaskTooltip();
+    layoutOnboardingEnergyTooltip();
   }
 
   function updateActionKeys() {
@@ -2684,6 +3557,13 @@
 
   function triggerWinProgressCoinReward(sourceEl) {
     if (!sourceEl) return;
+    if (
+      document
+        .querySelector(".app")
+        ?.classList.contains("scenario-onboarding-result")
+    ) {
+      return;
+    }
 
     void runCoinsToBadgeAnimation(sourceEl).firstArrival.then(() => {
       const start = coinBalance;
@@ -4000,14 +4880,116 @@
     });
   }
 
+  function resetOnboardingIntroModal() {
+    onboardingIntroStep = 0;
+    onboardingIntroAnimating = false;
+    onboardingIntroOpen = false;
+    if (!onboardingIntroEl) return;
+
+    onboardingIntroEl.classList.remove("is-open", "is-closing", "is-step-2");
+    onboardingIntroEl.hidden = true;
+    onboardingIntroEl.setAttribute("aria-hidden", "true");
+    if (onboardingIntroBackEl) onboardingIntroBackEl.hidden = true;
+    onboardingIntroActionLabels.forEach((label) => {
+      label.classList.toggle("is-active", label.dataset.step === "0");
+    });
+  }
+
+  function applyOnboardingIntroStep(step, { animate = true } = {}) {
+    onboardingIntroStep = step;
+    const isStep2 = step === 1;
+
+    if (!animate && onboardingIntroEl) {
+      onboardingIntroEl.classList.add("is-swap-instant");
+    }
+
+    onboardingIntroEl?.classList.toggle("is-step-2", isStep2);
+    if (onboardingIntroBackEl) onboardingIntroBackEl.hidden = !isStep2;
+    onboardingIntroActionLabels.forEach((label) => {
+      label.classList.toggle(
+        "is-active",
+        label.dataset.step === String(step)
+      );
+    });
+
+    if (!animate && onboardingIntroEl) {
+      void onboardingIntroEl.offsetWidth;
+      onboardingIntroEl.classList.remove("is-swap-instant");
+    }
+  }
+
+  function openOnboardingIntroModal() {
+    if (!onboardingIntroEl) return;
+    applyOnboardingIntroStep(0, { animate: false });
+    onboardingIntroEl.hidden = false;
+    onboardingIntroEl.setAttribute("aria-hidden", "false");
+    onboardingIntroEl.classList.remove("is-closing");
+    onboardingIntroEl.classList.add("is-open");
+    onboardingIntroOpen = true;
+    onboardingIntroAnimating = false;
+  }
+
+  async function closeOnboardingIntroModal() {
+    if (!onboardingIntroEl || !onboardingIntroOpen) {
+      resetOnboardingIntroModal();
+      return;
+    }
+
+    onboardingIntroAnimating = true;
+    onboardingIntroEl.classList.add("is-closing");
+    await waitRaffleDelay(ONBOARDING_INTRO_CLOSE_MS);
+    resetOnboardingIntroModal();
+  }
+
+  async function goOnboardingIntroStep(nextStep) {
+    if (
+      !onboardingIntroOpen ||
+      onboardingIntroAnimating ||
+      onboardingClosing ||
+      nextStep === onboardingIntroStep
+    ) {
+      return;
+    }
+
+    onboardingIntroAnimating = true;
+    applyOnboardingIntroStep(nextStep, { animate: true });
+    await waitRaffleDelay(ONBOARDING_INTRO_MS);
+    onboardingIntroAnimating = false;
+  }
+
+  async function handleOnboardingIntroAction() {
+    if (!onboardingIntroOpen || onboardingIntroAnimating || onboardingClosing) {
+      return;
+    }
+
+    if (onboardingIntroStep === 0) {
+      await goOnboardingIntroStep(1);
+      return;
+    }
+
+    await closeOnboardingIntroModal();
+  }
+
   function resetOnboardingPlayfield() {
     void hideOnboardingTooltip();
     clearOnboardingSpotlightTimers();
-    onboardingEl?.classList.remove("is-spotlight");
+    onboardingEl?.classList.remove(
+      "is-spotlight",
+      "is-help-reveal",
+      "is-dialog-exiting",
+      "is-chrome-result",
+      "is-result-handoff",
+      "is-tab-handoff",
+      "is-tab-handoff-in"
+    );
+    onboardingGridEl
+      ?.querySelectorAll(".grid-row.is-help-focus")
+      .forEach((rowEl) => rowEl.classList.remove("is-help-focus"));
     clearOnboardingSpotlightTargets();
     onboardingSpotlightActive = false;
     onboardingSpotlightBaseText = null;
     resolveOnboardingSpotlight();
+    resetOnboardingIntroModal();
     onboardingCurRow = 0;
     onboardingCurCol = 0;
     onboardingAnimating = false;
@@ -4090,6 +5072,391 @@
         }, col * FLIP_STAGGER_MS);
       });
     });
+  }
+
+  function revealOnboardingAnswerRow(row) {
+    const answer = ONBOARDING_ANSWER;
+    onboardingAnimating = true;
+    updateOnboardingActionKeys();
+
+    const flipWave = (onColStart) =>
+      new Promise((resolve) => {
+        let completed = 0;
+
+        for (let col = 0; col < COLS; col++) {
+          const cell = getOnboardingCell(row, col);
+          if (!cell) {
+            completed += 1;
+            if (completed === COLS) resolve();
+            continue;
+          }
+
+          window.setTimeout(() => {
+            onColStart(col, cell);
+            window.setTimeout(() => {
+              completed += 1;
+              if (completed === COLS) resolve();
+            }, FLIP_DURATION_MS);
+          }, col * FLIP_STAGGER_MS);
+        }
+      });
+
+    return (async () => {
+      // 1) Flip to empty face (unflip onto cleared front).
+      await flipWave((col, cell) => {
+        const front = cell.querySelector(".cell-front");
+        const inner = cell.querySelector(".cell-inner");
+        if (front) front.textContent = "";
+        cell.classList.remove("filled", "error");
+        onboardingBoard[row][col] = "";
+        inner?.classList.remove("flipped");
+      });
+
+      // Clear old backs while empty front is showing.
+      for (let col = 0; col < COLS; col++) {
+        const back = getOnboardingCell(row, col)?.querySelector(".cell-back");
+        if (back) {
+          back.textContent = "";
+          back.className = "cell-back";
+        }
+      }
+
+      // 2) Flip again onto correct answer (letters only on the back).
+      await flipWave((col, cell) => {
+        const front = cell.querySelector(".cell-front");
+        const back = cell.querySelector(".cell-back");
+        const inner = cell.querySelector(".cell-inner");
+        onboardingBoard[row][col] = answer[col];
+        if (front) front.textContent = "";
+        if (back) {
+          back.textContent = answer[col];
+          back.className = "cell-back correct";
+        }
+        cell.classList.remove("filled", "error");
+        inner?.classList.add("flipped");
+      });
+
+      for (let c = 0; c < COLS; c++) {
+        updateOnboardingKeyboardKey(answer[c], "correct");
+      }
+      await waitRaffleDelay(120);
+      onboardingAnimating = false;
+      updateOnboardingActionKeys();
+    })();
+  }
+
+  async function playOnboardingLastRowHelp(row) {
+    await hideOnboardingTooltip();
+    if (onboardingSpotlightActive) {
+      await hideOnboardingCellSpotlight({ restorePlaqueText: null });
+    }
+
+    const rowEl = getOnboardingRowEl(row);
+    onboardingGridEl
+      ?.querySelectorAll(".grid-row.is-help-focus")
+      .forEach((el) => el.classList.remove("is-help-focus"));
+    rowEl?.classList.add("is-help-focus");
+
+    const plaquePromise = setOnboardingPlaqueText(
+      "Поможем вам, но только в этот раз"
+    );
+    onboardingEl?.classList.add("is-help-reveal");
+    await plaquePromise;
+
+    await waitRaffleDelay(ONBOARDING_HELP_PAUSE_MS);
+    await revealOnboardingAnswerRow(row);
+    await waitRaffleDelay(ONBOARDING_HELP_PAUSE_MS);
+
+    onboardingEl?.classList.remove("is-help-reveal");
+    await waitRaffleDelay(ONBOARDING_PLAQUE_FADE_MS);
+    rowEl?.classList.remove("is-help-focus");
+  }
+
+  function playOnboardingWinScaleAnimation(row) {
+    return new Promise((resolve) => {
+      onboardingAnimating = true;
+      updateOnboardingActionKeys();
+
+      for (let col = 0; col < COLS; col++) {
+        const cell = getOnboardingCell(row, col);
+        if (!cell) continue;
+        cell.style.setProperty("--win-col", String(col));
+        cell.classList.add("win-scale");
+      }
+
+      const totalMs = (COLS - 1) * 100 + 1000;
+      window.setTimeout(() => {
+        onboardingGridEl
+          ?.querySelectorAll(".cell.win-scale")
+          .forEach((cell) => {
+            cell.classList.remove("win-scale");
+            cell.style.removeProperty("--win-col");
+          });
+        onboardingAnimating = false;
+        updateOnboardingActionKeys();
+        resolve();
+      }, totalMs);
+    });
+  }
+
+  function syncOnboardingBoardToGame() {
+    board = onboardingBoard.map((row) => row.slice());
+    submittedWords.length = 0;
+    onboardingSubmitted.forEach((word) => submittedWords.push(word));
+    curRow = Math.min(onboardingCurRow, ROWS - 1);
+    curCol = 0;
+    gameOver = true;
+
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const src = getOnboardingCell(r, c);
+        const dst = getCell(r, c);
+        if (!src || !dst) continue;
+
+        const srcFront = src.querySelector(".cell-front");
+        const srcBack = src.querySelector(".cell-back");
+        const srcInner = src.querySelector(".cell-inner");
+        const dstFront = dst.querySelector(".cell-front");
+        const dstBack = dst.querySelector(".cell-back");
+        const dstInner = dst.querySelector(".cell-inner");
+
+        dst.className = src.className;
+        dst.classList.remove("win-scale", "is-spotlight-target", "error");
+        if (dstFront) dstFront.textContent = srcFront?.textContent ?? "";
+        if (dstBack) {
+          dstBack.textContent = srcBack?.textContent ?? "";
+          dstBack.className = srcBack?.className || "cell-back";
+        }
+        dstInner?.classList.toggle(
+          "flipped",
+          Boolean(srcInner?.classList.contains("flipped"))
+        );
+      }
+    }
+
+    kbEl?.querySelectorAll(".key").forEach((key) => {
+      if (key.classList.contains("key--action")) return;
+      key.classList.remove("absent", "present", "correct");
+      const ch = key.dataset.key;
+      const src = onboardingKbEl?.querySelector(
+        `.key[data-key="${ch}"]:not(.key--action)`
+      );
+      if (!src) return;
+      ["absent", "present", "correct"].forEach((state) => {
+        if (src.classList.contains(state)) key.classList.add(state);
+      });
+    });
+  }
+
+  function prepareOnboardingResultContent() {
+    const app = document.querySelector(".app");
+    isWordNotGuessedActive = false;
+    lastResultAttempts = 1;
+
+    for (let i = 0; i < WIN_PROGRESS_WORDS.length; i += 1) {
+      WIN_PROGRESS_WORDS[i] = null;
+    }
+
+    fifthWordPanelIndex = 0;
+    resetProgressStageToDefault();
+    clearProgressAnimTimers();
+
+    const progressEl = document.getElementById("win-progress");
+    if (progressEl) {
+      progressEl.innerHTML = buildProgressHtml(ONBOARDING_PROGRESS_BADGES);
+    }
+    clearPrizeOverlay();
+    mountPrizeForPanel(winProgressPanelEl, { hidden: false });
+    renderWinProgress();
+    resetProgressStickers();
+
+    if (winWordEl) winWordEl.textContent = ONBOARDING_ANSWER;
+    if (winMessageEl) winMessageEl.textContent = ONBOARDING_RESULT_MESSAGE;
+
+    const yellowText = document.querySelector(".win-block--yellow__text");
+    const yellowEnergy = document.querySelector(".win-block--yellow__energy");
+    if (yellowText) yellowText.textContent = ONBOARDING_RESULT_YELLOW_TEXT;
+    if (yellowEnergy) yellowEnergy.hidden = true;
+
+    onboardingEl
+      ?.querySelectorAll(".energy-badge__value")
+      .forEach((el) => {
+        el.textContent = "0";
+      });
+    document
+      .querySelectorAll(".app > .header .energy-badge__value")
+      .forEach((el) => {
+        el.textContent = "0";
+      });
+
+    app?.classList.remove(
+      "scenario-thematic-word",
+      "scenario-word-not-guessed",
+      "scenario-fifth-word"
+    );
+    app?.classList.add("scenario-onboarding-result");
+    syncOnboardingTrainingTask();
+  }
+
+  function clearOnboardingResultChrome() {
+    const app = document.querySelector(".app");
+    app?.classList.remove(
+      "scenario-onboarding-result",
+      "is-onboarding-tab-slide",
+      "is-onboarding-tab-ready",
+      "is-onboarding-tab-in",
+      "is-onboarding-play-again",
+      "is-onboarding-energy-hint",
+      "is-onboarding-energy-hint-out"
+    );
+    app?.style.removeProperty("--onboarding-result-slide");
+    const dialog = onboardingEl?.querySelector(".onboarding-dialog");
+    dialog?.style.removeProperty("height");
+    onboardingEl?.classList.remove(
+      "is-dialog-exiting",
+      "is-result-handoff",
+      "is-tab-handoff",
+      "is-tab-handoff-in",
+      "is-chrome-result"
+    );
+    const yellowText = document.querySelector(".win-block--yellow__text");
+    const yellowEnergy = document.querySelector(".win-block--yellow__energy");
+    if (yellowText) yellowText.textContent = DEFAULT_YELLOW_BUTTON_TEXT;
+    if (yellowEnergy) yellowEnergy.hidden = false;
+    document.querySelector(".tab-bar")?.classList.remove("is-entering", "is-visible");
+  }
+
+  function snapshotMainGameChrome() {
+    mainGameChromeSnapshot = {
+      coinBalance,
+      badgeValues: Array.from(
+        document.querySelectorAll(".app > .header .energy-badge__value")
+      ).map((el) => el.textContent),
+      winWord: winWordEl?.textContent ?? ANSWER,
+      winMessage: winMessageEl?.innerHTML ?? "",
+    };
+  }
+
+  function restoreMainGameChrome() {
+    const snap = mainGameChromeSnapshot;
+    mainGameChromeSnapshot = null;
+    if (!snap) return;
+
+    setCoinBalance(snap.coinBalance);
+    document
+      .querySelectorAll(".app > .header .energy-badge__value")
+      .forEach((el, index) => {
+        if (snap.badgeValues[index] != null) {
+          el.textContent = snap.badgeValues[index];
+        }
+      });
+    if (winWordEl) winWordEl.textContent = snap.winWord || ANSWER;
+    if (winMessageEl) winMessageEl.innerHTML = snap.winMessage;
+  }
+
+  function isOnboardingSession() {
+    if (onboardingActive) return true;
+    return Boolean(
+      document
+        .querySelector(".app")
+        ?.classList.contains("scenario-onboarding-result")
+    );
+  }
+
+  async function finishOnboardingToResult(row) {
+    if (!onboardingEl || onboardingClosing) return;
+
+    onboardingDone = true;
+    updateOnboardingActionKeys();
+
+    await waitRaffleDelay(ONBOARDING_FLIP_TO_SCALE_MS);
+    if (onboardingClosing) return;
+
+    const app = document.querySelector(".app");
+    const dialog = onboardingEl.querySelector(".onboarding-dialog");
+    const tabBar = document.querySelector(".tab-bar");
+    const gameGridArea = document.querySelector("#game-main .grid-area");
+
+    syncOnboardingBoardToGame();
+    prepareOnboardingResultContent();
+    showAppScreen("game");
+    activateTab("game");
+
+    // Игра была opacity:0 — без этого выезд тапбара идёт в невидимом слое.
+    app?.classList.remove("is-onboarding-leave", "is-onboarding-transition");
+    app?.removeAttribute("aria-hidden");
+
+    const cellW = onboardingGridAreaEl?.style.getPropertyValue("--cell-width");
+    const cellH = onboardingGridAreaEl?.style.getPropertyValue("--cell-height");
+    if (gameGridArea) {
+      if (cellW) gameGridArea.style.setProperty("--cell-width", cellW);
+      if (cellH) gameGridArea.style.setProperty("--cell-height", cellH);
+    }
+
+    app?.classList.add("is-onboarding-tab-slide");
+    app?.classList.remove("is-onboarding-tab-ready", "is-onboarding-tab-in");
+    onboardingEl.classList.add("is-result-handoff", "is-tab-handoff");
+    onboardingEl.classList.remove("is-tab-handoff-in");
+    if (dialog) dialog.style.height = `${dialog.offsetHeight}px`;
+
+    void tabBar?.offsetHeight;
+    void onboardingEl.offsetHeight;
+    void dialog?.offsetHeight;
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    if (onboardingClosing) return;
+
+    app?.classList.add("is-onboarding-tab-ready");
+    void tabBar?.offsetHeight;
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    const scalePromise = playOnboardingWinScaleAnimation(row);
+
+    onboardingEl.classList.add("is-dialog-exiting", "is-tab-handoff-in");
+    if (dialog) dialog.style.height = "0px";
+    app?.classList.add("is-onboarding-tab-in");
+
+    await Promise.all([
+      scalePromise,
+      waitRaffleDelay(ONBOARDING_TAB_BAR_MS),
+    ]);
+    if (onboardingClosing) return;
+    if (dialog) dialog.style.removeProperty("height");
+
+    onboardingEl.classList.remove(
+      "is-open",
+      "is-settled",
+      "is-dialog-exiting",
+      "is-chrome-result",
+      "is-help-reveal",
+      "is-result-handoff",
+      "is-tab-handoff",
+      "is-tab-handoff-in"
+    );
+    onboardingEl.hidden = true;
+    onboardingEl.setAttribute("aria-hidden", "true");
+    resetOnboardingIntroModal();
+
+    app?.classList.remove(
+      "is-onboarding-tab-slide",
+      "is-onboarding-tab-ready",
+      "is-onboarding-tab-in"
+    );
+
+    onboardingActive = false;
+    if (startOnboardingBtnEl) startOnboardingBtnEl.disabled = false;
+
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    if (onboardingClosing) return;
+
+    await playNormalWordAnimation();
+    if (onboardingClosing) return;
+    playOnboardingResultConfetti();
+    await playWinHeroAnimation(ONBOARDING_ANSWER);
+    updateActionKeys();
+    await waitRaffleDelay(ONBOARDING_NOTIFY_SHEET_DELAY_MS);
+    if (onboardingClosing) return;
+    openOnboardingNotifySheet();
   }
 
   async function onboardingSubmitRow() {
@@ -4202,18 +5569,21 @@
       if (won) {
         onboardingDone = true;
         updateOnboardingActionKeys();
-        if (attemptPlaqueText) {
-          await setOnboardingPlaqueText(attemptPlaqueText);
-        }
+        await setOnboardingPlaqueText("Правильно!");
+        await finishOnboardingToResult(row);
+        return;
+      }
+
+      if (row === ROWS - 1) {
+        onboardingDone = true;
+        updateOnboardingActionKeys();
+        await playOnboardingLastRowHelp(row);
+        await finishOnboardingToResult(row);
         return;
       }
 
       onboardingCurRow += 1;
       onboardingCurCol = 0;
-
-      if (onboardingCurRow >= ROWS) {
-        onboardingDone = true;
-      }
       updateOnboardingActionKeys();
 
       let showedAbsentTip = false;
@@ -4251,13 +5621,17 @@
     if (
       !onboardingActive ||
       onboardingClosing ||
+      onboardingIntroOpen ||
       onboardingDone ||
       onboardingAnimating ||
       onboardingSpotlightActive ||
+      isOnboardingRulesSheetOpen() ||
       onboardingCurRow >= ROWS
     ) {
       return;
     }
+
+    triggerHaptic(HAPTIC_KEY_MS);
 
     if (ch === "⌫") {
       if (onboardingCurCol > 0) {
@@ -4294,6 +5668,8 @@
 
     const gap =
       parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--grid-gap")) || 6;
+    const gridTopMargin = 8;
+    const gridKbMargin = 24;
 
     let availW = onboardingGridAreaEl.clientWidth;
     let availH = onboardingGridAreaEl.clientHeight;
@@ -4301,7 +5677,6 @@
     if ((availW <= 0 || availH <= 0) && onboardingEl && onboardingKbEl) {
       const styles = getComputedStyle(document.documentElement);
       const sideMargin = parseFloat(styles.getPropertyValue("--side-margin")) || 20;
-      const gridKbMargin = parseFloat(styles.getPropertyValue("--grid-kb-margin")) || 24;
       const playEl = onboardingEl.querySelector(".onboarding__play");
 
       if (playEl) {
@@ -4309,7 +5684,7 @@
         availH =
           playEl.clientHeight -
           onboardingKbEl.offsetHeight -
-          8 -
+          gridTopMargin -
           gridKbMargin -
           parseFloat(getComputedStyle(onboardingKbEl).paddingBottom || "0");
       }
@@ -4343,6 +5718,7 @@
 
     onboardingActive = true;
     if (startOnboardingBtnEl) startOnboardingBtnEl.disabled = true;
+    snapshotMainGameChrome();
 
     app.classList.add("is-onboarding-transition", "is-onboarding-leave");
     await waitRaffleDelay(ONBOARDING_LEAVE_MS);
@@ -4354,6 +5730,7 @@
     onboardingEl.setAttribute("aria-hidden", "false");
     await new Promise((resolve) => requestAnimationFrame(resolve));
     onboardingEl.classList.add("is-open");
+    openOnboardingIntroModal();
     await new Promise((resolve) => requestAnimationFrame(resolve));
     updateOnboardingLayout();
     fitOnboardingPlaqueText();
@@ -4363,17 +5740,40 @@
   }
 
   async function closeOnboarding() {
-    if (!onboardingActive || onboardingClosing || !onboardingEl) return;
+    if (onboardingClosing || !onboardingEl) return;
+    if (!isOnboardingSession() && onboardingEl.hidden) return;
 
     const app = document.querySelector(".app");
     if (!app) return;
 
     onboardingClosing = true;
+    hideOnboardingTaskHint();
+    hideOnboardingEnergyHint({ animate: false });
+    closeOnboardingNotifySheet({ animateClose: false });
+    closeOnboardingRulesSheet({ animateClose: false });
+
+    const leavingResult = app.classList.contains("scenario-onboarding-result");
+    if (leavingResult) {
+      stopConfetti();
+      if (winPanelEl) winPanelEl.hidden = true;
+      app.classList.remove(
+        "is-animating-normal-word",
+        "is-animating-win-hero",
+        "keyboard-detached"
+      );
+      resetGameState();
+    } else {
+      clearOnboardingResultChrome();
+    }
+
+    await closeOnboardingIntroModal();
     await hideOnboardingTooltip();
     await hideOnboardingCellSpotlight();
 
     onboardingEl.classList.remove("is-settled", "is-open");
-    await waitRaffleDelay(ONBOARDING_LEAVE_MS);
+    if (!onboardingEl.hidden) {
+      await waitRaffleDelay(ONBOARDING_LEAVE_MS);
+    }
 
     resetOnboardingPlayfield();
     onboardingEl.hidden = true;
@@ -4388,6 +5788,9 @@
 
     onboardingActive = false;
     onboardingClosing = false;
+    onboardingDone = false;
+    restoreMainGameChrome();
+    resetOnboardingTrainingTask();
     if (startOnboardingBtnEl) startOnboardingBtnEl.disabled = false;
     updateLayout({ force: true });
   }
@@ -5359,6 +6762,7 @@
     const dots = [...pagination.querySelectorAll(".raffle-cards-dot")];
     let rafId = null;
     let scrollEndTimer = null;
+    let lastHapticSlideIndex = null;
 
     function scrollToSlide(slideIndex, behavior = "auto") {
       const maxIndex = Math.max(0, slides.length - 1);
@@ -5418,6 +6822,15 @@
       });
 
       const nearest = Math.max(0, Math.min(slides.length - 1, getNearestSlideIndex()));
+      if (
+        lastHapticSlideIndex !== null &&
+        nearest !== lastHapticSlideIndex &&
+        !raffleIntroRunning &&
+        !raffleParticipateSession
+      ) {
+        triggerHaptic(HAPTIC_SELECTION_MS);
+      }
+      lastHapticSlideIndex = nearest;
       updateDots(nearest);
       updateRafflePaginationLabelOpacity();
     }
@@ -5869,6 +7282,25 @@
       },
       onDone() {
         stopSplashConfetti();
+      },
+    });
+  }
+
+  function playOnboardingResultConfetti() {
+    if (!confettiEl) return;
+    const gridArea = document.querySelector("#game-main .grid-area");
+    const heroSlot = document.querySelector(".win-hero-slot");
+    stopConfetti();
+    confettiEl.classList.add("is-playing");
+    playConfettiInContainer(confettiEl, {
+      topEl: gridArea,
+      bottomEl: heroSlot,
+      spawnYShiftRatio: 0.2,
+      onRaf(id) {
+        confettiRafId = id;
+      },
+      onDone() {
+        stopConfetti();
       },
     });
   }
@@ -6494,7 +7926,9 @@
       isAnimating = true;
       updateActionKeys();
 
-      const gridArea = document.querySelector(".grid-area");
+      const gridArea =
+        document.querySelector("#game-main .grid-area") ??
+        document.querySelector(".grid-area");
       if (gridArea) {
         savedGameCellWidth = gridArea.style.getPropertyValue("--cell-width");
         savedGameCellHeight = gridArea.style.getPropertyValue("--cell-height");
@@ -6666,6 +8100,7 @@
       "scenario-win-hero",
       "scenario-thematic-word",
       "scenario-word-not-guessed",
+      "scenario-onboarding-result",
       "keyboard-detached",
       "is-animating-reverse-win-hero",
       "is-animating-reverse-normal-word",
@@ -6712,6 +8147,7 @@
     });
 
     stopPrizeIdleAnimation();
+    clearOnboardingResultChrome();
     resetWinProgress();
     applyWinResultContent();
     isAnimating = false;
@@ -6722,6 +8158,10 @@
 
   async function playAgain() {
     const app = document.querySelector(".app");
+    if (app?.classList.contains("scenario-onboarding-result")) {
+      void closeOnboarding();
+      return;
+    }
     if (isAnimating || !app?.classList.contains("scenario-normal-word")) return;
 
     await playReverseWinHeroAnimation();
@@ -6821,6 +8261,8 @@
     if (onboardingActive) return;
     if (gameOver || isAnimating || curRow >= ROWS) return;
 
+    triggerHaptic(HAPTIC_KEY_MS);
+
     if (ch === "⌫") {
       if (curCol > 0) {
         curCol -= 1;
@@ -6882,8 +8324,19 @@
   onboardingCloseBtnEl?.addEventListener("click", () => {
     void closeOnboarding();
   });
+  document.querySelector(".app > .header .close-btn")?.addEventListener("click", () => {
+    if (!isOnboardingSession()) return;
+    void closeOnboarding();
+  });
+  onboardingIntroActionEl?.addEventListener("click", () => {
+    void handleOnboardingIntroAction();
+  });
+  onboardingIntroBackEl?.addEventListener("click", () => {
+    void goOnboardingIntroStep(0);
+  });
   onboardingInfoBtnEl?.addEventListener("click", (event) => {
     event.preventDefault();
+    openOnboardingRulesSheet();
   });
   winSplashShareEl?.addEventListener("click", (event) => {
     event.preventDefault();
@@ -6911,6 +8364,9 @@
   initRaffleCarousel();
   initResultSheet();
   initTaskSheet();
+  initOnboardingNotifySheet();
+  initOnboardingRulesSheet();
+  frameEl?.addEventListener("pointerdown", handleEnergyHintPointerDown, true);
   resetRaffleProgress();
   updateMainScrollFade();
   updateRaffleScrollFade();
