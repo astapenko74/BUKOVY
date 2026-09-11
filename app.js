@@ -50,12 +50,16 @@
   const WIN_SPLASH_CONFETTI_AT = 0.3;
   const WIN_SPLASH_TITLE_AT = 0.6;
   const WIN_SPLASH_TITLE_MS = 700;
-  const WIN_SPLASH_CONTENT_OUT_MS = 700;
-  const WIN_SPLASH_SECONDARY_AT = 0.8;
-  const WIN_SPLASH_TASKS_CONTENT_MS = 800;
+  const WIN_SPLASH_CONTENT_OUT_MS = 1000;
+  const WIN_SPLASH_SECONDARY_AT = 0.7;
+  const WIN_SPLASH_RESULT_AT = 0.7;
+  const WIN_SPLASH_TASKS_CONTENT_MS = 1000;
   const WIN_SPLASH_TASKS_PROGRESS_AT = 0.9;
   const WIN_SPLASH_TASKS_PROGRESS_DELAY_MS = 500;
   const WIN_SPLASH_TASKS_PROGRESS_MS = 1000;
+  const WIN_SPLASH_TASKS_SWEEP_MS = 500;
+  const WIN_SPLASH_TASKS_SHIMMER_DELAY_MS = 1000;
+  const WIN_SPLASH_TASKS_SHIMMER_EVERY_MS = 4000;
   const LOSE_SPLASH_FLIP_DELAY_MS = 100;
   const PROGRESS_PHASE1_MS = 280;
   const PROGRESS_PHASE2_MS = 420;
@@ -7466,7 +7470,6 @@
       "is-content-in",
       "is-content-out",
       "is-title-in",
-      "is-image-glow",
       "win-splash--win",
       "win-splash--lose",
       "win-splash--thematic",
@@ -7603,9 +7606,10 @@
       winSplashEl.classList.add("is-fading-out");
       winSplashEl.classList.remove("is-open");
 
+      const resultAtMs = Math.round(WIN_SPLASH_FADE_MS * WIN_SPLASH_RESULT_AT);
+      window.setTimeout(resolve, resultAtMs);
       window.setTimeout(() => {
         hideWinSplash();
-        resolve();
       }, WIN_SPLASH_FADE_MS);
     });
   }
@@ -7626,7 +7630,6 @@
       "is-content-in",
       "is-content-out",
       "is-title-in",
-      "is-image-glow",
       "is-progress-tick",
       "is-claim-in"
     );
@@ -7663,7 +7666,6 @@
       "is-content-in",
       "is-content-out",
       "is-title-in",
-      "is-image-glow",
       "is-progress-tick",
       "is-claim-in"
     );
@@ -7727,7 +7729,12 @@
     if (!winSplashTasksListEl) return;
 
     winSplashTasksListEl.querySelectorAll(".tasks-splash-card").forEach((card) => {
-      card.classList.remove("is-complete");
+      card.classList.remove("is-complete", "is-shimmer-ready");
+      card.style.removeProperty("--tasks-shimmer-every");
+      if (card._tasksShimmerTimer) {
+        window.clearTimeout(card._tasksShimmerTimer);
+        card._tasksShimmerTimer = 0;
+      }
       const fill = card.querySelector(".tasks-splash-card__progress-fill");
       const left = card.querySelector(".tasks-splash-card__progress-left");
       const right = card.querySelector(".tasks-splash-card__progress-right");
@@ -7842,7 +7849,19 @@
 
     const tipX = fillRect.right - hostRect.left;
     const tipY = fillRect.top + fillRect.height / 2 - hostRect.top;
-    const count = 1 + Math.floor(Math.random() * 2);
+    spawnTasksProgressOutwardSparks(progress, tipX, tipY, {
+      count: 1 + Math.floor(Math.random() * 2),
+      distanceMin: 6,
+      distanceMax: 16,
+    });
+  }
+
+  function spawnTasksProgressOutwardSparks(progress, x, y, opts = {}) {
+    if (!progress) return;
+
+    const count = opts.count ?? 2;
+    const distanceMin = opts.distanceMin ?? 8;
+    const distanceMax = opts.distanceMax ?? 18;
 
     for (let i = 0; i < count; i += 1) {
       const particle = document.createElement("span");
@@ -7850,12 +7869,14 @@
         "win-progress__prize-particle win-progress__prize-particle--spark";
       particle.setAttribute("aria-hidden", "true");
 
-      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
-      const distance = 6 + Math.random() * 10;
-      const size = 2 + Math.random() * 2;
+      const side = Math.random() < 0.5 ? -1 : 1;
+      const angle =
+        side * (Math.PI / 2) + (Math.random() - 0.5) * (Math.PI * 0.7);
+      const distance = distanceMin + Math.random() * (distanceMax - distanceMin);
+      const size = 2 + Math.random() * 2.5;
 
-      particle.style.left = `${tipX}px`;
-      particle.style.top = `${tipY}px`;
+      particle.style.left = `${x}px`;
+      particle.style.top = `${y}px`;
       particle.style.width = `${size}px`;
       particle.style.height = `${size}px`;
       particle.style.margin = `${-size / 2}px 0 0 ${-size / 2}px`;
@@ -7863,7 +7884,7 @@
         PRIZE_PARTICLE_COLORS[Math.floor(Math.random() * PRIZE_PARTICLE_COLORS.length)];
       particle.style.setProperty("--tx", `${Math.cos(angle) * distance}px`);
       particle.style.setProperty("--ty", `${Math.sin(angle) * distance}px`);
-      particle.style.animationDuration = `${0.45 + Math.random() * 0.25}s`;
+      particle.style.animationDuration = `${0.4 + Math.random() * 0.3}s`;
 
       progress.appendChild(particle);
       particle.addEventListener(
@@ -7874,6 +7895,102 @@
         { once: true }
       );
     }
+  }
+
+  function runTasksSplashProgressSweep() {
+    return new Promise((resolve) => {
+      if (!winSplashTasksListEl) {
+        resolve();
+        return;
+      }
+
+      const progresses = [
+        ...winSplashTasksListEl.querySelectorAll(".tasks-splash-card__progress"),
+      ];
+      if (!progresses.length) {
+        resolve();
+        return;
+      }
+
+      let remaining = progresses.length;
+      const doneOne = () => {
+        remaining -= 1;
+        if (remaining <= 0) resolve();
+      };
+
+      progresses.forEach((progress) => {
+        const fill = progress.querySelector(".tasks-splash-card__progress-fill");
+        if (!fill) {
+          doneOne();
+          return;
+        }
+
+        const travelX = fill.offsetWidth;
+        if (travelX <= 0) {
+          doneOne();
+          return;
+        }
+
+        progress
+          .querySelectorAll(".tasks-splash-card__progress-sweep")
+          .forEach((node) => node.remove());
+        fill
+          .querySelectorAll(".tasks-splash-card__progress-sweep")
+          .forEach((node) => node.remove());
+
+        const startX = fill.offsetLeft;
+        const endX = startX + travelX;
+        const sparkY = fill.offsetTop + fill.offsetHeight / 2;
+
+        const spark = document.createElement("span");
+        spark.className = "tasks-splash-card__progress-sweep is-running";
+        spark.setAttribute("aria-hidden", "true");
+        spark.style.left = `${startX}px`;
+        spark.style.top = `${sparkY}px`;
+        progress.appendChild(spark);
+
+        const start = performance.now();
+        let lastBurstAt = 0;
+        let finished = false;
+
+        const finish = () => {
+          if (finished) return;
+          finished = true;
+          spark.remove();
+          doneOne();
+        };
+
+        const tick = (now) => {
+          if (finished) return;
+
+          const t = Math.min(1, (now - start) / WIN_SPLASH_TASKS_SWEEP_MS);
+          const x = startX + (endX - startX) * t;
+          spark.style.left = `${x}px`;
+
+          if (now - lastBurstAt >= 40) {
+            lastBurstAt = now;
+            spawnTasksProgressOutwardSparks(progress, x, sparkY, {
+              count: 2 + Math.floor(Math.random() * 2),
+              distanceMin: 8,
+              distanceMax: 20,
+            });
+          }
+
+          if (t < 1) {
+            requestAnimationFrame(tick);
+          } else {
+            spawnTasksProgressOutwardSparks(progress, endX, sparkY, {
+              count: 3,
+              distanceMin: 10,
+              distanceMax: 22,
+            });
+            finish();
+          }
+        };
+
+        requestAnimationFrame(tick);
+      });
+    });
   }
 
   function runTasksSplashProgressTick() {
@@ -7956,6 +8073,18 @@
             originSpanY: 70,
           });
         }
+
+        if (item.card._tasksShimmerTimer) {
+          window.clearTimeout(item.card._tasksShimmerTimer);
+        }
+        item.card.style.setProperty(
+          "--tasks-shimmer-every",
+          `${WIN_SPLASH_TASKS_SHIMMER_EVERY_MS}ms`
+        );
+        item.card._tasksShimmerTimer = window.setTimeout(() => {
+          item.card.classList.add("is-shimmer-ready");
+          item.card._tasksShimmerTimer = 0;
+        }, WIN_SPLASH_TASKS_SHIMMER_DELAY_MS);
       }
 
       function tick(now) {
@@ -8069,7 +8198,6 @@
       "is-content-in",
       "is-content-out",
       "is-title-in",
-      "is-image-glow",
       "is-progress-tick",
       "is-claim-in"
     );
@@ -8090,9 +8218,12 @@
         WIN_SPLASH_TASKS_CONTENT_MS + WIN_SPLASH_TASKS_PROGRESS_DELAY_MS;
 
       await waitMs(progressAtMs);
+      await runTasksSplashProgressSweep();
       const progressPromise = runTasksSplashProgressTick();
 
-      await waitMs(Math.max(0, buttonAtMs - progressAtMs));
+      await waitMs(
+        Math.max(0, buttonAtMs - progressAtMs - WIN_SPLASH_TASKS_SWEEP_MS)
+      );
       winSplashEl.classList.add("is-claim-in");
 
       await Promise.all([
@@ -8103,7 +8234,7 @@
       await skipGate.promise;
 
       winSplashEl.classList.add("is-content-out");
-      await waitMs(WIN_SPLASH_CONTENT_OUT_MS);
+      await waitMs(getSplashContentOutWaitMs(false));
     } finally {
       winSplashTasksCtaEl?.removeEventListener("click", onClaim);
     }
@@ -8126,8 +8257,10 @@
   }
 
   function getSplashContentOutWaitMs(towardSecondary) {
-    if (!towardSecondary) return WIN_SPLASH_CONTENT_OUT_MS;
-    return Math.round(WIN_SPLASH_CONTENT_OUT_MS * WIN_SPLASH_SECONDARY_AT);
+    if (towardSecondary) {
+      return Math.round(WIN_SPLASH_CONTENT_OUT_MS * WIN_SPLASH_SECONDARY_AT);
+    }
+    return Math.round(WIN_SPLASH_CONTENT_OUT_MS * WIN_SPLASH_RESULT_AT);
   }
 
   async function finishSplashTowardResult(normalWordPromise, options = {}) {
@@ -8146,7 +8279,6 @@
         !winSplashEl.classList.contains("is-content-out")
       ) {
         winSplashEl.classList.add("is-content-out");
-        winSplashEl.classList.remove("is-image-glow");
         await waitMs(getSplashContentOutWaitMs(true));
       }
 
@@ -8244,7 +8376,6 @@
         return;
       }
 
-      winSplashEl.classList.add("is-image-glow");
       playSplashConfetti();
 
       if (await raceSkip(Math.max(0, titleAtMs - confettiAtMs))) {
@@ -8263,7 +8394,6 @@
       detachSkip();
 
       winSplashEl.classList.add("is-content-out");
-      winSplashEl.classList.remove("is-image-glow");
       stopSplashConfetti();
       await waitMs(getSplashContentOutWaitMs(willShowFollowUpSplash()));
 
