@@ -47,11 +47,15 @@
   const DEFAULT_YELLOW_BUTTON_TEXT = "Играть ещё за 3";
   const WIN_SPLASH_CONTENT_DELAY_MS = 200;
   const WIN_SPLASH_CONTENT_MS = 700;
-  const WIN_SPLASH_CONFETTI_AT = 0.4;
+  const WIN_SPLASH_CONFETTI_AT = 0.3;
   const WIN_SPLASH_TITLE_AT = 0.6;
   const WIN_SPLASH_TITLE_MS = 700;
   const WIN_SPLASH_CONTENT_OUT_MS = 700;
-  const WIN_SPLASH_THEMATIC_DELAY_MS = 400;
+  const WIN_SPLASH_SECONDARY_AT = 0.8;
+  const WIN_SPLASH_TASKS_CONTENT_MS = 800;
+  const WIN_SPLASH_TASKS_PROGRESS_AT = 0.9;
+  const WIN_SPLASH_TASKS_PROGRESS_DELAY_MS = 500;
+  const WIN_SPLASH_TASKS_PROGRESS_MS = 1000;
   const LOSE_SPLASH_FLIP_DELAY_MS = 100;
   const PROGRESS_PHASE1_MS = 280;
   const PROGRESS_PHASE2_MS = 420;
@@ -77,8 +81,14 @@
   const winSplashBodyThematicEl = document.getElementById(
     "win-splash-body-thematic"
   );
-  const winSplashGridAreaEl = document.getElementById("win-splash-grid-area");
-  const winSplashGridEl = document.getElementById("win-splash-grid");
+  const winSplashBodyNotifyEl = document.getElementById(
+    "win-splash-body-notify"
+  );
+  const winSplashBodyTasksEl = document.getElementById(
+    "win-splash-body-tasks"
+  );
+  const winSplashImageAreaEl = document.getElementById("win-splash-image-area");
+  const winSplashImageEl = document.getElementById("win-splash-image");
   const winSplashAnswerRowEl = document.getElementById("win-splash-answer-row");
   const winSplashTitleEl = document.getElementById("win-splash-title");
   const winSplashSubtitleEl = document.getElementById("win-splash-subtitle");
@@ -89,6 +99,15 @@
   );
   const winSplashThematicSkipEl = document.getElementById(
     "win-splash-thematic-skip"
+  );
+  const winSplashNotifyCtaEl = document.getElementById("win-splash-notify-cta");
+  const winSplashTasksCtaEl = document.getElementById("win-splash-tasks-cta");
+  const winSplashTasksListEl = document.getElementById("win-splash-tasks-list");
+  const winSplashTasksCoinValueEl = document.getElementById(
+    "win-splash-tasks-coin-value"
+  );
+  const winSplashTasksClaimIconEl = document.getElementById(
+    "win-splash-tasks-claim-icon"
   );
   const winProgressStageEl = document.getElementById("win-progress-stage");
   const winProgressPrizeOverlayEl = document.getElementById("win-progress-prize-overlay");
@@ -158,6 +177,10 @@
   const taskExecuteStubEl = document.getElementById("task-execute-stub");
   const scenarioSelectEl = document.getElementById("scenario-select");
   const thematicWordSwitchEl = document.getElementById("thematic-word-switch");
+  const notifySplashSwitchEl = document.getElementById("notify-splash-switch");
+  const tasksProgressSplashSwitchEl = document.getElementById(
+    "tasks-progress-splash-switch"
+  );
   const raffleSectionSwitchEl = document.getElementById("raffle-section-switch");
   const raffleCardsPaginationLabelEl = document.getElementById("raffle-cards-pagination-label");
   const coinBadgeEl = document.getElementById("coin-badge");
@@ -221,6 +244,10 @@
 
   let activeScenario = scenarioSelectEl?.value ?? "2-4-word";
   let activeThematicWord = Boolean(thematicWordSwitchEl?.checked);
+  let activeNotifySplash = Boolean(notifySplashSwitchEl?.checked);
+  let activeTasksProgressSplash = Boolean(
+    tasksProgressSplashSwitchEl?.checked
+  );
   let profileSettingsDirty = false;
   let isWordNotGuessedActive = false;
 
@@ -557,6 +584,14 @@
     return activeThematicWord;
   }
 
+  function isNotifySplashEnabled() {
+    return activeNotifySplash;
+  }
+
+  function isTasksProgressSplashEnabled() {
+    return activeTasksProgressSplash;
+  }
+
   function isWordNotGuessedScenario() {
     return isWordNotGuessedActive;
   }
@@ -675,11 +710,17 @@
 
     const nextScenario = scenarioSelectEl?.value ?? "2-4-word";
     const nextThematic = Boolean(thematicWordSwitchEl?.checked);
+    const nextNotifySplash = Boolean(notifySplashSwitchEl?.checked);
+    const nextTasksProgressSplash = Boolean(
+      tasksProgressSplashSwitchEl?.checked
+    );
     const scenarioChanged = nextScenario !== activeScenario;
     const thematicChanged = nextThematic !== activeThematicWord;
 
     activeScenario = nextScenario;
     activeThematicWord = nextThematic;
+    activeNotifySplash = nextNotifySplash;
+    activeTasksProgressSplash = nextTasksProgressSplash;
     profileSettingsDirty = false;
 
     if (scenarioChanged) {
@@ -1636,6 +1677,9 @@
     if (coinBadgeValueEl) {
       coinBadgeValueEl.textContent = String(coinBalance);
     }
+    if (winSplashTasksCoinValueEl) {
+      winSplashTasksCoinValueEl.textContent = String(coinBalance);
+    }
   }
 
   function setCoinBalance(value) {
@@ -1685,7 +1729,8 @@
   function animateCoinBadgeValue(start, end) {
     return new Promise((resolve) => {
       const valueEl = coinBadgeValueEl ?? coinBadgeEl?.querySelector(".energy-badge__value");
-      if (!valueEl) {
+      const splashValueEl = winSplashTasksCoinValueEl;
+      if (!valueEl && !splashValueEl) {
         updateRaffleParticipateButtonsState(end);
         resolve();
         return;
@@ -1699,7 +1744,8 @@
         const t = Math.min(1, (now - startTime) / duration);
         const eased = 1 - Math.pow(1 - t, 3);
         const current = Math.round(start + (end - start) * eased);
-        valueEl.textContent = String(current);
+        if (valueEl) valueEl.textContent = String(current);
+        if (splashValueEl) splashValueEl.textContent = String(current);
         updateRaffleParticipateButtonsState(current);
         if (current !== lastHapticValue) {
           lastHapticValue = current;
@@ -1709,7 +1755,8 @@
         if (t < 1) {
           requestAnimationFrame(tick);
         } else {
-          valueEl.textContent = String(end);
+          if (valueEl) valueEl.textContent = String(end);
+          if (splashValueEl) splashValueEl.textContent = String(end);
           updateRaffleParticipateButtonsState(end);
           resolve();
         }
@@ -7141,6 +7188,7 @@
     const containerRect = containerEl.getBoundingClientRect();
     const topRect = options.topEl?.getBoundingClientRect();
     const bottomRect = options.bottomEl?.getBoundingClientRect();
+    const radialBurst = options.mode === "radial";
 
     let spawnYMin = height * 0.12;
     let spawnYMax = height * 0.42;
@@ -7165,6 +7213,14 @@
       }
     }
 
+    let burstX = width / 2;
+    let burstY = height * 0.35;
+    if (radialBurst && options.originEl) {
+      const originRect = options.originEl.getBoundingClientRect();
+      burstX = originRect.left + originRect.width / 2 - containerRect.left;
+      burstY = originRect.top + originRect.height / 2 - containerRect.top;
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
@@ -7181,6 +7237,28 @@
     }
 
     function spawnParticle(side) {
+      if (radialBurst) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = (11 + Math.random() * 9) / 1.5;
+        particles.push({
+          x: burstX,
+          y: burstY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          gravity: 0.08 + Math.random() * 0.05,
+          drag: 0.94 + Math.random() * 0.03,
+          rotation: Math.random() * Math.PI * 2,
+          spin: (Math.random() - 0.5) * 0.5,
+          w: 3 + Math.random() * 5,
+          h: 5 + Math.random() * 9,
+          color:
+            CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+          life: 1,
+          decay: 0.003 + Math.random() * 0.0025,
+        });
+        return;
+      }
+
       const y = spawnYMin + Math.random() * (spawnYMax - spawnYMin);
       const fromLeft = side === "left";
       const x = fromLeft ? 0 : width;
@@ -7195,6 +7273,7 @@
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         gravity: CONFETTI_GRAVITY_MIN + Math.random() * CONFETTI_GRAVITY_RANGE,
+        drag: 1,
         rotation: Math.random() * Math.PI * 2,
         spin: (Math.random() - 0.5) * 0.4,
         w: 3 + Math.random() * 5,
@@ -7227,6 +7306,11 @@
 
       for (let i = particles.length - 1; i >= 0; i -= 1) {
         const p = particles[i];
+        if (p.drag < 1) {
+          const dragFactor = Math.pow(p.drag, dt);
+          p.vx *= dragFactor;
+          p.vy *= dragFactor;
+        }
         p.vy += p.gravity * dt;
         p.x += p.vx * dt;
         p.y += p.vy * dt;
@@ -7274,9 +7358,8 @@
   function playSplashConfetti() {
     stopSplashConfetti();
     playConfettiInContainer(winSplashConfettiEl, {
-      topEl: winSplashGridAreaEl,
-      bottomEl: document.querySelector(".win-splash__copy"),
-      spawnYShiftRatio: 0.2,
+      mode: "radial",
+      originEl: winSplashImageEl || winSplashImageAreaEl,
       onRaf(id) {
         splashConfettiRafId = id;
       },
@@ -7362,74 +7445,6 @@
     return `Быстрее ${value}% игроков`;
   }
 
-  function syncSplashGridFromBoard() {
-    if (!winSplashGridEl || !gridEl) return;
-
-    winSplashGridEl.innerHTML = "";
-
-    for (let row = 0; row < ROWS; row += 1) {
-      const sourceRow = getRowEl(row);
-      const rowEl = document.createElement("div");
-      rowEl.className = "grid-row";
-      rowEl.dataset.row = String(row);
-
-      for (let col = 0; col < COLS; col += 1) {
-        const sourceCell = sourceRow?.children[col];
-        const cell = document.createElement("div");
-        cell.className = sourceCell?.className || "cell";
-        cell.classList.remove("win-scale");
-        cell.dataset.row = String(row);
-        cell.dataset.col = String(col);
-
-        const sourceInner = sourceCell?.querySelector(".cell-inner");
-        const sourceFront = sourceCell?.querySelector(".cell-front");
-        const sourceBack = sourceCell?.querySelector(".cell-back");
-        const flipped = sourceInner?.classList.contains("flipped");
-        const frontText = sourceFront?.textContent ?? "";
-        const backText = sourceBack?.textContent ?? "";
-        const backClass = sourceBack?.className || "cell-back";
-
-        cell.innerHTML =
-          '<div class="cell-inner' +
-          (flipped ? " flipped" : "") +
-          '"><div class="cell-front">' +
-          frontText +
-          '</div><div class="' +
-          backClass +
-          '">' +
-          backText +
-          "</div></div>";
-        rowEl.appendChild(cell);
-      }
-
-      winSplashGridEl.appendChild(rowEl);
-    }
-  }
-
-  function layoutSplashGrid() {
-    if (!winSplashGridAreaEl || !winSplashGridEl) return;
-
-    const gap = MINI_GRID_GAP_PX;
-    const availW = winSplashGridAreaEl.clientWidth;
-    const availH = 160;
-    if (availW <= 0) return;
-
-    let cellH = (availH - (ROWS - 1) * gap) / ROWS;
-    let cellW = (cellH * MINI_CELL_RATIO_W) / MINI_CELL_RATIO_H;
-    const totalW = cellW * COLS + gap * (COLS - 1);
-
-    if (totalW > availW) {
-      cellW = (availW - gap * (COLS - 1)) / COLS;
-      cellH = (cellW * MINI_CELL_RATIO_H) / MINI_CELL_RATIO_W;
-    }
-
-    cellW = Math.max(1, Math.floor(cellW));
-    cellH = Math.max(1, Math.floor(cellH));
-
-    winSplashGridEl.style.setProperty("--splash-cell-width", `${cellW}px`);
-    winSplashGridEl.style.setProperty("--splash-cell-height", `${cellH}px`);
-  }
-
   function positionWinSplash() {
     if (!winSplashEl) return;
     const app = document.querySelector(".app");
@@ -7451,10 +7466,14 @@
       "is-content-in",
       "is-content-out",
       "is-title-in",
-      "is-mini-glow",
+      "is-image-glow",
       "win-splash--win",
       "win-splash--lose",
-      "win-splash--thematic"
+      "win-splash--thematic",
+      "win-splash--notify",
+      "win-splash--tasks",
+      "is-progress-tick",
+      "is-claim-in"
     );
     winSplashEl.style.removeProperty("--win-splash-title-gap");
     winSplashEl.style.removeProperty("--win-splash-subtitle-gap");
@@ -7465,10 +7484,18 @@
     winSplashEl.classList.toggle("win-splash--win", mode === "win");
     winSplashEl.classList.toggle("win-splash--lose", mode === "lose");
     winSplashEl.classList.toggle("win-splash--thematic", mode === "thematic");
+    winSplashEl.classList.toggle("win-splash--notify", mode === "notify");
+    winSplashEl.classList.toggle("win-splash--tasks", mode === "tasks");
     if (winSplashBodyWinEl) winSplashBodyWinEl.hidden = mode !== "win";
     if (winSplashBodyLoseEl) winSplashBodyLoseEl.hidden = mode !== "lose";
     if (winSplashBodyThematicEl) {
       winSplashBodyThematicEl.hidden = mode !== "thematic";
+    }
+    if (winSplashBodyNotifyEl) {
+      winSplashBodyNotifyEl.hidden = mode !== "notify";
+    }
+    if (winSplashBodyTasksEl) {
+      winSplashBodyTasksEl.hidden = mode !== "tasks";
     }
   }
 
@@ -7537,9 +7564,6 @@
       winSplashEl.hidden = true;
       winSplashEl.setAttribute("aria-hidden", "true");
     }
-    if (winSplashGridEl) {
-      winSplashGridEl.innerHTML = "";
-    }
     if (winSplashAnswerRowEl) {
       winSplashAnswerRowEl.innerHTML = "";
       winSplashAnswerRowEl.style.removeProperty("--cell-width");
@@ -7548,6 +7572,8 @@
     if (winSplashBodyWinEl) winSplashBodyWinEl.hidden = false;
     if (winSplashBodyLoseEl) winSplashBodyLoseEl.hidden = true;
     if (winSplashBodyThematicEl) winSplashBodyThematicEl.hidden = true;
+    if (winSplashBodyNotifyEl) winSplashBodyNotifyEl.hidden = true;
+    if (winSplashBodyTasksEl) winSplashBodyTasksEl.hidden = true;
   }
 
   function fadeWinSplashIn() {
@@ -7584,9 +7610,10 @@
     });
   }
 
-  async function playThematicSplashAnimation() {
+  async function playThematicSplashAnimation(options = {}) {
     if (!winSplashEl) return;
 
+    const { towardNext = false } = options;
     const skipGate = createSkipGate();
     const onSkip = (event) => {
       event.preventDefault();
@@ -7599,14 +7626,14 @@
       "is-content-in",
       "is-content-out",
       "is-title-in",
-      "is-mini-glow"
+      "is-image-glow",
+      "is-progress-tick",
+      "is-claim-in"
     );
 
     winSplashThematicSkipEl?.addEventListener("click", onSkip);
 
     try {
-      await waitMs(WIN_SPLASH_THEMATIC_DELAY_MS);
-
       requestAnimationFrame(() => {
         winSplashEl.classList.add("is-content-in");
       });
@@ -7614,10 +7641,493 @@
       await skipGate.promise;
 
       winSplashEl.classList.add("is-content-out");
-      await waitMs(WIN_SPLASH_CONTENT_OUT_MS);
+      await waitMs(getSplashContentOutWaitMs(towardNext));
     } finally {
       winSplashThematicSkipEl?.removeEventListener("click", onSkip);
     }
+  }
+
+  async function playNotifySplashAnimation(options = {}) {
+    if (!winSplashEl) return;
+
+    const { towardNext = false } = options;
+    const skipGate = createSkipGate();
+    const onContinue = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      skipGate.trigger();
+    };
+
+    setWinSplashMode("notify");
+    winSplashEl.classList.remove(
+      "is-content-in",
+      "is-content-out",
+      "is-title-in",
+      "is-image-glow",
+      "is-progress-tick",
+      "is-claim-in"
+    );
+
+    winSplashNotifyCtaEl?.addEventListener("click", onContinue);
+
+    try {
+      requestAnimationFrame(() => {
+        winSplashEl.classList.add("is-content-in");
+      });
+
+      await skipGate.promise;
+
+      winSplashEl.classList.add("is-content-out");
+      await waitMs(getSplashContentOutWaitMs(towardNext));
+    } finally {
+      winSplashNotifyCtaEl?.removeEventListener("click", onContinue);
+    }
+  }
+
+  function cubicBezierEase(t, x1, y1, x2, y2) {
+    const epsilon = 1e-6;
+
+    function sampleCurveX(aT) {
+      return (
+        3 * x1 * (1 - aT) * (1 - aT) * aT +
+        3 * x2 * (1 - aT) * aT * aT +
+        aT * aT * aT
+      );
+    }
+
+    function sampleCurveY(aT) {
+      return (
+        3 * y1 * (1 - aT) * (1 - aT) * aT +
+        3 * y2 * (1 - aT) * aT * aT +
+        aT * aT * aT
+      );
+    }
+
+    function sampleCurveDerivativeX(aT) {
+      return (
+        3 * x1 * (1 - aT) * (1 - aT) +
+        6 * (x2 - x1) * (1 - aT) * aT +
+        3 * (1 - x2) * aT * aT
+      );
+    }
+
+    let aT = t;
+    for (let i = 0; i < 8; i += 1) {
+      const x = sampleCurveX(aT) - t;
+      if (Math.abs(x) < epsilon) break;
+      const d = sampleCurveDerivativeX(aT);
+      if (Math.abs(d) < epsilon) break;
+      aT -= x / d;
+    }
+
+    return sampleCurveY(Math.min(1, Math.max(0, aT)));
+  }
+
+  function resetTasksSplashCards() {
+    if (!winSplashTasksListEl) return;
+
+    winSplashTasksListEl.querySelectorAll(".tasks-splash-card").forEach((card) => {
+      card.classList.remove("is-complete");
+      const fill = card.querySelector(".tasks-splash-card__progress-fill");
+      const left = card.querySelector(".tasks-splash-card__progress-left");
+      const right = card.querySelector(".tasks-splash-card__progress-right");
+
+      if (fill?.dataset.progressFrom) {
+        fill.style.width = `${fill.dataset.progressFrom}%`;
+      }
+
+      if (left) {
+        left.textContent = left.dataset.leftFrom || left.textContent;
+        delete left.dataset.rollReady;
+      }
+
+      if (right) {
+        if (right.dataset.countFrom && right.dataset.countTotal) {
+          right.textContent = `${right.dataset.countFrom} / ${right.dataset.countTotal}`;
+        }
+        delete right.dataset.rollReady;
+      }
+    });
+  }
+
+  function ensureTasksRollHost(el, initialText) {
+    if (!el) return null;
+    if (el.dataset.rollReady === "1") {
+      return el.querySelector(".tasks-splash-card__roll-track");
+    }
+
+    el.textContent = "";
+    el.dataset.rollReady = "1";
+    const track = document.createElement("span");
+    track.className = "tasks-splash-card__roll-track";
+    const item = document.createElement("span");
+    item.className = "tasks-splash-card__roll-item";
+    item.textContent = initialText;
+    track.appendChild(item);
+    el.appendChild(track);
+    return track;
+  }
+
+  function rollTasksSplashText(el, nextText) {
+    return new Promise((resolve) => {
+      if (!el) {
+        resolve();
+        return;
+      }
+
+      const track = ensureTasksRollHost(el, el.textContent.trim() || nextText);
+      if (!track) {
+        resolve();
+        return;
+      }
+
+      let current = track.querySelector(".tasks-splash-card__roll-item:last-child");
+      if (!current) {
+        current = document.createElement("span");
+        current.className = "tasks-splash-card__roll-item";
+        current.textContent = nextText;
+        track.appendChild(current);
+      }
+
+      if (current.textContent === nextText) {
+        resolve();
+        return;
+      }
+
+      if (track.children.length > 1) {
+        track.style.transition = "none";
+        track.classList.remove("is-rolling");
+        track.replaceChildren(current);
+        void track.offsetWidth;
+        track.style.transition = "";
+      }
+
+      const next = document.createElement("span");
+      next.className = "tasks-splash-card__roll-item";
+      next.textContent = nextText;
+      track.appendChild(next);
+
+      requestAnimationFrame(() => {
+        track.classList.add("is-rolling");
+      });
+
+      const onEnd = (event) => {
+        if (event.target !== track || event.propertyName !== "transform") return;
+        track.removeEventListener("transitionend", onEnd);
+        track.style.transition = "none";
+        track.classList.remove("is-rolling");
+        track.replaceChildren(next);
+        void track.offsetWidth;
+        track.style.transition = "";
+        resolve();
+      };
+
+      track.addEventListener("transitionend", onEnd);
+    });
+  }
+
+  function syncTasksSplashCoinBadge() {
+    if (winSplashTasksCoinValueEl) {
+      winSplashTasksCoinValueEl.textContent = String(coinBalance);
+    }
+  }
+
+  function spawnTasksProgressTipSparks(fill) {
+    const progress = fill?.closest(".tasks-splash-card__progress");
+    if (!progress || !fill) return;
+
+    const fillRect = fill.getBoundingClientRect();
+    const hostRect = progress.getBoundingClientRect();
+    if (!fillRect.width || !hostRect.width) return;
+
+    const tipX = fillRect.right - hostRect.left;
+    const tipY = fillRect.top + fillRect.height / 2 - hostRect.top;
+    const count = 1 + Math.floor(Math.random() * 2);
+
+    for (let i = 0; i < count; i += 1) {
+      const particle = document.createElement("span");
+      particle.className =
+        "win-progress__prize-particle win-progress__prize-particle--spark";
+      particle.setAttribute("aria-hidden", "true");
+
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI;
+      const distance = 6 + Math.random() * 10;
+      const size = 2 + Math.random() * 2;
+
+      particle.style.left = `${tipX}px`;
+      particle.style.top = `${tipY}px`;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.margin = `${-size / 2}px 0 0 ${-size / 2}px`;
+      particle.style.background =
+        PRIZE_PARTICLE_COLORS[Math.floor(Math.random() * PRIZE_PARTICLE_COLORS.length)];
+      particle.style.setProperty("--tx", `${Math.cos(angle) * distance}px`);
+      particle.style.setProperty("--ty", `${Math.sin(angle) * distance}px`);
+      particle.style.animationDuration = `${0.45 + Math.random() * 0.25}s`;
+
+      progress.appendChild(particle);
+      particle.addEventListener(
+        "animationend",
+        () => {
+          particle.remove();
+        },
+        { once: true }
+      );
+    }
+  }
+
+  function runTasksSplashProgressTick() {
+    return new Promise((resolve) => {
+      if (!winSplashEl || !winSplashTasksListEl) {
+        resolve();
+        return;
+      }
+
+      const cards = [
+        ...winSplashTasksListEl.querySelectorAll(".tasks-splash-card"),
+      ];
+      const animating = cards
+        .map((card) => {
+          const fill = card.querySelector(".tasks-splash-card__progress-fill");
+          const left = card.querySelector(".tasks-splash-card__progress-left");
+          const right = card.querySelector(".tasks-splash-card__progress-right");
+          if (!fill?.dataset.progressTo) return null;
+          return {
+            card,
+            fill,
+            left,
+            right,
+            from: Number(fill.dataset.progressFrom) || 0,
+            to: Number(fill.dataset.progressTo) || 0,
+            countFrom: Number(right?.dataset.countFrom),
+            countTo: Number(right?.dataset.countTo),
+            countTotal: right?.dataset.countTotal || "",
+            leftFrom: left?.dataset.leftFrom || "",
+            leftTo: left?.dataset.leftTo || "",
+            complete: card.dataset.tasksCard === "2",
+          };
+        })
+        .filter(Boolean);
+
+      winSplashEl.classList.add("is-progress-tick");
+
+      animating.forEach((item) => {
+        const rightStart =
+          Number.isFinite(item.countFrom) && item.countTotal
+            ? `${item.countFrom} / ${item.countTotal}`
+            : item.right?.textContent?.trim() || "";
+        const leftStart = item.leftFrom || item.left?.textContent?.trim() || "";
+
+        if (item.right) {
+          ensureTasksRollHost(item.right, rightStart);
+          item.lastCount = item.countFrom;
+        }
+        if (item.left) {
+          ensureTasksRollHost(item.left, leftStart);
+          item.leftRolled = false;
+        }
+
+        item.fill.style.width = `${item.to}%`;
+        if (item.complete) {
+          item.rewardReady = false;
+        }
+      });
+
+      const start = performance.now();
+      const x1 = 0.45;
+      const y1 = 1.45;
+      const x2 = 0.8;
+      const y2 = 1;
+      let lastTipSparkAt = 0;
+
+      function markRewardReady(item) {
+        if (!item.complete || item.rewardReady) return;
+        item.rewardReady = true;
+        item.card.classList.add("is-complete");
+        const sparksHost = item.card.querySelector("[data-tasks-sparks]");
+        if (sparksHost) {
+          spawnPrizeParticles(sparksHost, {
+            sparkOnly: true,
+            particleScale: 1,
+            randomOrigin: true,
+            originInsetX: 10,
+            originSpanX: 80,
+            originInsetY: 15,
+            originSpanY: 70,
+          });
+        }
+      }
+
+      function tick(now) {
+        const t = Math.min(1, (now - start) / WIN_SPLASH_TASKS_PROGRESS_MS);
+        const eased = cubicBezierEase(t, x1, y1, x2, y2);
+
+        if (now - lastTipSparkAt >= 55) {
+          lastTipSparkAt = now;
+          animating.forEach((item) => {
+            spawnTasksProgressTipSparks(item.fill);
+          });
+        }
+
+        animating.forEach((item) => {
+          const progressPct = item.from + (item.to - item.from) * eased;
+
+          if (
+            item.right &&
+            Number.isFinite(item.countFrom) &&
+            Number.isFinite(item.countTo)
+          ) {
+            const value = Math.round(
+              item.countFrom + (item.countTo - item.countFrom) * eased
+            );
+            if (value !== item.lastCount) {
+              item.lastCount = value;
+              void rollTasksSplashText(
+                item.right,
+                `${value} / ${item.countTotal}`
+              );
+            }
+          }
+
+          if (
+            item.complete &&
+            item.left &&
+            item.leftTo &&
+            !item.leftRolled &&
+            eased >= 0.45
+          ) {
+            item.leftRolled = true;
+            void rollTasksSplashText(item.left, item.leftTo);
+          }
+
+          if (item.complete && progressPct >= item.to) {
+            markRewardReady(item);
+          }
+        });
+
+        if (t < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          animating.forEach((item) => {
+            markRewardReady(item);
+          });
+          Promise.all(
+            animating.map(async (item) => {
+              if (
+                item.right &&
+                Number.isFinite(item.countTo) &&
+                item.countTotal
+              ) {
+                await rollTasksSplashText(
+                  item.right,
+                  `${item.countTo} / ${item.countTotal}`
+                );
+              }
+              if (item.complete && item.left && item.leftTo && !item.leftRolled) {
+                item.leftRolled = true;
+                await rollTasksSplashText(item.left, item.leftTo);
+              }
+            })
+          ).then(resolve);
+        }
+      }
+
+      requestAnimationFrame(tick);
+    });
+  }
+
+  async function playTasksProgressSplashAnimation() {
+    if (!winSplashEl) return;
+
+    const skipGate = createSkipGate();
+    let claiming = false;
+
+    const onClaim = async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (claiming || skipGate.skipped) return;
+      claiming = true;
+
+      const splashCoinIcon = document.querySelector(
+        "#win-splash-tasks-coin-badge .energy-badge__icon"
+      );
+      const coinFly = winSplashTasksClaimIconEl
+        ? runCoinsToBadgeAnimation(winSplashTasksClaimIconEl, {
+            targetIcon: splashCoinIcon,
+          })
+        : null;
+
+      await (coinFly?.halfway ?? Promise.resolve());
+      await (coinFly?.firstArrival ?? Promise.resolve()).then(() =>
+        animateCoinBadgeCounter(TASK_REWARD_COIN_AMOUNT)
+      );
+      skipGate.trigger();
+    };
+
+    setWinSplashMode("tasks");
+    winSplashEl.classList.remove(
+      "is-content-in",
+      "is-content-out",
+      "is-title-in",
+      "is-image-glow",
+      "is-progress-tick",
+      "is-claim-in"
+    );
+    resetTasksSplashCards();
+    syncTasksSplashCoinBadge();
+
+    winSplashTasksCtaEl?.addEventListener("click", onClaim);
+
+    try {
+      requestAnimationFrame(() => {
+        winSplashEl.classList.add("is-content-in");
+      });
+
+      const progressAtMs = Math.round(
+        WIN_SPLASH_TASKS_CONTENT_MS * WIN_SPLASH_TASKS_PROGRESS_AT
+      );
+      const buttonAtMs =
+        WIN_SPLASH_TASKS_CONTENT_MS + WIN_SPLASH_TASKS_PROGRESS_DELAY_MS;
+
+      await waitMs(progressAtMs);
+      const progressPromise = runTasksSplashProgressTick();
+
+      await waitMs(Math.max(0, buttonAtMs - progressAtMs));
+      winSplashEl.classList.add("is-claim-in");
+
+      await Promise.all([
+        progressPromise,
+        waitMs(WIN_SPLASH_TASKS_PROGRESS_MS),
+      ]);
+
+      await skipGate.promise;
+
+      winSplashEl.classList.add("is-content-out");
+      await waitMs(WIN_SPLASH_CONTENT_OUT_MS);
+    } finally {
+      winSplashTasksCtaEl?.removeEventListener("click", onClaim);
+    }
+  }
+
+  function willShowSecondarySplash() {
+    return (
+      isThematicWordEnabled() ||
+      (isNotifySplashEnabled() &&
+        Boolean(winSplashEl?.classList.contains("win-splash--win")))
+    );
+  }
+
+  function willShowTasksProgressSplash() {
+    return isTasksProgressSplashEnabled();
+  }
+
+  function willShowFollowUpSplash() {
+    return willShowSecondarySplash() || willShowTasksProgressSplash();
+  }
+
+  function getSplashContentOutWaitMs(towardSecondary) {
+    if (!towardSecondary) return WIN_SPLASH_CONTENT_OUT_MS;
+    return Math.round(WIN_SPLASH_CONTENT_OUT_MS * WIN_SPLASH_SECONDARY_AT);
   }
 
   async function finishSplashTowardResult(normalWordPromise, options = {}) {
@@ -7625,18 +8135,30 @@
 
     stopSplashConfetti();
 
-    if (isThematicWordEnabled()) {
+    const showSecondarySplash = willShowSecondarySplash();
+    const showTasksSplash = willShowTasksProgressSplash();
+    const showFollowUp = showSecondarySplash || showTasksSplash;
+
+    if (showFollowUp) {
       if (
         !contentAlreadyOut &&
         winSplashEl?.classList.contains("is-content-in") &&
         !winSplashEl.classList.contains("is-content-out")
       ) {
         winSplashEl.classList.add("is-content-out");
-        winSplashEl.classList.remove("is-mini-glow");
-        await waitMs(WIN_SPLASH_CONTENT_OUT_MS);
+        winSplashEl.classList.remove("is-image-glow");
+        await waitMs(getSplashContentOutWaitMs(true));
       }
 
-      await playThematicSplashAnimation();
+      if (isThematicWordEnabled()) {
+        await playThematicSplashAnimation({ towardNext: showTasksSplash });
+      } else if (showSecondarySplash) {
+        await playNotifySplashAnimation({ towardNext: showTasksSplash });
+      }
+
+      if (showTasksSplash) {
+        await playTasksProgressSplashAnimation();
+      }
     }
 
     await fadeWinSplashOut();
@@ -7662,7 +8184,6 @@
     updateActionKeys();
 
     positionWinSplash();
-    syncSplashGridFromBoard();
     if (winSplashTitleEl) {
       winSplashTitleEl.innerHTML = getSplashTitleHtml(attempts);
     }
@@ -7674,7 +8195,6 @@
     setWinSplashMode("win");
     winSplashEl.hidden = false;
     winSplashEl.setAttribute("aria-hidden", "false");
-    layoutSplashGrid();
 
     winSplashSkipEl?.addEventListener("click", onSkip);
 
@@ -7710,35 +8230,24 @@
 
       const normalWordPromise = playNormalWordAnimation();
 
-      normalWordPromise.then(() => {
-        if (!skipGate.skipped) {
-          winSplashEl.classList.add("is-mini-glow");
-        }
-      });
-
       requestAnimationFrame(() => {
         winSplashEl.classList.add("is-content-in");
       });
 
-      if (
-        await raceSkip(
-          Math.round(WIN_SPLASH_CONTENT_MS * WIN_SPLASH_CONFETTI_AT)
-        )
-      ) {
+      const titleAtMs = Math.round(WIN_SPLASH_CONTENT_MS * WIN_SPLASH_TITLE_AT);
+      const confettiAtMs = Math.round(
+        WIN_SPLASH_CONTENT_MS * WIN_SPLASH_CONFETTI_AT
+      );
+
+      if (await raceSkip(confettiAtMs)) {
         await finishEarly(normalWordPromise);
         return;
       }
 
+      winSplashEl.classList.add("is-image-glow");
       playSplashConfetti();
 
-      if (
-        await raceSkip(
-          Math.round(
-            WIN_SPLASH_CONTENT_MS *
-              (WIN_SPLASH_TITLE_AT - WIN_SPLASH_CONFETTI_AT)
-          )
-        )
-      ) {
+      if (await raceSkip(Math.max(0, titleAtMs - confettiAtMs))) {
         await finishEarly(normalWordPromise);
         return;
       }
@@ -7754,9 +8263,9 @@
       detachSkip();
 
       winSplashEl.classList.add("is-content-out");
-      winSplashEl.classList.remove("is-mini-glow");
+      winSplashEl.classList.remove("is-image-glow");
       stopSplashConfetti();
-      await waitMs(WIN_SPLASH_CONTENT_OUT_MS);
+      await waitMs(getSplashContentOutWaitMs(willShowFollowUpSplash()));
 
       await finishSplashTowardResult(normalWordPromise, {
         contentAlreadyOut: true,
@@ -7849,7 +8358,7 @@
       detachSkip();
 
       winSplashEl.classList.add("is-content-out");
-      await waitMs(WIN_SPLASH_CONTENT_OUT_MS);
+      await waitMs(getSplashContentOutWaitMs(willShowFollowUpSplash()));
 
       await finishSplashTowardResult(normalWordPromise, {
         contentAlreadyOut: true,
@@ -8310,7 +8819,22 @@
   });
 
   scenarioSelectEl?.addEventListener("change", markProfileSettingsDirty);
-  thematicWordSwitchEl?.addEventListener("change", markProfileSettingsDirty);
+  thematicWordSwitchEl?.addEventListener("change", () => {
+    if (thematicWordSwitchEl.checked && notifySplashSwitchEl?.checked) {
+      notifySplashSwitchEl.checked = false;
+    }
+    markProfileSettingsDirty();
+  });
+  notifySplashSwitchEl?.addEventListener("change", () => {
+    if (notifySplashSwitchEl.checked && thematicWordSwitchEl?.checked) {
+      thematicWordSwitchEl.checked = false;
+    }
+    markProfileSettingsDirty();
+  });
+  tasksProgressSplashSwitchEl?.addEventListener(
+    "change",
+    markProfileSettingsDirty
+  );
   raffleSectionSwitchEl?.addEventListener("change", () => {
     const preservedCoins = coinBalance;
     resetRaffleProgress();

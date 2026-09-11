@@ -64,13 +64,16 @@
           <div class="win-splash__confetti" id="win-splash-confetti" aria-hidden="true"></div>
           <div class="win-splash__body" id="win-splash-body-win">
             <div class="win-splash__main">
-              <div class="win-splash__grid-area" id="win-splash-grid-area">
-                <div
-                  class="grid win-splash__grid"
-                  id="win-splash-grid"
-                  role="grid"
-                  aria-label="Мини-поле"
-                ></div>
+              <div class="win-splash__image-area" id="win-splash-image-area">
+                <div class="win-splash__image-glow" aria-hidden="true"></div>
+                <img
+                  class="win-splash__image"
+                  id="win-splash-image"
+                  src="assets/Verh.png"
+                  alt=""
+                  width="260"
+                  height="200"
+                />
               </div>
               <div class="win-splash__copy">
                 <h2 class="win-splash__title" id="win-splash-title"></h2>
@@ -129,6 +132,229 @@
               </button>
               <button class="win-splash__thematic-skip" id="win-splash-thematic-skip" type="button">
                 Пропустить
+              </button>
+            </div>
+          </div>
+          <div
+            class="win-splash__body win-splash__body--notify"
+            id="win-splash-body-notify"
+            hidden
+          >
+            <div class="win-splash__main">
+              <div class="win-splash__notify-cluster">
+                <img
+                  class="win-splash__notify-image"
+                  src="assets/Uvedi.png"
+                  alt=""
+                  width="260"
+                  height="200"
+                />
+                <h2 class="win-splash__notify-title">Будем на связи</h2>
+                <p class="win-splash__notify-subtitle">
+                  Включите уведомления, чтобы не&nbsp;пропускать новые слова и события
+                </p>
+              </div>
+            </div>
+            <div class="win-splash__actions win-splash__actions--notify">
+              <div class="win-splash__notify-block">
+                <div class="win-splash__notify-block-text">
+                  <p class="win-splash__notify-block-title">Уведомления</p>
+                  <p class="win-splash__notify-block-subtitle">
+                    О&nbsp;важных&nbsp;событиях&nbsp;в&nbsp;игре
+                  </p>
+                </div>
+                <label class="win-switch">
+                  <input
+                    class="win-switch__input"
+                    type="checkbox"
+                    role="switch"
+                    aria-label="Уведомления"
+                  />
+                  <span class="win-switch__track" aria-hidden="true"></span>
+                </label>
+              </div>
+              <button class="win-splash__notify-cta" id="win-splash-notify-cta" type="button">
+                Продолжить
+              </button>
+            </div>
+          </div>
+          <div
+            class="win-splash__body win-splash__body--tasks"
+            id="win-splash-body-tasks"
+            hidden
+          >
+            <div class="nav-row win-splash__tasks-nav">
+              <div class="nav-row__badges">
+                <button
+                  class="energy-badge coin-badge"
+                  id="win-splash-tasks-coin-badge"
+                  type="button"
+                >
+                  <img
+                    class="energy-badge__icon"
+                    src="assets/badge-coin.png?v=2"
+                    alt=""
+                    width="16"
+                    height="16"
+                  />
+                  <span class="energy-badge__value" id="win-splash-tasks-coin-value"
+                    >0</span
+                  >
+                </button>
+                <button class="energy-badge" type="button">
+                  <img
+                    class="energy-badge__icon"
+                    src="assets/Лого энергии для бейджа.png"
+                    alt=""
+                    width="16"
+                    height="16"
+                  />
+                  <span class="energy-badge__value">17</span>
+                </button>
+              </div>
+            </div>
+            <div class="win-splash__main win-splash__main--tasks">
+              <h2 class="win-splash__tasks-title">Прогресс по заданиям</h2>
+              <div class="win-splash__tasks-list" id="win-splash-tasks-list">
+                <article
+                  class="tasks-splash-card"
+                  data-tasks-card="1"
+                  data-tilt="0.5"
+                >
+                  <div class="tasks-splash-card__info">
+                    <p class="tasks-splash-card__title">Отгадайте 10 слов дня</p>
+                    <div class="tasks-splash-card__progress">
+                      <div class="tasks-splash-card__progress-track">
+                        <div
+                          class="tasks-splash-card__progress-fill"
+                          data-progress-from="70"
+                          data-progress-to="80"
+                          style="width: 70%"
+                        ></div>
+                      </div>
+                      <div class="tasks-splash-card__progress-meta">
+                        <span class="tasks-splash-card__progress-left"
+                          >До 27 ноября</span
+                        >
+                        <span
+                          class="tasks-splash-card__progress-right"
+                          data-count-from="7"
+                          data-count-to="8"
+                          data-count-total="10"
+                          >7 / 10</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tasks-splash-card__rewards">
+                    <div class="tasks-splash-card__reward-item" data-reward="energy">
+                      <img
+                        class="tasks-splash-card__reward-icon"
+                        src="assets/Энергия.png"
+                        width="36"
+                        height="36"
+                        alt=""
+                        draggable="false"
+                      />
+                      <span class="tasks-splash-card__reward-value">+20</span>
+                    </div>
+                  </div>
+                </article>
+                <article
+                  class="tasks-splash-card"
+                  data-tasks-card="2"
+                  data-tilt="-0.5"
+                >
+                  <div class="tasks-splash-card__info">
+                    <p class="tasks-splash-card__title">
+                      Отгадываете слова в течение 20&nbsp;дней без пропусков
+                    </p>
+                    <div class="tasks-splash-card__progress">
+                      <div class="tasks-splash-card__progress-track">
+                        <div
+                          class="tasks-splash-card__progress-fill"
+                          data-progress-from="95"
+                          data-progress-to="100"
+                          style="width: 95%"
+                        ></div>
+                      </div>
+                      <div class="tasks-splash-card__progress-meta">
+                        <span
+                          class="tasks-splash-card__progress-left"
+                          data-left-from="До 28 ноября"
+                          data-left-to="Выполнено"
+                          >До 28 ноября</span
+                        >
+                        <span
+                          class="tasks-splash-card__progress-right"
+                          data-count-from="19"
+                          data-count-to="20"
+                          data-count-total="20"
+                          >19 / 20</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tasks-splash-card__rewards" data-tasks-sparks>
+                    <div class="tasks-splash-card__reward-item" data-reward="coin">
+                      <img
+                        class="tasks-splash-card__reward-icon"
+                        id="win-splash-tasks-claim-icon"
+                        src="assets/Монетка.png"
+                        width="36"
+                        height="36"
+                        alt=""
+                        draggable="false"
+                      />
+                      <span class="tasks-splash-card__reward-value">+250</span>
+                    </div>
+                  </div>
+                </article>
+                <article
+                  class="tasks-splash-card"
+                  data-tasks-card="3"
+                  data-tilt="0.5"
+                >
+                  <div class="tasks-splash-card__info">
+                    <p class="tasks-splash-card__title">Отгадайте 5 слов за энергию</p>
+                    <div class="tasks-splash-card__progress">
+                      <div class="tasks-splash-card__progress-track">
+                        <div
+                          class="tasks-splash-card__progress-fill"
+                          style="width: 60%"
+                        ></div>
+                      </div>
+                      <div class="tasks-splash-card__progress-meta">
+                        <span class="tasks-splash-card__progress-left"
+                          >До 1 декабря</span
+                        >
+                        <span class="tasks-splash-card__progress-right">3 / 5</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tasks-splash-card__rewards">
+                    <div class="tasks-splash-card__reward-item" data-reward="coin">
+                      <img
+                        class="tasks-splash-card__reward-icon"
+                        src="assets/Монетка.png"
+                        width="36"
+                        height="36"
+                        alt=""
+                        draggable="false"
+                      />
+                      <span class="tasks-splash-card__reward-value">+20</span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+            <div class="win-splash__actions win-splash__actions--tasks">
+              <button
+                class="win-splash__tasks-cta"
+                id="win-splash-tasks-cta"
+                type="button"
+              >
+                Забрать награду
               </button>
             </div>
           </div>
@@ -862,6 +1088,32 @@
                           type="checkbox"
                           role="switch"
                           aria-label="Тематическое слово"
+                        />
+                        <span class="win-switch__track" aria-hidden="true"></span>
+                      </label>
+                    </div>
+                    <div class="profile-field profile-field--switch">
+                      <span class="profile-field__label">Сплеш уведомлений</span>
+                      <label class="win-switch">
+                        <input
+                          class="win-switch__input"
+                          id="notify-splash-switch"
+                          type="checkbox"
+                          role="switch"
+                          aria-label="Сплеш уведомлений"
+                        />
+                        <span class="win-switch__track" aria-hidden="true"></span>
+                      </label>
+                    </div>
+                    <div class="profile-field profile-field--switch">
+                      <span class="profile-field__label">Прогресс заданий</span>
+                      <label class="win-switch">
+                        <input
+                          class="win-switch__input"
+                          id="tasks-progress-splash-switch"
+                          type="checkbox"
+                          role="switch"
+                          aria-label="Прогресс заданий"
                         />
                         <span class="win-switch__track" aria-hidden="true"></span>
                       </label>
