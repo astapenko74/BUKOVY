@@ -20,9 +20,9 @@
   const REVERSE_NORMAL_WORD_MS = 1000;
   const WIN_SPLASH_FADE_MS = 600;
   const ONBOARDING_LEAVE_MS = 600;
-  const ONBOARDING_ANSWER = "СЛОВО";
-  const ONBOARDING_WORD_SAHAR = "САХАР";
-  const ONBOARDING_WORD_SOVET = "СОВЕТ";
+  const ONBOARDING_ANSWER = "БУКВА";
+  const ONBOARDING_WORD_DEBUT = "ДЕБЮТ";
+  const ONBOARDING_WORD_BLESK = "БЛЕСК";
   const ONBOARDING_TOOLTIP_MS = 3000;
   const ONBOARDING_PLAQUE_FADE_MS = 400;
   const ONBOARDING_TOOLTIP_IN_MS = 300;
@@ -37,13 +37,26 @@
   const ONBOARDING_CHROME_MS = 400;
   const ONBOARDING_TAB_BAR_MS = 600;
   const ONBOARDING_FLIP_TO_SCALE_MS = 400;
-  const ONBOARDING_NOTIFY_SHEET_DELAY_MS = 600;
   const ONBOARDING_TASK_TOOLTIP_DELAY_MS = 500;
-  const ONBOARDING_ENERGY_HINT_DIM_MS = 300;
-  const ONBOARDING_ENERGY_TOOLTIP_MS = 300;
+  const ONBOARDING_PRIZES_HINT_DELAY_MS = 300;
+  const ONBOARDING_TASK_HINT_AFTER_RESULT_MS = 600;
+  const ONBOARDING_PRIZES_TOOLTIP_MS = 300;
+  const ONBOARDING_PLAY_COINS = 0;
+  const ONBOARDING_PLAY_ENERGY = 9;
   const ONBOARDING_PROGRESS_BADGES = [1, 2, 3, 4];
   const ONBOARDING_RESULT_MESSAGE = "Первое слово — и сразу в яблочко!";
-  const ONBOARDING_RESULT_YELLOW_TEXT = "Новое слово через 12:37";
+  const ONBOARDING_PLAQUE_START_HTML =
+    "Давайте начнём<br />со слова «<b>ДЕБЮТ</b>»";
+  const ONBOARDING_PLAQUE_DEBUT_SPOT_HTML =
+    "Буква «<b>Б</b>» есть в слове,<br />но&nbsp;не&nbsp;на&nbsp;этом месте";
+  const ONBOARDING_PLAQUE_BLESK_HTML =
+    "Теперь попробуйте<br />слово «<b>БЛЕСК</b>»";
+  const ONBOARDING_PLAQUE_BLESK_SPOT_HTML =
+    "Ура! Буква «<b>Б</b>»<br />на своем месте";
+  const ONBOARDING_PLAQUE_FREE_HINT_HTML =
+    "Ну не могли же мы загадать «<b>БУКВА</b>»";
+  const ONBOARDING_TASK1_TITLE_HTML =
+    "Включите уведомления<br />в игре «5 букв»";
   const DEFAULT_YELLOW_BUTTON_TEXT = "Играть ещё за 3";
   const WIN_SPLASH_CONTENT_DELAY_MS = 200;
   const WIN_SPLASH_CONTENT_MS = 700;
@@ -105,6 +118,13 @@
     "win-splash-thematic-skip"
   );
   const winSplashNotifyCtaEl = document.getElementById("win-splash-notify-cta");
+  const winSplashNotifySwitchEl = document.getElementById("win-splash-notify-switch");
+  const winSplashNotifySubtitleEl = document.getElementById(
+    "win-splash-notify-subtitle"
+  );
+  const winSplashNotifyImageEl = document.querySelector(
+    ".win-splash__notify-image"
+  );
   const winSplashTasksCtaEl = document.getElementById("win-splash-tasks-cta");
   const winSplashTasksListEl = document.getElementById("win-splash-tasks-list");
   const winSplashTasksCoinValueEl = document.getElementById(
@@ -155,17 +175,7 @@
   );
   const taskSheetRewardNoteEl = document.getElementById("task-sheet-reward-note");
   const taskSheetActionEl = document.getElementById("task-sheet-action");
-  const onboardingNotifySheetEl = document.getElementById("onboarding-notify-sheet");
-  const onboardingNotifyBackdropEl = document.getElementById(
-    "onboarding-notify-backdrop"
-  );
-  const onboardingNotifyPanelEl = document.getElementById("onboarding-notify-panel");
-  const onboardingNotifyBarEl = document.getElementById("onboarding-notify-bar");
-  const onboardingNotifyCloseEl = document.getElementById("onboarding-notify-close");
-  const onboardingNotifyEnableEl = document.getElementById(
-    "onboarding-notify-enable"
-  );
-  const onboardingNotifyLaterEl = document.getElementById("onboarding-notify-later");
+  const taskSheetRewardMainEl = document.getElementById("task-sheet-reward-main");
   const onboardingRulesSheetEl = document.getElementById("onboarding-rules-sheet");
   const onboardingRulesBackdropEl = document.getElementById(
     "onboarding-rules-backdrop"
@@ -175,12 +185,13 @@
   const onboardingRulesCloseEl = document.getElementById("onboarding-rules-close");
   const onboardingRulesBodyEl = document.getElementById("onboarding-rules-body");
   const onboardingTaskTooltipEl = document.getElementById("onboarding-task-tooltip");
-  const onboardingEnergyTooltipEl = document.getElementById(
-    "onboarding-energy-tooltip"
+  const onboardingPrizesTooltipEl = document.getElementById(
+    "onboarding-prizes-tooltip"
   );
   const taskExecuteStubEl = document.getElementById("task-execute-stub");
   const scenarioSelectEl = document.getElementById("scenario-select");
   const thematicWordSwitchEl = document.getElementById("thematic-word-switch");
+  const wordCoinsSwitchEl = document.getElementById("word-coins-switch");
   const notifySplashSwitchEl = document.getElementById("notify-splash-switch");
   const tasksProgressSplashSwitchEl = document.getElementById(
     "tasks-progress-splash-switch"
@@ -210,6 +221,18 @@
   const onboardingTooltipBodyEl = onboardingTooltipEl?.querySelector(
     ".onboarding-tooltip__body"
   );
+  const prizeProgressTooltipEl = document.getElementById(
+    "prize-progress-tooltip"
+  );
+  const prizeProgressTooltipTextEl = document.getElementById(
+    "prize-progress-tooltip-text"
+  );
+  const prizeProgressTooltipTailEl = prizeProgressTooltipEl?.querySelector(
+    ".prize-progress-tooltip__tail"
+  );
+  const prizeProgressTooltipBodyEl = prizeProgressTooltipEl?.querySelector(
+    ".prize-progress-tooltip__body"
+  );
   const onboardingIntroEl = document.getElementById("onboarding-intro");
   const onboardingIntroBackEl = document.getElementById("onboarding-intro-back");
   const onboardingIntroActionEl = document.getElementById(
@@ -221,13 +244,14 @@
       )
     : [];
   const raffleTabEl = document.querySelector('.tab[data-tab="raffle"]');
+  const prizesTabEl = document.querySelector('.tab[data-tab="prizes"]');
 
   let onboardingActive = false;
   let onboardingClosing = false;
   let onboardingAnimating = false;
   let onboardingDone = false;
   let mainGameChromeSnapshot = null;
-  let onboardingStep = "sahar";
+  let onboardingStep = "debut";
   let onboardingWrongCount = 0;
   let onboardingAbsentTipShown = false;
   let onboardingSubmitted = [];
@@ -242,6 +266,7 @@
   let onboardingSpotlightArmed = false;
   let onboardingSpotlightActive = false;
   let onboardingSpotlightBaseText = null;
+  let onboardingSpotlightBaseHtml = false;
   let onboardingIntroStep = 0;
   let onboardingIntroOpen = false;
   let onboardingIntroAnimating = false;
@@ -314,6 +339,10 @@
   const CONFETTI_DECAY_MIN = 0.005;
   const CONFETTI_DECAY_RANGE = 0.004;
   const PRIZE_WIGGLE_INTERVAL_MS = 7000;
+  const PRIZE_TOOLTIP_GAP_PX = 4;
+  const PRIZE_TOOLTIP_BODY_TAIL_RIGHT_PX = 9;
+  const PRIZE_TOOLTIP_TAIL_WIDTH_PX = 24;
+  const PRIZE_TOOLTIP_TAIL_HEIGHT_PX = 8;
   const PRIZE_PARTICLE_COLORS = ["#ffdd2d", "#ffb400", "#ffcd33", "#ffe566"];
 
   const RESULT_SHEET_OPEN_MS = 500;
@@ -331,8 +360,13 @@
   const TASK_REWARD_READY_TEXT = "Заберите до 25 ноября";
   const TASK_CLAIM_BUTTON_TEXT = "Забрать награду";
   const ONBOARDING_TASK_SHEET_CLAIM_TEXT = "Забрать";
-  const ONBOARDING_TASK_ENERGY_AMOUNT = 6;
-  const ONBOARDING_TASK_GIFT_SRC = "assets/icon-gift.png";
+  const ONBOARDING_TASK_GIFT_SRC = "assets/Gift_Alt.png";
+  const NOTIFY_SPLASH_SUBTITLE_OFF =
+    "Включите уведомления, чтобы не&nbsp;пропускать новые слова и события";
+  const NOTIFY_SPLASH_SUBTITLE_ON =
+    "Раньше всех узнаете<br />о&nbsp;новых словах и событиях";
+  const NOTIFY_SPLASH_SUBTITLE_SWAP_MS = 300;
+  const NOTIFY_SPLASH_TILT_MS = 600;
   const ENERGY_FLY_SRC = "assets/Энергия.png";
   const TASK_SWAP_MS = 800;
   const TASK_BADGE_MS = 400;
@@ -417,8 +451,11 @@
   let isOnboardingTrainingTaskClaimed = false;
   let isOnboardingTrainingTaskClaiming = false;
   let removedOnboardingTaskListItem = null;
-  let onboardingEnergyHintTimer = null;
-  let onboardingEnergyHintHiding = false;
+  let onboardingPrizesHintTimer = null;
+  let onboardingPrizesHintHiding = false;
+  let onboardingPrizesFirstVisitDone = false;
+  let onboardingTask1TitleOriginalHtml = null;
+  let setPrizesSegmentActive = null;
   let taskExecuteStubRunning = false;
   let removedTask2ListItem = null;
   let coinBalance = INITIAL_COIN_BALANCE;
@@ -430,6 +467,10 @@
   let confettiRafId = null;
   let splashConfettiRafId = null;
   let prizeAnimTimer = null;
+  let prizeAnimStartTimer = null;
+  let prizeProgressTooltipTimer = null;
+  let prizeProgressTooltipArmed = false;
+  let prizeProgressTooltipToken = 0;
   let progressAnimTimers = [];
   let savedGameCellWidth = null;
   let savedGameCellHeight = null;
@@ -592,6 +633,10 @@
     return activeNotifySplash;
   }
 
+  function isWordCoinsEnabled() {
+    return Boolean(wordCoinsSwitchEl?.checked);
+  }
+
   function isTasksProgressSplashEnabled() {
     return activeTasksProgressSplash;
   }
@@ -606,6 +651,15 @@
 
   function isPrizeWiggleAllowed() {
     return !isFifthWordScenario() || fifthWordPanelIndex >= 1;
+  }
+
+  function isResultPageVisible() {
+    return Boolean(
+      gameScreenEl &&
+        !gameScreenEl.hidden &&
+        winPanelEl &&
+        !winPanelEl.hidden
+    );
   }
 
   function markProfileSettingsDirty() {
@@ -672,6 +726,11 @@
   };
 
   function showAppScreen(tabId) {
+    if (tabId !== "game") {
+      stopPrizeIdleAnimation();
+      void hidePrizeProgressTooltip();
+    }
+
     if (tabId !== "raffle") {
       closeTaskSheet({ animateClose: false });
     }
@@ -695,11 +754,27 @@
 
     if (tabId === "prizes") {
       setPrizesTabDot(false);
+      if (isOnboardingSession()) {
+        const app = document.querySelector(".app");
+        if (!onboardingPrizesFirstVisitDone) {
+          onboardingPrizesFirstVisitDone = true;
+          app?.classList.add("is-onboarding-owned-preview");
+          setPrizesSegmentActive?.("owned");
+        } else {
+          app?.classList.remove("is-onboarding-owned-preview");
+          setPrizesSegmentActive?.("available");
+        }
+      }
       if (isRaffleSectionEnabled()) {
         prepareRaffleIntroPresentation();
         void maybePlayRaffleIntro();
       }
       requestAnimationFrame(updatePrizesScrollFade);
+    }
+
+    if (tabId === "game") {
+      syncActivePrizePosition();
+      startPrizeIdleAnimation();
     }
   }
 
@@ -1460,6 +1535,28 @@
     return document.querySelector('.raffle-task-card[data-task-id="onboarding"]');
   }
 
+  function getTask1CardTitleEl() {
+    return document.querySelector(
+      '.raffle-task-card[data-task-id="1"] .raffle-task-card__title'
+    );
+  }
+
+  function applyOnboardingTask1Title() {
+    const titleEl = getTask1CardTitleEl();
+    if (!titleEl) return;
+    if (onboardingTask1TitleOriginalHtml == null) {
+      onboardingTask1TitleOriginalHtml = titleEl.innerHTML;
+    }
+    titleEl.innerHTML = ONBOARDING_TASK1_TITLE_HTML;
+  }
+
+  function restoreOnboardingTask1Title() {
+    const titleEl = getTask1CardTitleEl();
+    if (!titleEl || onboardingTask1TitleOriginalHtml == null) return;
+    titleEl.innerHTML = onboardingTask1TitleOriginalHtml;
+    onboardingTask1TitleOriginalHtml = null;
+  }
+
   function syncOnboardingTrainingTask() {
     const cardEl = getOnboardingTrainingCardEl();
     const li = cardEl?.closest("li");
@@ -1678,6 +1775,14 @@
   }
 
   function syncCoinBadgeValue() {
+    // Во время результата онбординга бейджи не из игры — не перезаписывать.
+    if (
+      document
+        .querySelector(".app")
+        ?.classList.contains("scenario-onboarding-result")
+    ) {
+      return;
+    }
     if (coinBadgeValueEl) {
       coinBadgeValueEl.textContent = String(coinBalance);
     }
@@ -2166,6 +2271,14 @@
 
   function animateEnergyBadgeTo(end) {
     return new Promise((resolve) => {
+      if (
+        document
+          .querySelector(".app")
+          ?.classList.contains("scenario-onboarding-result")
+      ) {
+        resolve();
+        return;
+      }
       const valueEl = energyBadgeValueEl;
       if (!valueEl) {
         resolve();
@@ -2227,23 +2340,37 @@
       }
     }
 
-    hideOnboardingEnergyHint({ animate: false });
+    hideOnboardingPrizesHint({ animate: false });
     document.querySelector(".app")?.classList.remove("is-onboarding-play-again");
     syncOnboardingTrainingTask();
   }
 
-  function isOnboardingEnergyHintActive() {
+  function isOnboardingPrizesHintActive() {
     return Boolean(
-      document.querySelector(".app")?.classList.contains("is-onboarding-energy-hint")
+      document.querySelector(".app")?.classList.contains("is-onboarding-prizes-hint")
     );
   }
 
-  function isOnboardingEnergyHintBlocking() {
-    const app = document.querySelector(".app");
-    return Boolean(
-      app?.classList.contains("is-onboarding-energy-hint") ||
-        app?.classList.contains("is-onboarding-energy-hint-out")
-    );
+
+  function setOnboardingBadgeDisplay() {
+    // Только константы онбординга. Не читать coinBalance / энергию игры.
+    const coins = String(ONBOARDING_PLAY_COINS);
+    const energy = String(ONBOARDING_PLAY_ENERGY);
+
+    onboardingEl?.querySelectorAll(".onboarding-nav-badges .energy-badge").forEach((badge) => {
+      const valueEl = badge.querySelector(".energy-badge__value");
+      if (!valueEl) return;
+      valueEl.textContent = badge.classList.contains("coin-badge") ? coins : energy;
+    });
+
+    // Визуал хедера результата (DOM), без изменения игрового стейта — restore вернёт снимок.
+    document
+      .querySelectorAll(".app > .header .nav-row__badges .energy-badge")
+      .forEach((badge) => {
+        const valueEl = badge.querySelector(".energy-badge__value");
+        if (!valueEl) return;
+        valueEl.textContent = badge.classList.contains("coin-badge") ? coins : energy;
+      });
   }
 
   function enableOnboardingPlayAgainButton() {
@@ -2255,87 +2382,86 @@
     if (yellowEnergy) yellowEnergy.hidden = false;
   }
 
-  function layoutOnboardingEnergyTooltip() {
-    const tooltip = onboardingEnergyTooltipEl;
-    const tail = tooltip?.querySelector(".onboarding-energy-tooltip__tail");
-    const body = tooltip?.querySelector(".onboarding-energy-tooltip__body");
-    if (!tooltip || !tail || !body || tooltip.hidden || !energyBadgeEl || !frameEl) {
-      return;
-    }
+  function layoutOnboardingPrizesTooltip() {
+    const tooltip = onboardingPrizesTooltipEl;
+    const tail = tooltip?.querySelector(".onboarding-prizes-tooltip__tail");
+    const body = tooltip?.querySelector(".onboarding-prizes-tooltip__body");
+    if (!tooltip || !tail || tooltip.hidden || !prizesTabEl || !frameEl) return;
 
     const frameRect = frameEl.getBoundingClientRect();
-    const badgeRect = energyBadgeEl.getBoundingClientRect();
-    const tailWidth = tail.offsetWidth || 24;
-    const tailHeight = tail.offsetHeight || 8;
-
-    tooltip.style.top = `${badgeRect.bottom - frameRect.top + 8}px`;
+    const tabRect = prizesTabEl.getBoundingClientRect();
+    const tailWidth = tail.offsetWidth || 30;
+    const tailHeight = tail.offsetHeight || 12;
+    tooltip.style.bottom = `${frameRect.bottom - tabRect.top + 8}px`;
     tail.style.left = `${
-      badgeRect.left + badgeRect.width / 2 - frameRect.left - tailWidth / 2
+      tabRect.left + tabRect.width / 2 - frameRect.left - tailWidth / 2
     }px`;
 
-    const bodyWidth = body.offsetWidth;
-    const bodyHeight = body.offsetHeight;
-    const tailLeft = parseFloat(tail.style.left) || 0;
-    const bodyLeft = frameRect.width - 16 - bodyWidth;
-    const minX = Math.min(bodyLeft, tailLeft);
-    const maxX = Math.max(bodyLeft + bodyWidth, tailLeft + tailWidth);
-    tooltip.style.transformOrigin = `${(minX + maxX) / 2}px ${
-      (bodyHeight + tailHeight) / 2
-    }px`;
+    if (body) {
+      const bodyWidth = body.offsetWidth;
+      const bodyHeight = body.offsetHeight;
+      const frameWidth = frameRect.width;
+      const tailCenter = tabRect.left + tabRect.width / 2 - frameRect.left;
+      // Центр тела = центр хвоста, с отступами 16px от краёв фрейма.
+      let bodyLeft = tailCenter - bodyWidth / 2;
+      bodyLeft = Math.max(16, Math.min(bodyLeft, frameWidth - 16 - bodyWidth));
+      body.style.left = `${bodyLeft}px`;
+      body.style.right = "auto";
+      body.style.transform = "none";
+
+      const tailLeft = parseFloat(tail.style.left) || 0;
+      const minX = Math.min(bodyLeft, tailLeft);
+      const maxX = Math.max(bodyLeft + bodyWidth, tailLeft + tailWidth);
+      tooltip.style.transformOrigin = `${(minX + maxX) / 2}px ${
+        -(bodyHeight + tailHeight) / 2
+      }px`;
+    }
   }
 
-  function revealOnboardingEnergyTooltip() {
-    if (!isOnboardingEnergyHintActive() || !onboardingEnergyTooltipEl) return;
-    onboardingEnergyTooltipEl.classList.remove("is-visible");
-    onboardingEnergyTooltipEl.hidden = false;
-    onboardingEnergyTooltipEl.setAttribute("aria-hidden", "false");
-    layoutOnboardingEnergyTooltip();
+  function revealOnboardingPrizesTooltip() {
+    if (!isOnboardingPrizesHintActive() || !onboardingPrizesTooltipEl) return;
+    onboardingPrizesTooltipEl.classList.remove("is-visible");
+    onboardingPrizesTooltipEl.hidden = false;
+    onboardingPrizesTooltipEl.setAttribute("aria-hidden", "false");
+    layoutOnboardingPrizesTooltip();
     requestAnimationFrame(() => {
-      layoutOnboardingEnergyTooltip();
+      layoutOnboardingPrizesTooltip();
       requestAnimationFrame(() => {
-        if (!isOnboardingEnergyHintActive() || !onboardingEnergyTooltipEl) return;
-        onboardingEnergyTooltipEl.classList.add("is-visible");
+        if (!isOnboardingPrizesHintActive() || !onboardingPrizesTooltipEl) return;
+        onboardingPrizesTooltipEl.classList.add("is-visible");
       });
     });
   }
 
-  function startOnboardingEnergyHint() {
+  function startOnboardingPrizesHint() {
     const app = document.querySelector(".app");
     if (!app) return;
 
-    enableOnboardingPlayAgainButton();
-    app.classList.remove("is-onboarding-energy-hint-out");
-    app.classList.add("is-onboarding-energy-hint");
-    window.clearTimeout(onboardingEnergyHintTimer);
-    onboardingEnergyHintTimer = window.setTimeout(() => {
-      onboardingEnergyHintTimer = null;
-      if (!isOnboardingEnergyHintActive()) return;
-      revealOnboardingEnergyTooltip();
-    }, ONBOARDING_ENERGY_HINT_DIM_MS);
+    app.classList.add("is-onboarding-prizes-hint");
+    window.clearTimeout(onboardingPrizesHintTimer);
+    onboardingPrizesHintTimer = window.setTimeout(() => {
+      onboardingPrizesHintTimer = null;
+      if (!isOnboardingPrizesHintActive()) return;
+      revealOnboardingPrizesTooltip();
+    }, ONBOARDING_PRIZES_HINT_DELAY_MS);
   }
 
-  async function hideOnboardingEnergyHint(options = {}) {
+  async function hideOnboardingPrizesHint(options = {}) {
     const animate = options.animate !== false;
     const app = document.querySelector(".app");
-    const tooltip = onboardingEnergyTooltipEl;
-    const hintActive = Boolean(
-      app?.classList.contains("is-onboarding-energy-hint") ||
-        app?.classList.contains("is-onboarding-energy-hint-out")
-    );
+    const tooltip = onboardingPrizesTooltipEl;
+    const hintActive = Boolean(app?.classList.contains("is-onboarding-prizes-hint"));
     const tooltipVisible = Boolean(tooltip && !tooltip.hidden);
 
-    window.clearTimeout(onboardingEnergyHintTimer);
-    onboardingEnergyHintTimer = null;
+    window.clearTimeout(onboardingPrizesHintTimer);
+    onboardingPrizesHintTimer = null;
 
     if (!hintActive && !tooltipVisible) return;
-    if (onboardingEnergyHintHiding && animate) return;
+    if (onboardingPrizesHintHiding && animate) return;
 
     if (!animate) {
-      onboardingEnergyHintHiding = false;
-      app?.classList.remove(
-        "is-onboarding-energy-hint",
-        "is-onboarding-energy-hint-out"
-      );
+      onboardingPrizesHintHiding = false;
+      app?.classList.remove("is-onboarding-prizes-hint");
       if (tooltip) {
         tooltip.classList.remove("is-visible");
         tooltip.hidden = true;
@@ -2344,25 +2470,20 @@
       return;
     }
 
-    onboardingEnergyHintHiding = true;
+    onboardingPrizesHintHiding = true;
     tooltip?.classList.remove("is-visible");
-    app?.classList.add("is-onboarding-energy-hint-out");
-    app?.classList.remove("is-onboarding-energy-hint");
-    await waitRaffleDelay(ONBOARDING_ENERGY_TOOLTIP_MS);
-    app?.classList.remove("is-onboarding-energy-hint-out");
+    await waitRaffleDelay(ONBOARDING_PRIZES_TOOLTIP_MS);
+    app?.classList.remove("is-onboarding-prizes-hint");
     if (tooltip) {
       tooltip.hidden = true;
       tooltip.setAttribute("aria-hidden", "true");
     }
-    onboardingEnergyHintHiding = false;
+    onboardingPrizesHintHiding = false;
   }
 
-  function handleEnergyHintPointerDown(event) {
-    if (!isOnboardingEnergyHintBlocking()) return;
-    if (event.target.closest(".app > .header .close-btn")) return;
-    event.preventDefault();
-    event.stopPropagation();
-    void hideOnboardingEnergyHint();
+  function handlePrizesHintPointerDown() {
+    if (!isOnboardingPrizesHintActive()) return;
+    void hideOnboardingPrizesHint();
   }
 
   async function claimOnboardingTrainingReward(source) {
@@ -2381,11 +2502,7 @@
     const giftIcon = cardEl.querySelector(
       '.raffle-task-card__reward-item[data-reward="gift"] .raffle-task-card__reward-icon'
     );
-    const energyIcon = cardEl.querySelector(
-      '.raffle-task-card__reward-item[data-reward="energy"] .raffle-task-card__reward-icon'
-    );
     const prizesIcon = getGiftIconEl();
-    const energyTarget = energyBadgeEl?.querySelector(".energy-badge__icon");
 
     const giftFly = giftIcon
       ? runCoinsToBadgeAnimation(giftIcon, {
@@ -2394,26 +2511,13 @@
           count: 1,
         })
       : null;
-    const energyFly = energyIcon
-      ? runCoinsToBadgeAnimation(energyIcon, {
-          targetIcon: energyTarget,
-          src: ENERGY_FLY_SRC,
-          count: ONBOARDING_TASK_ENERGY_AMOUNT,
-        })
-      : null;
 
-    await Promise.all([
-      giftFly?.halfway ?? Promise.resolve(),
-      energyFly?.halfway ?? Promise.resolve(),
-    ]);
+    await (giftFly?.halfway ?? Promise.resolve());
 
     isOnboardingTrainingTaskClaimed = true;
 
     await Promise.all([
       animateTaskCardRemove(cardEl),
-      (energyFly?.firstArrival ?? Promise.resolve()).then(() =>
-        animateEnergyBadgeTo(ONBOARDING_TASK_ENERGY_AMOUNT)
-      ),
       (giftFly?.firstArrival ?? Promise.resolve()).then(() => {
         setPrizesTabDot(true);
       }),
@@ -2421,7 +2525,7 @@
 
     isOnboardingTrainingTaskClaiming = false;
     syncOnboardingTrainingTask();
-    startOnboardingEnergyHint();
+    startOnboardingPrizesHint();
   }
 
   function updateTaskSheetContent(cardEl, options = {}) {
@@ -2473,19 +2577,13 @@
     if (taskSheetRewardOnboardingPrizeEl) {
       taskSheetRewardOnboardingPrizeEl.hidden = cardEl.dataset.taskId !== "onboarding";
     }
+    if (taskSheetRewardMainEl) {
+      taskSheetRewardMainEl.hidden = cardEl.dataset.taskId === "onboarding";
+    }
     if (taskSheetRewardIconEl && rewardIconSrc) {
       taskSheetRewardIconEl.src = rewardIconSrc;
     }
     if (cardEl.dataset.taskId === "onboarding") {
-      const energyIcon = cardEl.querySelector(
-        '.raffle-task-card__reward-item[data-reward="energy"] .raffle-task-card__reward-icon'
-      );
-      if (taskSheetRewardIconEl) {
-        taskSheetRewardIconEl.src = energyIcon?.getAttribute("src") || ENERGY_FLY_SRC;
-      }
-      if (taskSheetRewardLabelEl) {
-        taskSheetRewardLabelEl.textContent = ONBOARDING_TASK_ENERGY_AMOUNT + " энергий";
-      }
       if (taskSheetRewardNoteEl) {
         taskSheetRewardNoteEl.textContent = "Выдадим сразу";
       }
@@ -2671,155 +2769,6 @@
     });
 
     taskSheetBarEl?.addEventListener("pointercancel", (event) => {
-      if (event.pointerId !== activePointerId) return;
-      finishDrag(event.clientY);
-    });
-  }
-
-  function isOnboardingNotifySheetOpen() {
-    return (
-      onboardingNotifySheetEl?.classList.contains("is-open") ||
-      onboardingNotifySheetEl?.classList.contains("is-closing") ||
-      false
-    );
-  }
-
-  function finishOnboardingNotifySheetClose() {
-    const app = document.querySelector(".app");
-    app?.classList.remove("onboarding-notify-sheet-open");
-    onboardingNotifySheetEl?.classList.remove("is-closing");
-    onboardingNotifyPanelEl?.classList.remove("is-dragging");
-    if (onboardingNotifyPanelEl) {
-      onboardingNotifyPanelEl.style.transform = "";
-    }
-    if (onboardingNotifySheetEl) {
-      onboardingNotifySheetEl.hidden = true;
-      onboardingNotifySheetEl.setAttribute("aria-hidden", "true");
-    }
-  }
-
-  function openOnboardingNotifySheet() {
-    if (!onboardingNotifySheetEl || !onboardingNotifyPanelEl || isOnboardingNotifySheetOpen()) {
-      return;
-    }
-
-    const app = document.querySelector(".app");
-    onboardingNotifySheetEl.hidden = false;
-    onboardingNotifySheetEl.classList.remove("is-closing");
-    onboardingNotifyPanelEl.classList.remove("is-dragging");
-    onboardingNotifyPanelEl.style.transform = "";
-    onboardingNotifySheetEl.setAttribute("aria-hidden", "false");
-    app?.classList.add("onboarding-notify-sheet-open");
-
-    void onboardingNotifyPanelEl.offsetWidth;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        prepareOnboardingNotifyDim();
-        onboardingNotifySheetEl.classList.add("is-open");
-      });
-    });
-  }
-
-  function closeOnboardingNotifySheet(options = {}) {
-    if (!onboardingNotifySheetEl) {
-      return Promise.resolve();
-    }
-    if (
-      !onboardingNotifySheetEl.classList.contains("is-open") &&
-      !onboardingNotifySheetEl.classList.contains("is-closing")
-    ) {
-      finishOnboardingNotifySheetClose();
-      return Promise.resolve();
-    }
-
-    const animateClose = options.animateClose !== false;
-    const revealTaskHint = options.revealTaskHint === true && !onboardingClosing;
-    const app = document.querySelector(".app");
-    app?.classList.remove("onboarding-notify-sheet-open");
-    if (revealTaskHint) {
-      prepareOnboardingTaskHint();
-    }
-
-    if (animateClose) {
-      onboardingNotifySheetEl.classList.add("is-closing");
-      onboardingNotifySheetEl.classList.remove("is-open");
-      onboardingNotifyPanelEl?.classList.remove("is-dragging");
-      if (onboardingNotifyPanelEl) {
-        onboardingNotifyPanelEl.style.transform = "";
-      }
-      return new Promise((resolve) => {
-        window.setTimeout(() => {
-          finishOnboardingNotifySheetClose();
-          if (revealTaskHint) revealOnboardingTaskTooltip();
-          resolve();
-        }, RESULT_SHEET_CLOSE_MS);
-      });
-    }
-
-    onboardingNotifySheetEl.classList.remove("is-open", "is-closing");
-    finishOnboardingNotifySheetClose();
-    if (revealTaskHint) revealOnboardingTaskTooltip();
-    return Promise.resolve();
-  }
-
-  function initOnboardingNotifySheet() {
-    let dragStartY = 0;
-    let isDragging = false;
-    let activePointerId = null;
-
-    const finishDrag = (clientY) => {
-      if (!isDragging || !onboardingNotifyPanelEl) return;
-      isDragging = false;
-      activePointerId = null;
-      onboardingNotifyPanelEl.classList.remove("is-dragging");
-
-      const delta = Math.max(0, clientY - dragStartY);
-      if (delta > onboardingNotifyPanelEl.offsetHeight * 0.25) {
-        onboardingNotifyPanelEl.style.transform = "";
-        closeOnboardingNotifySheet({ animateClose: true, revealTaskHint: true });
-        return;
-      }
-
-      onboardingNotifyPanelEl.style.transform = "";
-    };
-
-    const closeAnimated = () => {
-      closeOnboardingNotifySheet({ animateClose: true, revealTaskHint: true });
-    };
-
-    onboardingNotifyCloseEl?.addEventListener("click", closeAnimated);
-    onboardingNotifyEnableEl?.addEventListener("click", closeAnimated);
-    onboardingNotifyLaterEl?.addEventListener("click", closeAnimated);
-    onboardingNotifyBackdropEl?.addEventListener("click", closeAnimated);
-
-    onboardingNotifyBarEl?.addEventListener("pointerdown", (event) => {
-      if (!isOnboardingNotifySheetOpen() || !onboardingNotifyPanelEl) return;
-      isDragging = true;
-      activePointerId = event.pointerId;
-      dragStartY = event.clientY;
-      onboardingNotifyPanelEl.classList.add("is-dragging");
-      onboardingNotifyBarEl.setPointerCapture(event.pointerId);
-      event.preventDefault();
-    });
-
-    onboardingNotifyBarEl?.addEventListener("pointermove", (event) => {
-      if (
-        !isDragging ||
-        event.pointerId !== activePointerId ||
-        !onboardingNotifyPanelEl
-      ) {
-        return;
-      }
-      const offset = Math.max(0, event.clientY - dragStartY);
-      onboardingNotifyPanelEl.style.transform = "translateY(" + offset + "px)";
-    });
-
-    onboardingNotifyBarEl?.addEventListener("pointerup", (event) => {
-      if (event.pointerId !== activePointerId) return;
-      finishDrag(event.clientY);
-    });
-
-    onboardingNotifyBarEl?.addEventListener("pointercancel", (event) => {
       if (event.pointerId !== activePointerId) return;
       finishDrag(event.clientY);
     });
@@ -3144,6 +3093,7 @@
       });
     });
 
+    setPrizesSegmentActive = setActive;
     setActive(segmentEl.dataset.active || "available");
   }
 
@@ -3155,11 +3105,13 @@
         const tabId = tab.dataset.tab;
         if (!navigableTabs.has(tabId)) return;
         if (isOnboardingTaskHintActive() && tabId !== "raffle") return;
-        if (isOnboardingEnergyHintBlocking()) return;
         if (tabId === "raffle" && raffleTabEl?.hidden) return;
 
         if (tabId === "raffle") {
           hideOnboardingTaskHint();
+        }
+        if (tabId === "prizes") {
+          hideOnboardingPrizesHint({ animate: true });
         }
 
         activateTab(tabId);
@@ -3349,6 +3301,7 @@
     layoutResultSheetGrid();
     layoutOnboardingTaskTooltip();
     layoutOnboardingEnergyTooltip();
+    layoutPrizeProgressTooltip();
   }
 
   function updateActionKeys() {
@@ -3608,6 +3561,7 @@
 
   function triggerWinProgressCoinReward(sourceEl) {
     if (!sourceEl) return;
+    if (!isWordCoinsEnabled()) return;
     if (
       document
         .querySelector(".app")
@@ -3880,6 +3834,7 @@
     setProgressBadges(slot);
     setProgressLines(slot);
     setBadgeFillScale(slot, 0, false);
+    void hidePrizeProgressTooltip();
     scheduleWordAnimation(word, label, slot);
     if (slot === 3) {
       scheduleWordAnimation(PRIZE_COLUMN_WORD, prizeLabel, 3);
@@ -4152,6 +4107,7 @@
     resetProgressStickers();
     stopPrizeIdleAnimation();
     fifthWordPrizeLabelRevealed = false;
+    void hidePrizeProgressTooltip();
 
     progressEl.dataset.fifthToPrize = "pending";
     renderWinProgress();
@@ -4560,18 +4516,23 @@
     }
   }
 
-  async function setOnboardingPlaqueText(text) {
+  async function setOnboardingPlaqueText(text, options = {}) {
     if (!onboardingDialogTextEl) return;
-    if (
-      onboardingDialogTextEl.textContent === text &&
-      onboardingDialogTextEl.style.opacity !== "0"
-    ) {
+    const asHtml = options.html === true;
+    const current = asHtml
+      ? onboardingDialogTextEl.innerHTML
+      : onboardingDialogTextEl.textContent;
+    if (current === text && onboardingDialogTextEl.style.opacity !== "0") {
       return;
     }
 
     onboardingDialogTextEl.style.opacity = "0";
     await waitRaffleDelay(ONBOARDING_PLAQUE_FADE_MS);
-    onboardingDialogTextEl.textContent = text;
+    if (asHtml) {
+      onboardingDialogTextEl.innerHTML = text;
+    } else {
+      onboardingDialogTextEl.textContent = text;
+    }
     fitOnboardingPlaqueText();
     void onboardingDialogTextEl.offsetWidth;
     onboardingDialogTextEl.style.opacity = "1";
@@ -4670,8 +4631,11 @@
     updateOnboardingActionKeys();
 
     if (plaqueText != null) {
-      await setOnboardingPlaqueText(plaqueText);
+      await setOnboardingPlaqueText(plaqueText, {
+        html: onboardingSpotlightBaseHtml,
+      });
     }
+    onboardingSpotlightBaseHtml = false;
 
     resolveOnboardingSpotlight();
   }
@@ -4681,6 +4645,8 @@
     row,
     cols,
     basePlaqueText,
+    html = false,
+    basePlaqueHtml = false,
   }) {
     if (!onboardingEl) return;
 
@@ -4690,6 +4656,7 @@
     }
 
     onboardingSpotlightBaseText = basePlaqueText ?? null;
+    onboardingSpotlightBaseHtml = basePlaqueHtml === true;
 
     const targetCols = Array.isArray(cols) ? cols : [];
     targetCols.forEach((col) => {
@@ -4699,7 +4666,7 @@
     onboardingSpotlightActive = true;
     updateOnboardingActionKeys();
     onboardingEl.classList.add("is-spotlight");
-    await setOnboardingPlaqueText(text);
+    await setOnboardingPlaqueText(text, { html });
 
     return new Promise((resolve) => {
       onboardingSpotlightResolve = resolve;
@@ -5045,18 +5012,20 @@
     onboardingCurCol = 0;
     onboardingAnimating = false;
     onboardingDone = false;
-    onboardingStep = "sahar";
+    onboardingStep = "debut";
     onboardingWrongCount = 0;
     onboardingAbsentTipShown = false;
     onboardingSubmitted = [];
     onboardingBoard = Array.from({ length: ROWS }, () => Array(COLS).fill(""));
     onboardingSpotlightBaseText = null;
+    onboardingSpotlightBaseHtml = false;
 
     if (onboardingDialogTextEl) {
       onboardingDialogTextEl.style.opacity = "1";
-      onboardingDialogTextEl.textContent = "Для начала введите слово «САХАР»";
+      onboardingDialogTextEl.innerHTML = ONBOARDING_PLAQUE_START_HTML;
       fitOnboardingPlaqueText();
     }
+    setOnboardingBadgeDisplay();
 
     onboardingGridEl?.querySelectorAll(".cell").forEach((cell) => {
       cell.classList.remove(
@@ -5324,21 +5293,8 @@
     if (winWordEl) winWordEl.textContent = ONBOARDING_ANSWER;
     if (winMessageEl) winMessageEl.textContent = ONBOARDING_RESULT_MESSAGE;
 
-    const yellowText = document.querySelector(".win-block--yellow__text");
-    const yellowEnergy = document.querySelector(".win-block--yellow__energy");
-    if (yellowText) yellowText.textContent = ONBOARDING_RESULT_YELLOW_TEXT;
-    if (yellowEnergy) yellowEnergy.hidden = true;
-
-    onboardingEl
-      ?.querySelectorAll(".energy-badge__value")
-      .forEach((el) => {
-        el.textContent = "0";
-      });
-    document
-      .querySelectorAll(".app > .header .energy-badge__value")
-      .forEach((el) => {
-        el.textContent = "0";
-      });
+    setOnboardingBadgeDisplay();
+    enableOnboardingPlayAgainButton();
 
     app?.classList.remove(
       "scenario-thematic-word",
@@ -5346,6 +5302,7 @@
       "scenario-fifth-word"
     );
     app?.classList.add("scenario-onboarding-result");
+    applyOnboardingTask1Title();
     syncOnboardingTrainingTask();
   }
 
@@ -5357,8 +5314,8 @@
       "is-onboarding-tab-ready",
       "is-onboarding-tab-in",
       "is-onboarding-play-again",
-      "is-onboarding-energy-hint",
-      "is-onboarding-energy-hint-out"
+      "is-onboarding-prizes-hint",
+      "is-onboarding-owned-preview"
     );
     app?.style.removeProperty("--onboarding-result-slide");
     const dialog = onboardingEl?.querySelector(".onboarding-dialog");
@@ -5375,6 +5332,7 @@
     if (yellowText) yellowText.textContent = DEFAULT_YELLOW_BUTTON_TEXT;
     if (yellowEnergy) yellowEnergy.hidden = false;
     document.querySelector(".tab-bar")?.classList.remove("is-entering", "is-visible");
+    restoreOnboardingTask1Title();
   }
 
   function snapshotMainGameChrome() {
@@ -5505,9 +5463,10 @@
     playOnboardingResultConfetti();
     await playWinHeroAnimation(ONBOARDING_ANSWER);
     updateActionKeys();
-    await waitRaffleDelay(ONBOARDING_NOTIFY_SHEET_DELAY_MS);
+    await waitRaffleDelay(ONBOARDING_TASK_HINT_AFTER_RESULT_MS);
     if (onboardingClosing) return;
-    openOnboardingNotifySheet();
+    prepareOnboardingTaskHint();
+    revealOnboardingTaskTooltip();
   }
 
   async function onboardingSubmitRow() {
@@ -5524,8 +5483,8 @@
     const guess = onboardingBoard[onboardingCurRow].join("");
     const row = onboardingCurRow;
 
-    if (onboardingStep === "sahar") {
-      if (guess !== ONBOARDING_WORD_SAHAR) {
+    if (onboardingStep === "debut") {
+      if (guess !== ONBOARDING_WORD_DEBUT) {
         onboardingWrongCount += 1;
         shakeOnboardingRow(row);
         const tipText =
@@ -5544,22 +5503,24 @@
 
       await revealOnboardingRow(row);
       onboardingSubmitted.push(guess);
-      onboardingStep = "sovet";
+      onboardingStep = "blesk";
       onboardingWrongCount = 0;
       onboardingCurRow += 1;
       onboardingCurCol = 0;
       updateOnboardingActionKeys();
       await showOnboardingCellSpotlight({
-        text: "Буква на своем месте",
+        text: ONBOARDING_PLAQUE_DEBUT_SPOT_HTML,
         row,
-        cols: [0],
-        basePlaqueText: "Теперь попробуйте слово «СОВЕТ»",
+        cols: [2],
+        basePlaqueText: ONBOARDING_PLAQUE_BLESK_HTML,
+        html: true,
+        basePlaqueHtml: true,
       });
       return;
     }
 
-    if (onboardingStep === "sovet") {
-      if (guess !== ONBOARDING_WORD_SOVET) {
+    if (onboardingStep === "blesk") {
+      if (guess !== ONBOARDING_WORD_BLESK) {
         onboardingWrongCount += 1;
         shakeOnboardingRow(row);
         const tipText =
@@ -5582,10 +5543,12 @@
       onboardingCurCol = 0;
       updateOnboardingActionKeys();
       await showOnboardingCellSpotlight({
-        text: "Эти буквы есть в слове, но стоят не здесь",
+        text: ONBOARDING_PLAQUE_BLESK_SPOT_HTML,
         row,
-        cols: [1, 2],
+        cols: [0],
         basePlaqueText: "Теперь попробуйте сами угадать слово",
+        html: true,
+        basePlaqueHtml: false,
       });
       return;
     }
@@ -5614,8 +5577,9 @@
         row === 2
           ? "Что же это за слово?"
           : row === 4
-            ? "Ну не могли же мы загадать «СЛОВО»"
+            ? ONBOARDING_PLAQUE_FREE_HINT_HTML
             : null;
+      const attemptPlaqueHtml = row === 4;
 
       if (won) {
         onboardingDone = true;
@@ -5648,7 +5612,7 @@
           showedAbsentTip = true;
           const basePlaqueText =
             attemptPlaqueText ||
-            onboardingDialogTextEl?.textContent ||
+            onboardingDialogTextEl?.innerHTML ||
             "Теперь попробуйте сами угадать слово";
           await showOnboardingCellSpotlight({
             text:
@@ -5658,12 +5622,17 @@
             row,
             cols: absentCols,
             basePlaqueText,
+            basePlaqueHtml: Boolean(attemptPlaqueText)
+              ? attemptPlaqueHtml
+              : basePlaqueText.includes("<"),
           });
         }
       }
 
       if (attemptPlaqueText && !showedAbsentTip) {
-        await setOnboardingPlaqueText(attemptPlaqueText);
+        await setOnboardingPlaqueText(attemptPlaqueText, {
+          html: attemptPlaqueHtml,
+        });
       }
     }
   }
@@ -5779,6 +5748,7 @@
 
     onboardingEl.hidden = false;
     onboardingEl.setAttribute("aria-hidden", "false");
+    setOnboardingBadgeDisplay();
     await new Promise((resolve) => requestAnimationFrame(resolve));
     onboardingEl.classList.add("is-open");
     openOnboardingIntroModal();
@@ -5799,9 +5769,11 @@
 
     onboardingClosing = true;
     hideOnboardingTaskHint();
-    hideOnboardingEnergyHint({ animate: false });
-    closeOnboardingNotifySheet({ animateClose: false });
+    hideOnboardingPrizesHint({ animate: false });
     closeOnboardingRulesSheet({ animateClose: false });
+    onboardingPrizesFirstVisitDone = false;
+    app.classList.remove("is-onboarding-owned-preview");
+    setPrizesSegmentActive?.("available");
 
     const leavingResult = app.classList.contains("scenario-onboarding-result");
     if (leavingResult) {
@@ -7010,7 +6982,7 @@
   }
 
   function wigglePrize() {
-    if (!isPrizeWiggleAllowed()) return;
+    if (!isPrizeWiggleAllowed() || !isResultPageVisible()) return;
 
     const prize = getActivePrizeEl();
     const bottomWrap = getActivePrizeBottomWrap();
@@ -7045,22 +7017,198 @@
   }
 
   function startPrizeIdleAnimation() {
-    if (!isPrizeWiggleAllowed()) return;
-    if (prizeAnimTimer) return;
+    if (!isPrizeWiggleAllowed() || !isResultPageVisible()) return;
+    if (prizeAnimTimer || prizeAnimStartTimer) return;
 
-    window.setTimeout(() => {
+    prizeAnimStartTimer = window.setTimeout(() => {
+      prizeAnimStartTimer = null;
       wigglePrize();
       prizeAnimTimer = window.setInterval(wigglePrize, PRIZE_WIGGLE_INTERVAL_MS);
     }, PRIZE_WIGGLE_INTERVAL_MS);
   }
 
+  function clearPrizeParticles() {
+    getActivePrizeParticlesEl()
+      ?.querySelectorAll(".win-progress__prize-particle")
+      .forEach((el) => {
+        el.remove();
+      });
+  }
+
   function stopPrizeIdleAnimation() {
+    if (prizeAnimStartTimer) {
+      window.clearTimeout(prizeAnimStartTimer);
+      prizeAnimStartTimer = null;
+    }
     if (prizeAnimTimer) {
-      clearInterval(prizeAnimTimer);
+      window.clearInterval(prizeAnimTimer);
       prizeAnimTimer = null;
     }
     getActivePrizeEl()?.classList.remove("is-wiggling");
     getActivePrizeBottomWrap()?.classList.remove("is-wiggling");
+    clearPrizeParticles();
+  }
+
+  function isPrizeProgressTooltipReady() {
+    const progressEl = getActiveWinProgress();
+    if (!progressEl || !isResultPageVisible()) return false;
+    return !progressEl.classList.contains("win-progress--animating");
+  }
+
+  function getPrizeProgressTooltipText() {
+    const app = document.querySelector(".app");
+    if (app?.classList.contains("scenario-onboarding-result")) {
+      return "Ещё 1 слово до приза";
+    }
+    if (isWordNotGuessedScenario()) {
+      return "Ещё 4 слова до приза";
+    }
+    if (isFifthWordScenario()) {
+      return "Ещё 5 слов до приза";
+    }
+    return "Ещё 3 слова до приза";
+  }
+
+  function clearPrizeProgressTooltipTimers() {
+    if (prizeProgressTooltipTimer) {
+      window.clearTimeout(prizeProgressTooltipTimer);
+      prizeProgressTooltipTimer = null;
+    }
+    if (prizeProgressTooltipArmed) {
+      document.removeEventListener(
+        "pointerdown",
+        handlePrizeProgressTooltipDismiss,
+        true
+      );
+      prizeProgressTooltipArmed = false;
+    }
+  }
+
+  function handlePrizeProgressTooltipDismiss(event) {
+    if (!prizeProgressTooltipArmed) return;
+    const col = getActiveWinProgress()?.querySelector(
+      ".win-progress__col--prize"
+    );
+    if (col && col.contains(event.target)) return;
+    void hidePrizeProgressTooltip();
+  }
+
+  function layoutPrizeProgressTooltip() {
+    const tooltip = prizeProgressTooltipEl;
+    const tail = prizeProgressTooltipTailEl;
+    const body = prizeProgressTooltipBodyEl;
+    const col = getActiveWinProgress()?.querySelector(
+      ".win-progress__col--prize"
+    );
+    if (!tooltip || !tail || !body || !col || !frameEl || tooltip.hidden) {
+      return;
+    }
+
+    const frameRect = frameEl.getBoundingClientRect();
+    const colRect = col.getBoundingClientRect();
+    const tailLeft =
+      colRect.left +
+      (colRect.width - PRIZE_TOOLTIP_TAIL_WIDTH_PX) / 2 -
+      frameRect.left;
+    const tailTop =
+      colRect.top -
+      PRIZE_TOOLTIP_GAP_PX -
+      PRIZE_TOOLTIP_TAIL_HEIGHT_PX -
+      frameRect.top;
+
+    tail.style.left = `${tailLeft}px`;
+    tail.style.top = `${tailTop}px`;
+
+    const bodyWidth = body.offsetWidth;
+    const bodyHeight = body.offsetHeight;
+    const bodyLeft =
+      tailLeft +
+      PRIZE_TOOLTIP_TAIL_WIDTH_PX +
+      PRIZE_TOOLTIP_BODY_TAIL_RIGHT_PX -
+      bodyWidth;
+    const bodyTop = tailTop - bodyHeight;
+
+    body.style.left = `${bodyLeft}px`;
+    body.style.top = `${bodyTop}px`;
+  }
+
+  function isPrizeProgressTooltipOpen() {
+    return Boolean(
+      prizeProgressTooltipEl &&
+        !prizeProgressTooltipEl.hidden &&
+        prizeProgressTooltipEl.classList.contains("is-visible")
+    );
+  }
+
+  async function hidePrizeProgressTooltip() {
+    prizeProgressTooltipToken += 1;
+    clearPrizeProgressTooltipTimers();
+    if (!prizeProgressTooltipEl || prizeProgressTooltipEl.hidden) return;
+
+    prizeProgressTooltipEl.classList.remove("is-visible");
+    prizeProgressTooltipEl.classList.add("is-hiding");
+    const token = prizeProgressTooltipToken;
+    await waitRaffleDelay(ONBOARDING_TOOLTIP_OUT_MS);
+    if (token !== prizeProgressTooltipToken || !prizeProgressTooltipEl) return;
+    prizeProgressTooltipEl.classList.remove("is-hiding");
+    prizeProgressTooltipEl.hidden = true;
+    prizeProgressTooltipEl.setAttribute("aria-hidden", "true");
+    if (prizeProgressTooltipTextEl) prizeProgressTooltipTextEl.textContent = "";
+    if (prizeProgressTooltipTailEl) {
+      prizeProgressTooltipTailEl.style.left = "";
+      prizeProgressTooltipTailEl.style.top = "";
+    }
+    if (prizeProgressTooltipBodyEl) {
+      prizeProgressTooltipBodyEl.style.left = "";
+      prizeProgressTooltipBodyEl.style.top = "";
+    }
+  }
+
+  async function showPrizeProgressTooltip() {
+    if (!prizeProgressTooltipEl || !prizeProgressTooltipTextEl) return;
+    if (!isPrizeProgressTooltipReady()) return;
+
+    await hidePrizeProgressTooltip();
+    if (!isPrizeProgressTooltipReady()) return;
+    const token = prizeProgressTooltipToken;
+
+    prizeProgressTooltipTextEl.textContent = getPrizeProgressTooltipText();
+    prizeProgressTooltipEl.hidden = false;
+    prizeProgressTooltipEl.setAttribute("aria-hidden", "false");
+    prizeProgressTooltipEl.classList.remove("is-hiding", "is-visible");
+    layoutPrizeProgressTooltip();
+
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    if (token !== prizeProgressTooltipToken) return;
+    if (!isPrizeProgressTooltipReady() || prizeProgressTooltipEl.hidden) return;
+
+    layoutPrizeProgressTooltip();
+    prizeProgressTooltipEl.classList.add("is-visible");
+
+    prizeProgressTooltipTimer = window.setTimeout(() => {
+      void hidePrizeProgressTooltip();
+    }, ONBOARDING_TOOLTIP_MS);
+
+    window.setTimeout(() => {
+      if (!prizeProgressTooltipEl || prizeProgressTooltipEl.hidden) return;
+      prizeProgressTooltipArmed = true;
+      document.addEventListener(
+        "pointerdown",
+        handlePrizeProgressTooltipDismiss,
+        true
+      );
+    }, 40);
+  }
+
+  function handlePrizeColumnClick(event) {
+    const col = event.target.closest(".win-progress__col--prize");
+    if (!col || !winProgressStageEl?.contains(col)) return;
+    if (!isPrizeProgressTooltipReady()) return;
+    if (isPrizeProgressTooltipOpen()) {
+      void hidePrizeProgressTooltip();
+      return;
+    }
+    void showPrizeProgressTooltip();
   }
 
   function scrollMainToTop(durationMs) {
@@ -7650,15 +7798,71 @@
     }
   }
 
+  function syncWinSplashNotifySubtitle(enabled, animate) {
+    if (!winSplashNotifySubtitleEl) return;
+
+    const html = enabled
+      ? NOTIFY_SPLASH_SUBTITLE_ON
+      : NOTIFY_SPLASH_SUBTITLE_OFF;
+
+    if (!animate) {
+      winSplashNotifySubtitleEl.classList.remove("is-swapping");
+      winSplashNotifySubtitleEl.innerHTML = html;
+      winSplashNotifyImageEl?.classList.remove("is-tilting");
+      return;
+    }
+
+    if (winSplashNotifySubtitleEl._subtitleSwapToken) {
+      winSplashNotifySubtitleEl._subtitleSwapToken += 1;
+    } else {
+      winSplashNotifySubtitleEl._subtitleSwapToken = 1;
+    }
+    const token = winSplashNotifySubtitleEl._subtitleSwapToken;
+
+    if (winSplashNotifyImageEl) {
+      winSplashNotifyImageEl.classList.remove("is-tilting");
+      void winSplashNotifyImageEl.offsetWidth;
+      winSplashNotifyImageEl.classList.add("is-tilting");
+    }
+
+    winSplashNotifySubtitleEl.classList.add("is-swapping");
+    window.setTimeout(() => {
+      if (winSplashNotifySubtitleEl._subtitleSwapToken !== token) return;
+      winSplashNotifySubtitleEl.innerHTML = html;
+      void winSplashNotifySubtitleEl.offsetWidth;
+      winSplashNotifySubtitleEl.classList.remove("is-swapping");
+    }, NOTIFY_SPLASH_SUBTITLE_SWAP_MS);
+  }
+
   async function playNotifySplashAnimation(options = {}) {
     if (!winSplashEl) return;
 
     const { towardNext = false } = options;
+    let toggleLocked = false;
     const skipGate = createSkipGate();
     const onContinue = (event) => {
       event.preventDefault();
       event.stopPropagation();
       skipGate.trigger();
+    };
+    const unlockNotifyToggle = () => {
+      toggleLocked = false;
+      if (winSplashNotifySwitchEl) {
+        winSplashNotifySwitchEl.disabled = false;
+      }
+      winSplashNotifyImageEl?.classList.remove("is-tilting");
+    };
+    const onNotifyToggle = () => {
+      if (toggleLocked) return;
+      toggleLocked = true;
+      if (winSplashNotifySwitchEl) {
+        winSplashNotifySwitchEl.disabled = true;
+      }
+      syncWinSplashNotifySubtitle(
+        Boolean(winSplashNotifySwitchEl?.checked),
+        true
+      );
+      window.setTimeout(unlockNotifyToggle, NOTIFY_SPLASH_TILT_MS);
     };
 
     setWinSplashMode("notify");
@@ -7670,7 +7874,15 @@
       "is-claim-in"
     );
 
+    if (winSplashNotifySwitchEl) {
+      winSplashNotifySwitchEl.checked = false;
+      winSplashNotifySwitchEl.disabled = false;
+    }
+    toggleLocked = false;
+    syncWinSplashNotifySubtitle(false, false);
+
     winSplashNotifyCtaEl?.addEventListener("click", onContinue);
+    winSplashNotifySwitchEl?.addEventListener("change", onNotifyToggle);
 
     try {
       requestAnimationFrame(() => {
@@ -7683,6 +7895,11 @@
       await waitMs(getSplashContentOutWaitMs(towardNext));
     } finally {
       winSplashNotifyCtaEl?.removeEventListener("click", onContinue);
+      winSplashNotifySwitchEl?.removeEventListener("change", onNotifyToggle);
+      if (winSplashNotifySwitchEl) {
+        winSplashNotifySwitchEl.disabled = false;
+      }
+      winSplashNotifyImageEl?.classList.remove("is-tilting");
     }
   }
 
@@ -8612,6 +8829,9 @@
       }
 
       app.classList.add("is-animating-normal-word");
+      if (app.classList.contains("scenario-onboarding-result")) {
+        setOnboardingBadgeDisplay();
+      }
 
       requestAnimationFrame(() => {
         if (gridEl) {
@@ -8645,6 +8865,7 @@
       updateActionKeys();
       stopConfetti();
       stopPrizeIdleAnimation();
+      void hidePrizeProgressTooltip();
       scrollMainToTop(WIN_HERO_MS);
 
       board = Array.from({ length: ROWS }, () => Array(COLS).fill(""));
@@ -8672,6 +8893,7 @@
   function playReverseNormalWordAnimation() {
     return new Promise((resolve) => {
       closeResultSheet({ animateClose: false });
+      void hidePrizeProgressTooltip();
       const app = document.querySelector(".app");
       if (!app || !kbEl) {
         resolve();
@@ -8786,6 +9008,7 @@
     });
 
     stopPrizeIdleAnimation();
+    void hidePrizeProgressTooltip();
     clearOnboardingResultChrome();
     resetWinProgress();
     applyWinResultContent();
@@ -8955,6 +9178,7 @@
     }
     markProfileSettingsDirty();
   });
+  wordCoinsSwitchEl?.addEventListener("change", markProfileSettingsDirty);
   notifySplashSwitchEl?.addEventListener("change", () => {
     if (notifySplashSwitchEl.checked && thematicWordSwitchEl?.checked) {
       thematicWordSwitchEl.checked = false;
@@ -9018,14 +9242,21 @@
   initRaffleCarousel();
   initResultSheet();
   initTaskSheet();
-  initOnboardingNotifySheet();
   initOnboardingRulesSheet();
-  frameEl?.addEventListener("pointerdown", handleEnergyHintPointerDown, true);
+  winProgressStageEl?.addEventListener("click", handlePrizeColumnClick);
+  frameEl?.addEventListener("pointerdown", handlePrizesHintPointerDown, true);
   resetRaffleProgress();
   updateMainScrollFade();
   updateRaffleScrollFade();
 
-  mainEl?.addEventListener("scroll", updateMainScrollFade, { passive: true });
+  mainEl?.addEventListener(
+    "scroll",
+    () => {
+      updateMainScrollFade();
+      layoutPrizeProgressTooltip();
+    },
+    { passive: true }
+  );
   rafflePageEl?.addEventListener("scroll", updateRaffleScrollFade, { passive: true });
   prizesPageEl?.addEventListener("scroll", updatePrizesScrollFade, {
     passive: true,

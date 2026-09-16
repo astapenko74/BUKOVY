@@ -1153,6 +1153,10 @@ button {
   padding-top: 20px;
 }
 
+.raffle-task-card[data-task-id="onboarding"] .raffle-task-card__rewards {
+  background: #ffdd2d;
+}
+
 .raffle-task-card__partner {
   display: flex;
   align-items: center;
@@ -2385,7 +2389,7 @@ button {
   height: 12px;
 }
 
-.onboarding-energy-tooltip {
+.onboarding-prizes-tooltip {
   position: absolute;
   left: 0;
   right: 0;
@@ -2394,116 +2398,61 @@ button {
   opacity: 0;
   transform: scale(0.8);
   transform-origin: center center;
+}
+
+.onboarding-prizes-tooltip[hidden] {
+  display: none !important;
+}
+
+.onboarding-prizes-tooltip.is-visible {
+  opacity: 1;
+  transform: scale(1);
   transition:
     opacity 300ms cubic-bezier(0.4, 0.1, 0.2, 1),
     transform 300ms cubic-bezier(0.4, 0.1, 0.2, 1);
 }
 
-.onboarding-energy-tooltip[hidden] {
-  display: none !important;
-}
-
-.onboarding-energy-tooltip.is-visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.onboarding-energy-tooltip__tail {
+.onboarding-prizes-tooltip__body {
   position: absolute;
-  top: 0;
-  display: block;
-  width: 24px;
-  height: 8px;
-}
-
-.onboarding-energy-tooltip__body {
-  position: absolute;
-  right: 16px;
-  top: 8px;
-  padding: 12px 16px;
-  border-radius: 8px;
+  left: 0;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 10px 10px;
+  border-radius: 22px;
   background: #ffffff;
   box-sizing: border-box;
-  width: max-content;
-  max-width: calc(100% - 32px);
 }
 
-.onboarding-energy-tooltip__text {
+.onboarding-prizes-tooltip__image {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.onboarding-prizes-tooltip__text {
   margin: 0;
   font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 15px;
   font-weight: 400;
   line-height: 20px;
-  color: #1c1c1e;
-  text-align: center;
+  color: #333333;
+  text-align: left;
 }
 
-.app.is-onboarding-energy-hint > .header .status-bar-image,
-.app.is-onboarding-energy-hint .app-content,
-.app.is-onboarding-energy-hint .win-splash,
-.app.is-onboarding-energy-hint .tooltip,
-.app.is-onboarding-energy-hint .tab-bar__separator,
-.app.is-onboarding-energy-hint .home-indicator,
-.app.is-onboarding-energy-hint .tab,
-.app.is-onboarding-energy-hint > .header .logo,
-.app.is-onboarding-energy-hint > .header .nav-row__badges .coin-badge,
-.app.is-onboarding-energy-hint-out > .header .status-bar-image,
-.app.is-onboarding-energy-hint-out .app-content,
-.app.is-onboarding-energy-hint-out .win-splash,
-.app.is-onboarding-energy-hint-out .tooltip,
-.app.is-onboarding-energy-hint-out .tab-bar__separator,
-.app.is-onboarding-energy-hint-out .home-indicator,
-.app.is-onboarding-energy-hint-out .tab,
-.app.is-onboarding-energy-hint-out > .header .logo,
-.app.is-onboarding-energy-hint-out > .header .nav-row__badges .coin-badge {
-  transition: opacity 300ms cubic-bezier(0.4, 0.1, 0.2, 1);
+.onboarding-prizes-tooltip__tail {
+  position: absolute;
+  bottom: 0;
+  display: block;
+  width: 30px;
+  height: 12px;
 }
 
-.app.is-onboarding-energy-hint > .header .status-bar-image,
-.app.is-onboarding-energy-hint .app-content,
-.app.is-onboarding-energy-hint .win-splash,
-.app.is-onboarding-energy-hint .tooltip,
-.app.is-onboarding-energy-hint .tab-bar__separator,
-.app.is-onboarding-energy-hint .home-indicator,
-.app.is-onboarding-energy-hint .tab,
-.app.is-onboarding-energy-hint > .header .logo,
-.app.is-onboarding-energy-hint > .header .nav-row__badges .coin-badge {
-  opacity: 0.15;
-}
-
-.app.is-onboarding-energy-hint-out > .header .status-bar-image,
-.app.is-onboarding-energy-hint-out .app-content,
-.app.is-onboarding-energy-hint-out .win-splash,
-.app.is-onboarding-energy-hint-out .tooltip,
-.app.is-onboarding-energy-hint-out .tab-bar__separator,
-.app.is-onboarding-energy-hint-out .home-indicator,
-.app.is-onboarding-energy-hint-out .tab,
-.app.is-onboarding-energy-hint-out > .header .logo,
-.app.is-onboarding-energy-hint-out > .header .nav-row__badges .coin-badge {
-  opacity: 1;
-}
-
-.app.is-onboarding-energy-hint *,
-.app.is-onboarding-energy-hint-out *,
-.app.is-onboarding-energy-hint.scenario-onboarding-result.scenario-normal-word .nav-row__badges,
-.app.is-onboarding-energy-hint.scenario-onboarding-result.is-animating-normal-word .nav-row__badges,
-.app.is-onboarding-energy-hint.scenario-onboarding-result.scenario-normal-word .nav-row__badges *,
-.app.is-onboarding-energy-hint.scenario-onboarding-result.is-animating-normal-word .nav-row__badges *,
-.app.is-onboarding-energy-hint-out.scenario-onboarding-result.scenario-normal-word .nav-row__badges,
-.app.is-onboarding-energy-hint-out.scenario-onboarding-result.is-animating-normal-word .nav-row__badges,
-.app.is-onboarding-energy-hint-out.scenario-onboarding-result.scenario-normal-word .nav-row__badges *,
-.app.is-onboarding-energy-hint-out.scenario-onboarding-result.is-animating-normal-word .nav-row__badges * {
-  pointer-events: none;
-}
-
-.app.is-onboarding-energy-hint > .header .nav-row__badges .energy-badge:not(.coin-badge) {
-  opacity: 1;
-}
-
-.app.is-onboarding-energy-hint > .header .close-btn,
-.app.is-onboarding-energy-hint-out > .header .close-btn {
-  opacity: 1;
-  pointer-events: auto;
+.app.is-onboarding-owned-preview .prizes-owned-list > .prize-card:not(:first-of-type) {
+  display: none;
 }
 
 .app.scenario-onboarding-result.is-onboarding-play-again .win-block--yellow {
@@ -2654,6 +2603,10 @@ button {
   transition: opacity 400ms cubic-bezier(0.2, 0, 0.4, 0.9);
 }
 
+.onboarding-dialog__text b {
+  font-weight: 700;
+}
+
 .onboarding-dialog__tail {
   display: block;
   flex-shrink: 0;
@@ -2790,6 +2743,63 @@ button {
 }
 
 .onboarding-tooltip__text {
+  margin: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #1c1c1e;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.prize-progress-tooltip {
+  position: absolute;
+  inset: 0;
+  z-index: 160;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.prize-progress-tooltip[hidden] {
+  display: none !important;
+}
+
+.prize-progress-tooltip.is-visible {
+  opacity: 1;
+}
+
+.prize-progress-tooltip.is-hiding {
+  transition: opacity 150ms cubic-bezier(0.4, 0, 1, 1);
+  opacity: 0;
+}
+
+.prize-progress-tooltip__tail,
+.prize-progress-tooltip__body {
+  position: absolute;
+}
+
+.prize-progress-tooltip__tail {
+  display: block;
+  width: 24px;
+  height: 8px;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  transform: rotate(180deg);
+}
+
+.prize-progress-tooltip__body {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #ffffff;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(100%, calc(100vw - 32px));
+}
+
+.prize-progress-tooltip__text {
   margin: 0;
   font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 15px;
@@ -3772,6 +3782,13 @@ button {
   grid-template-rows: 48px 14px;
   overflow: visible;
   z-index: 2;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.win-progress--animating .win-progress__col--prize {
+  pointer-events: none;
+  cursor: default;
 }
 
 .win-progress__prize-slot {
@@ -4844,103 +4861,6 @@ button {
   pointer-events: none;
 }
 
-/* ——— Штора уведомлений онбординга ——— */
-.app.onboarding-notify-sheet-open {
-  overflow: hidden !important;
-}
-
-#onboarding-notify-backdrop {
-  display: none !important;
-}
-
-.onboarding-notify-sheet .result-sheet__panel {
-  height: auto;
-  max-height: calc(100% - 16px);
-  padding-bottom: 16px;
-}
-
-.onboarding-notify-sheet__body {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.onboarding-notify-sheet__image {
-  display: block;
-  width: 200px;
-  height: 120px;
-  margin-top: 24px;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-.onboarding-notify-sheet__title {
-  margin: 24px 16px 0;
-  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 24px;
-  text-align: center;
-  color: #ffffff;
-}
-
-.onboarding-notify-sheet__subtitle {
-  margin: 12px 16px 0;
-  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  line-height: 20px;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.onboarding-notify-sheet__enable {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(100% - 32px);
-  height: 56px;
-  margin: 32px 16px 0;
-  border: none;
-  border-radius: 16px;
-  background: var(--accent-1);
-  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 17px;
-  font-weight: 400;
-  line-height: 20px;
-  color: var(--primary-on-light);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.onboarding-notify-sheet__enable:active {
-  background: var(--accent-1-pressed);
-}
-
-.onboarding-notify-sheet__later {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(100% - 32px);
-  height: 56px;
-  margin: 8px 16px 0;
-  border: none;
-  background: transparent;
-  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 17px;
-  font-weight: 400;
-  line-height: 20px;
-  color: #ffffff;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
 /* ——— Штора правил онбординга ——— */
 #onboarding-rules-backdrop {
   z-index: 550;
@@ -5594,8 +5514,31 @@ button {
   transform: scale(1);
 }
 
+.win-splash--notify.is-content-in .win-splash__notify-image.is-tilting {
+  transition: none;
+  animation: win-splash-notify-tilt 600ms cubic-bezier(0.49, 0, 0.51, 1) both;
+}
+
 .win-splash--notify.is-content-out .win-splash__notify-image {
   transform: scale(1);
+}
+
+@keyframes win-splash-notify-tilt {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  33% {
+    transform: scale(1) rotate(15deg);
+  }
+
+  66% {
+    transform: scale(1) rotate(-25deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 .win-splash__notify-title {
@@ -5616,11 +5559,18 @@ button {
   font-weight: 400;
   line-height: 20px;
   color: rgba(255, 255, 255, 0.7);
+  transition: opacity 300ms cubic-bezier(0.2, 0, 0.4, 0.9);
+}
+
+.win-splash__notify-subtitle.is-swapping {
+  opacity: 0;
 }
 
 .win-splash--notify.is-content-in .win-splash__notify-title,
 .win-splash--notify.is-content-in .win-splash__notify-subtitle {
-  transition: margin 1000ms cubic-bezier(0.25, 1.4, 0.65, 1.3);
+  transition:
+    margin 1000ms cubic-bezier(0.25, 1.4, 0.65, 1.3),
+    opacity 300ms cubic-bezier(0.2, 0, 0.4, 0.9);
 }
 
 .win-splash--notify.is-content-in:not(.is-content-out) .win-splash__notify-title {
@@ -5633,7 +5583,9 @@ button {
 
 .win-splash--notify.is-content-out .win-splash__notify-title,
 .win-splash--notify.is-content-out .win-splash__notify-subtitle {
-  transition: margin 1000ms cubic-bezier(0.25, 1.4, 0.65, 1.3);
+  transition:
+    margin 1000ms cubic-bezier(0.25, 1.4, 0.65, 1.3),
+    opacity 300ms cubic-bezier(0.2, 0, 0.4, 0.9);
 }
 
 .win-splash__actions--notify {

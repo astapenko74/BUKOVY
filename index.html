@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>5 букв</title>
-    <link rel="stylesheet" href="styles.css?v=283" />
+    <link rel="stylesheet" href="styles.css?v=293" />
   </head>
   <body>
     <div class="viewport-gate" id="viewport-gate">
@@ -149,7 +149,7 @@
                   height="200"
                 />
                 <h2 class="win-splash__notify-title">Будем на связи</h2>
-                <p class="win-splash__notify-subtitle">
+                <p class="win-splash__notify-subtitle" id="win-splash-notify-subtitle">
                   Включите уведомления, чтобы не&nbsp;пропускать новые слова и события
                 </p>
               </div>
@@ -165,6 +165,7 @@
                 <label class="win-switch">
                   <input
                     class="win-switch__input"
+                    id="win-splash-notify-switch"
                     type="checkbox"
                     role="switch"
                     aria-label="Уведомления"
@@ -611,22 +612,11 @@
                           Забрать награду
                         </button>
                       </div>
-                      <div class="raffle-task-card__rewards">
-                        <div class="raffle-task-card__reward-item" data-reward="energy">
-                          <img
-                            class="raffle-task-card__reward-icon"
-                            src="assets/Энергия.png"
-                            width="36"
-                            height="36"
-                            alt=""
-                            draggable="false"
-                          />
-                          <span class="raffle-task-card__reward-value">+1</span>
-                        </div>
+                        <div class="raffle-task-card__rewards">
                         <div class="raffle-task-card__reward-item" data-reward="gift">
                           <img
                             class="raffle-task-card__reward-icon"
-                            src="assets/icon-gift.png"
+                            src="assets/Gift_Alt.png"
                             width="36"
                             height="36"
                             alt=""
@@ -705,7 +695,7 @@
                         <div class="raffle-task-card__reward-item" data-reward="ticket">
                           <img
                             class="raffle-task-card__reward-icon"
-                            src="assets/Билет.png"
+                            src="assets/Ticet_Alt.png"
                             width="36"
                             height="36"
                             alt=""
@@ -1076,6 +1066,19 @@
                       </select>
                     </label>
                     <div class="profile-field profile-field--switch">
+                      <span class="profile-field__label">Монеты за слова</span>
+                      <label class="win-switch">
+                        <input
+                          class="win-switch__input"
+                          id="word-coins-switch"
+                          type="checkbox"
+                          role="switch"
+                          aria-label="Монеты за слова"
+                        />
+                        <span class="win-switch__track" aria-hidden="true"></span>
+                      </label>
+                    </div>
+                    <div class="profile-field profile-field--switch">
                       <span class="profile-field__label">Тематическое слово</span>
                       <label class="win-switch">
                         <input
@@ -1249,6 +1252,28 @@
       </div>
 
       <div
+        class="prize-progress-tooltip"
+        id="prize-progress-tooltip"
+        hidden
+        aria-hidden="true"
+      >
+        <div class="prize-progress-tooltip__body">
+          <p
+            class="prize-progress-tooltip__text"
+            id="prize-progress-tooltip-text"
+          ></p>
+        </div>
+        <img
+          class="prize-progress-tooltip__tail"
+          src="assets/tail_tooltip.svg?v=2"
+          width="24"
+          height="8"
+          alt=""
+          draggable="false"
+        />
+      </div>
+
+      <div
         class="onboarding-task-tooltip"
         id="onboarding-task-tooltip"
         hidden
@@ -1278,24 +1303,32 @@
       </div>
 
       <div
-        class="onboarding-energy-tooltip"
-        id="onboarding-energy-tooltip"
+        class="onboarding-prizes-tooltip"
+        id="onboarding-prizes-tooltip"
         hidden
         aria-hidden="true"
       >
+        <div class="onboarding-prizes-tooltip__body">
+          <img
+            class="onboarding-prizes-tooltip__image"
+            src="assets/Gift_Alt.png"
+            width="40"
+            height="40"
+            alt=""
+            draggable="false"
+          />
+          <p class="onboarding-prizes-tooltip__text">
+            Полученные призы<br />находятся здесь
+          </p>
+        </div>
         <img
-          class="onboarding-energy-tooltip__tail"
-          src="assets/tail_tooltip.svg?v=2"
-          width="24"
-          height="8"
+          class="onboarding-prizes-tooltip__tail"
+          src="assets/tail_2.svg"
+          width="30"
+          height="12"
           alt=""
           draggable="false"
         />
-        <div class="onboarding-energy-tooltip__body">
-          <p class="onboarding-energy-tooltip__text">
-            Энергия нужна, чтобы играть чаще
-          </p>
-        </div>
       </div>
 
       <div
@@ -1353,7 +1386,7 @@
                   <div class="task-sheet__reward-icon-frame">
                     <img
                       class="task-sheet__reward-icon"
-                      src="assets/icon-gift.png"
+                      src="assets/Gift_Alt.png"
                       width="24"
                       height="24"
                       alt=""
@@ -1373,7 +1406,7 @@
                   <div class="task-sheet__reward-icon-frame">
                     <img
                       class="task-sheet__reward-icon"
-                      src="assets/Билет.png"
+                      src="assets/Ticet_Alt.png"
                       width="24"
                       height="24"
                       alt=""
@@ -1439,74 +1472,6 @@
       </div>
 
       <div
-        class="result-sheet-backdrop"
-        id="onboarding-notify-backdrop"
-        hidden
-        aria-hidden="true"
-      ></div>
-
-      <div
-        class="result-sheet onboarding-notify-sheet"
-        id="onboarding-notify-sheet"
-        hidden
-        aria-hidden="true"
-      >
-        <div
-          class="result-sheet__panel onboarding-notify-sheet__panel"
-          id="onboarding-notify-panel"
-        >
-          <div class="result-sheet__gradient" aria-hidden="true"></div>
-          <div class="result-sheet__bar" id="onboarding-notify-bar">
-            <span class="result-sheet__handle" aria-hidden="true"></span>
-          </div>
-          <button
-            class="result-sheet__close"
-            id="onboarding-notify-close"
-            type="button"
-            aria-label="Закрыть"
-          >
-            <img
-              src="assets/tui-button-close.svg"
-              width="24"
-              height="24"
-              alt=""
-              draggable="false"
-            />
-          </button>
-          <div class="onboarding-notify-sheet__body">
-            <img
-              class="onboarding-notify-sheet__image"
-              src="assets/mas_03.png"
-              width="200"
-              height="120"
-              alt=""
-              draggable="false"
-            />
-            <h2 class="onboarding-notify-sheet__title">
-              Будем на связи
-            </h2>
-            <p class="onboarding-notify-sheet__subtitle">
-              Включите уведомления, чтобы не&nbsp;пропускать новые слова и выигрывать больше призов
-            </p>
-            <button
-              class="onboarding-notify-sheet__enable"
-              id="onboarding-notify-enable"
-              type="button"
-            >
-              Включить уведомления
-            </button>
-            <button
-              class="onboarding-notify-sheet__later"
-              id="onboarding-notify-later"
-              type="button"
-            >
-              Позже
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div
         class="task-execute-stub"
         id="task-execute-stub"
         hidden
@@ -1545,7 +1510,7 @@
               type="button"
               aria-label="Информация"
             >
-              <img src="assets/info.svg?v=2" width="22" height="22" alt="" draggable="false" />
+              <img src="assets/info.svg?v=4" width="22" height="22" alt="" draggable="false" />
             </button>
             <div class="nav-row__badges onboarding-nav-badges" id="onboarding-nav-badges">
               <button class="energy-badge coin-badge" type="button" tabindex="-1">
@@ -1566,7 +1531,7 @@
                   width="16"
                   height="16"
                 />
-                <span class="energy-badge__value">0</span>
+                <span class="energy-badge__value">9</span>
               </button>
             </div>
           </div>
@@ -1577,7 +1542,7 @@
             <div class="onboarding-dialog__bubble">
               <div class="onboarding-dialog__plaque">
                 <p class="onboarding-dialog__text" id="onboarding-dialog-text">
-                  Для начала введите слово «САХАР»
+                  Давайте начнём<br />со слова «<b>ДЕБЮТ</b>»
                 </p>
               </div>
               <img
@@ -1902,6 +1867,6 @@
       </div>
     </div>
 
-    <script src="app.js?v=242"></script>
+    <script src="app.js?v=251"></script>
   </body>
 </html>
