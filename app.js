@@ -423,9 +423,9 @@
       sheetHint: "Для участия купите долю",
       sheetDescHtml:
         "Разделим 5 000 000 между участниками.<br />Больше долей – больше выигрыш",
-      sheetImage: "assets/raffle-share-sheet.png?v=2",
+      sheetImage: "assets/raffle-share-sheet.webp?v=2",
       sheetIcon: "assets/raffle-share-quarter.svg?v=2",
-      visualSrc: "assets/raffle-visual-share.png",
+      visualSrc: "assets/raffle-visual-share.webp",
       activeBaseSrc: "assets/raffle-event-card-1-active.svg?v=2",
       participatedSubtitle: "Делят 155 456 игроков",
       backTitle: "Делим деньги",
@@ -450,9 +450,9 @@
       sheetBoughtDescHtml:
         "Купить приз можно только 1 раз. Выдадим его в течении N дней после подведения итогов",
       sheetBoughtDate: "Итоги 1 декабря",
-      sheetImage: "assets/raffle-garant-sheet.png?v=1",
+      sheetImage: "assets/raffle-garant-sheet.webp?v=1",
       sheetIcon: "assets/raffle-garant-gift.svg?v=2",
-      visualSrc: "assets/raffle-visual-garant.png",
+      visualSrc: "assets/raffle-visual-garant.webp",
       activeBaseSrc: "assets/raffle-event-card-2-active.svg?v=2",
       participatedSubtitle: "Участвуют 564 238 игроков",
       backTitle: "Розыгрыш",
@@ -477,9 +477,9 @@
       sheetDescHtml:
         "Чтобы получить билеты на розыгрыш,<br />выполняйте задания от Fresh Auto",
       sheetActionLabel: "К заданиям",
-      sheetImage: "assets/raffle-partner-sheet.png?v=1",
+      sheetImage: "assets/raffle-partner-sheet.webp?v=1",
       sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
-      visualSrc: "assets/raffle-visual-car.png",
+      visualSrc: "assets/raffle-visual-car.webp",
       activeBaseSrc: "assets/raffle-event-card-3-active.svg?v=2",
       participatedSubtitle: "Участвуют 37 174 игрока",
       backTitle: "Розыгрыш",
@@ -6481,7 +6481,7 @@
       sheetHint: "Для участия купите билет",
       sheetDescHtml:
         "Разыграем 10 призов по 100 000 ₽.<br />Больше билетов – выше шансы",
-      sheetImage: "assets/raffle-draw-100k-sheet.png",
+      sheetImage: "assets/raffle-draw-100k-sheet.webp",
       sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
     },
     {
@@ -6494,7 +6494,7 @@
       sheetHint: "Для участия купите билет",
       sheetDescHtml:
         "Разыграем 1 приз размером 1 000 000 ₽.<br />Больше билетов – выше шансы",
-      sheetImage: "assets/raffle-draw-1m-sheet.png",
+      sheetImage: "assets/raffle-draw-1m-sheet.webp",
       sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
     },
     {
@@ -6507,7 +6507,7 @@
       sheetHint: "Для участия купите билет",
       sheetDescHtml:
         "Разыграем 10 призов по 50 000 ₽ на покупку техники.<br />Больше билетов – выше шансы",
-      sheetImage: "assets/raffle-draw-tech-sheet.png",
+      sheetImage: "assets/raffle-draw-tech-sheet.webp",
       sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
     },
     {
@@ -6520,7 +6520,7 @@
       sheetHint: "Для участия купите билет",
       sheetDescHtml:
         "Разыграем 1 000 кэшбэков размером в 50% на покупки в «Пятёрочке».<br />Больше билетов – выше шансы",
-      sheetImage: "assets/raffle-draw-shop-sheet.png",
+      sheetImage: "assets/raffle-draw-shop-sheet.webp",
       sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
     },
   ];
@@ -6653,7 +6653,7 @@
 
       const image = document.createElement("img");
       image.className = "raffle-tickets-sheet__image";
-      image.src = "assets/raffle-ticket-card.png";
+      image.src = "assets/raffle-ticket-card.webp";
       image.width = 84;
       image.height = 72;
       image.alt = "";
@@ -6891,7 +6891,7 @@
       dateEl.textContent = card.sheetBoughtDate;
     }
     if (heroEl && card?.sheetImage) heroEl.src = card.sheetImage;
-    else if (heroEl && !card?.sheetImage) heroEl.src = "assets/raffle-visual-money.png";
+    else if (heroEl && !card?.sheetImage) heroEl.src = "assets/raffle-visual-money.webp";
     if (hintIconEl) {
       hintIconEl.src = card?.sheetIcon || "assets/coupon.svg?v=2";
     }
@@ -7199,7 +7199,7 @@
 
     const icon = document.createElement("img");
     icon.className = "raffle-buy-toast__icon";
-    icon.src = options.iconSrc || "assets/raffle-share-dolia.png?v=1";
+    icon.src = options.iconSrc || "assets/raffle-share-dolia.webp?v=1";
     icon.width = 40;
     icon.height = 40;
     icon.alt = "";
@@ -7360,7 +7360,7 @@
     raffleBuySpentOut = coinBalance < card.buyUnit;
     playRaffleBuyEdgeConfetti();
     showRaffleBuyToast(boughtCount, {
-      iconSrc: "assets/raffle-draw-toast.png",
+      iconSrc: "assets/raffle-draw-toast.webp",
       line1:
         "Купили " +
         boughtCount +
@@ -7422,7 +7422,7 @@
     document.getElementById("raffle-buy-sheet")?.classList.add("is-garant-bought");
     playRaffleBuyEdgeConfetti();
     showRaffleBuyToast(1, {
-      iconSrc: "assets/raffle-garant-dolia.png?v=1",
+      iconSrc: "assets/raffle-garant-dolia.webp?v=1",
       line1: "Купили 1 гарантированный приз,",
       line2: "итоги 1 декабря",
     });
