@@ -355,10 +355,10 @@
   const RAFFLE_CARD_HEIGHT = 388;
   const RAFFLE_CARD_GAP = 20;
   const RAFFLE_SLIDE_STEP = RAFFLE_CARD_WIDTH + RAFFLE_CARD_GAP;
-  const RAFFLE_CARD_SRC = "assets/raffle-event-card-inactive.svg";
-  const RAFFLE_SHARE_BG_SRC = "assets/raffle-share-bg.svg";
-  const RAFFLE_GARANT_BG_SRC = "assets/raffle-garant-bg.svg";
-  const RAFFLE_PARTNER_BG_SRC = "assets/raffle-partner-bg.svg";
+  const RAFFLE_CARD_SRC = "assets/raffle-event-card-inactive.svg?v=2";
+  const RAFFLE_SHARE_BG_SRC = "assets/raffle-share-bg.svg?v=2";
+  const RAFFLE_GARANT_BG_SRC = "assets/raffle-garant-bg.svg?v=2";
+  const RAFFLE_PARTNER_BG_SRC = "assets/raffle-partner-bg.svg?v=2";
   const RAFFLE_TOKEN_SRC = "assets/Монетка активная.png";
   const RAFFLE_TOKEN_INACTIVE_SRC = "assets/Монетка неактивная.png";
   const INITIAL_COIN_BALANCE = 17500;
@@ -424,9 +424,9 @@
       sheetDescHtml:
         "Разделим 5 000 000 между участниками.<br />Больше долей – больше выигрыш",
       sheetImage: "assets/raffle-share-sheet.png?v=2",
-      sheetIcon: "assets/raffle-share-quarter.svg",
+      sheetIcon: "assets/raffle-share-quarter.svg?v=2",
       visualSrc: "assets/raffle-visual-share.png",
-      activeBaseSrc: "assets/raffle-event-card-1-active.svg",
+      activeBaseSrc: "assets/raffle-event-card-1-active.svg?v=2",
       participatedSubtitle: "Делят 155 456 игроков",
       backTitle: "Делим деньги",
       backSubtitle:
@@ -451,9 +451,9 @@
         "Купить приз можно только 1 раз. Выдадим его в течении N дней после подведения итогов",
       sheetBoughtDate: "Итоги 1 декабря",
       sheetImage: "assets/raffle-garant-sheet.png?v=1",
-      sheetIcon: "assets/raffle-garant-gift.svg",
+      sheetIcon: "assets/raffle-garant-gift.svg?v=2",
       visualSrc: "assets/raffle-visual-garant.png",
-      activeBaseSrc: "assets/raffle-event-card-2-active.svg",
+      activeBaseSrc: "assets/raffle-event-card-2-active.svg?v=2",
       participatedSubtitle: "Участвуют 564 238 игроков",
       backTitle: "Розыгрыш",
       backSubtitle:
@@ -478,9 +478,9 @@
         "Чтобы получить билеты на розыгрыш,<br />выполняйте задания от Fresh Auto",
       sheetActionLabel: "К заданиям",
       sheetImage: "assets/raffle-partner-sheet.png?v=1",
-      sheetIcon: "assets/raffle-partner-coupon.svg",
+      sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
       visualSrc: "assets/raffle-visual-car.png",
-      activeBaseSrc: "assets/raffle-event-card-3-active.svg",
+      activeBaseSrc: "assets/raffle-event-card-3-active.svg?v=2",
       participatedSubtitle: "Участвуют 37 174 игрока",
       backTitle: "Розыгрыш",
       backSubtitle:
@@ -6482,7 +6482,7 @@
       sheetDescHtml:
         "Разыграем 10 призов по 100 000 ₽.<br />Больше билетов – выше шансы",
       sheetImage: "assets/raffle-draw-100k-sheet.png",
-      sheetIcon: "assets/raffle-partner-coupon.svg",
+      sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
     },
     {
       sheetKind: "draw",
@@ -6495,7 +6495,7 @@
       sheetDescHtml:
         "Разыграем 1 приз размером 1 000 000 ₽.<br />Больше билетов – выше шансы",
       sheetImage: "assets/raffle-draw-1m-sheet.png",
-      sheetIcon: "assets/raffle-partner-coupon.svg",
+      sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
     },
     {
       sheetKind: "draw",
@@ -6508,7 +6508,7 @@
       sheetDescHtml:
         "Разыграем 10 призов по 50 000 ₽ на покупку техники.<br />Больше билетов – выше шансы",
       sheetImage: "assets/raffle-draw-tech-sheet.png",
-      sheetIcon: "assets/raffle-partner-coupon.svg",
+      sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
     },
     {
       sheetKind: "draw",
@@ -6521,7 +6521,7 @@
       sheetDescHtml:
         "Разыграем 1 000 кэшбэков размером в 50% на покупки в «Пятёрочке».<br />Больше билетов – выше шансы",
       sheetImage: "assets/raffle-draw-shop-sheet.png",
-      sheetIcon: "assets/raffle-partner-coupon.svg",
+      sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
     },
   ];
 
@@ -6893,7 +6893,7 @@
     if (heroEl && card?.sheetImage) heroEl.src = card.sheetImage;
     else if (heroEl && !card?.sheetImage) heroEl.src = "assets/raffle-visual-money.png";
     if (hintIconEl) {
-      hintIconEl.src = card?.sheetIcon || "assets/coupon.svg";
+      hintIconEl.src = card?.sheetIcon || "assets/coupon.svg?v=2";
     }
     if (hintEl) {
       hintEl.textContent =
