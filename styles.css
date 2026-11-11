@@ -925,7 +925,192 @@ button {
 }
 
 .prizes-available > .raffle-info-card--history {
-  margin-top: 20px;
+  margin-top: 0;
+}
+
+.raffle-draws {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 24px;
+  align-items: start;
+  width: 100%;
+  margin-top: 12px;
+  margin-bottom: 44px;
+}
+
+.raffle-draws[hidden] {
+  display: none;
+}
+
+.raffle-draw-card {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.raffle-draw-card[data-draw="0"] {
+  --draw-color: #f59201;
+}
+
+.raffle-draw-card[data-draw="1"] {
+  --draw-color: #07c2af;
+}
+
+.raffle-draw-card[data-draw="2"] {
+  --draw-color: #fe3360;
+}
+
+.raffle-draw-card[data-draw="3"] {
+  --draw-color: #62c366;
+}
+
+.raffle-draw-card__frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 165.5 / 198;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #2c2c2e;
+  transition: background-color calc(3333ms * 0.56) cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.raffle-draw-card.is-bought .raffle-draw-card__frame {
+  background: var(--draw-color);
+}
+
+.raffle-draw-card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-draw-card__badge,
+.raffle-draw-card__tickets {
+  position: absolute;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #333333;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.raffle-draw-card__badge {
+  top: 10px;
+  left: 10px;
+  transition:
+    background-color calc(3333ms * 0.56) cubic-bezier(0.4, 0.1, 0.2, 1),
+    color calc(3333ms * 0.56) cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.raffle-draw-card:not(.is-bought) .raffle-draw-card__badge {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.raffle-draw-card__tickets {
+  left: 10px;
+  bottom: 10px;
+  gap: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.5);
+  transform-origin: left bottom;
+  transition:
+    opacity 500ms cubic-bezier(0.35, 1.3, 0.25, 1),
+    transform 500ms cubic-bezier(0.35, 1.3, 0.25, 1),
+    visibility 0s linear 500ms;
+}
+
+.raffle-draw-card.is-bought .raffle-draw-card__tickets {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  transition:
+    opacity 500ms cubic-bezier(0.35, 1.3, 0.25, 1),
+    transform 500ms cubic-bezier(0.35, 1.3, 0.25, 1),
+    visibility 0s linear 0s;
+}
+
+.raffle-draw-card__ticket-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-draw-card__title,
+.raffle-draw-card__price,
+.raffle-draw-card__desc {
+  display: block;
+  padding: 0 8px;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.raffle-draw-card__title {
+  margin: 12px 0 0;
+  color: #f6f7f8;
+  font-weight: 400;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.raffle-draw-card__price {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  margin-top: 4px;
+  color: #f6f7f8;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.raffle-draw-card__price img {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-draw-card__desc {
+  margin-top: 6px;
+  color: #9299a2;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .prizes-available.is-stage-inactive > .raffle-info-card--history {
@@ -2264,6 +2449,21 @@ button {
   opacity: 0.15;
   pointer-events: none;
   transition: opacity 500ms cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.app > .header .energy-badge:not(.coin-badge) {
+  transition: opacity 500ms cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.app.is-sheet-open.is-raffle-sheet-open > .header .nav-row__badges,
+.app.scenario-onboarding-result.is-sheet-open.is-raffle-sheet-open > .header .nav-row__badges,
+.app.scenario-onboarding-result.is-sheet-open.is-raffle-sheet-open.is-animating-normal-word > .header .nav-row__badges,
+.app.scenario-onboarding-result.is-sheet-open.is-raffle-sheet-open.scenario-normal-word > .header .nav-row__badges {
+  opacity: 1;
+}
+
+.app.is-sheet-open.is-raffle-sheet-open > .header .energy-badge:not(.coin-badge) {
+  opacity: 0.15;
 }
 
 .app.is-onboarding-notify-dim > .header .status-bar-image,
@@ -6013,4 +6213,690 @@ button {
 
 .win-splash__tasks-cta:active {
   background: #ffcd33;
+}
+
+/* ——— Штора покупки в карусели ——— */
+.prizes-page.raffle-buy-sheet-open {
+  overflow: hidden !important;
+}
+
+.raffle-buy-sheet .result-sheet__panel {
+  height: auto;
+  max-height: calc(100% - 108px);
+  padding-bottom: 0;
+  background: #2c2c2e;
+}
+
+.raffle-buy-sheet__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.raffle-buy-sheet__hero {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  aspect-ratio: 375 / 240;
+  background: #f59201;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.raffle-buy-sheet__hero-image {
+  position: absolute;
+  right: -14%;
+  bottom: -42%;
+  width: 96%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-buy-sheet.is-share .raffle-buy-sheet__hero {
+  background: #edeff0;
+  transition: background-color calc(3333ms * 0.56) cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.raffle-buy-sheet.is-share.is-hero-bought .raffle-buy-sheet__hero {
+  background: #0ac2af;
+}
+
+.raffle-buy-sheet.is-garant .raffle-buy-sheet__hero {
+  background: #edeff0;
+  transition: background-color calc(3333ms * 0.56) cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.raffle-buy-sheet.is-garant.is-garant-bought .raffle-buy-sheet__hero {
+  background: #428bf9;
+}
+
+.raffle-buy-sheet.is-garant .raffle-buy-sheet__buy {
+  margin-top: 32px;
+}
+
+.raffle-buy-sheet.is-garant .raffle-buy-sheet__terms {
+  margin-top: 32px;
+}
+
+.raffle-buy-sheet.is-garant.is-garant-bought .raffle-buy-sheet__terms {
+  margin-left: 0;
+  margin-right: 0;
+  text-align: left;
+}
+
+.raffle-buy-sheet.is-partner .raffle-buy-sheet__hero {
+  background: #edeff0;
+  transition: background-color calc(3333ms * 0.56) cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.raffle-buy-sheet.is-partner.is-partner-bought .raffle-buy-sheet__hero {
+  background: #b078ff;
+}
+
+.raffle-buy-sheet.is-draw .raffle-buy-sheet__hero {
+  background: #edeff0;
+  transition: background-color calc(3333ms * 0.56) cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.raffle-buy-sheet.is-draw.is-draw-bought .raffle-buy-sheet__hero {
+  background: var(--draw-color, #f59201);
+}
+
+.raffle-buy-sheet.is-partner .raffle-buy-sheet__buy {
+  margin-top: 32px;
+}
+
+.raffle-buy-sheet__hint-chevron {
+  display: none;
+  width: 16px;
+  height: 16px;
+  margin-left: -4px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-buy-sheet.is-partner.is-partner-bought .raffle-buy-sheet__hint-chevron,
+.raffle-buy-sheet.is-draw.is-draw-bought .raffle-buy-sheet__hint-chevron {
+  display: block;
+}
+
+.raffle-buy-sheet.is-partner.is-partner-bought .raffle-buy-sheet__hint,
+.raffle-buy-sheet.is-draw.is-draw-bought .raffle-buy-sheet__hint {
+  cursor: pointer;
+}
+
+.raffle-buy-sheet.is-share .raffle-buy-sheet__hero-image,
+.raffle-buy-sheet.is-garant .raffle-buy-sheet__hero-image,
+.raffle-buy-sheet.is-partner .raffle-buy-sheet__hero-image,
+.raffle-buy-sheet.is-draw .raffle-buy-sheet__hero-image {
+  inset: 0;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.raffle-buy-sheet__date {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #333333;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.raffle-buy-sheet__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 4;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.raffle-buy-sheet__close img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-buy-sheet__body {
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.raffle-buy-sheet__footer {
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+  padding: 0 16px 24px;
+  background: #2c2c2e;
+}
+
+.raffle-buy-sheet__fade {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(44, 44, 46, 0) 0%,
+    rgba(44, 44, 46, 1) 75%
+  );
+}
+
+.raffle-buy-sheet.is-overflow .result-sheet__panel {
+  height: calc(100% - 108px);
+}
+
+.raffle-buy-sheet.is-overflow .raffle-buy-sheet__scroll {
+  position: absolute;
+  inset: 0;
+}
+
+.raffle-buy-sheet.is-overflow .raffle-buy-sheet__footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+}
+
+.raffle-buy-sheet.is-overflow .raffle-buy-sheet__fade {
+  display: block;
+}
+
+.raffle-buy-sheet__title {
+  margin: 16px 0 0;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 36px;
+  color: #f6f7f8;
+}
+
+.raffle-buy-sheet__hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.raffle-buy-sheet__hint-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-buy-sheet.is-share .raffle-buy-sheet__hint-icon {
+  filter: none;
+}
+
+.raffle-buy-sheet__hint-text {
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 22px;
+  color: #ffffff;
+}
+
+.raffle-buy-sheet__desc {
+  margin: 20px 0 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.raffle-buy-sheet__counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  margin-top: 20px;
+  padding: 6px 6px 6px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+}
+
+.raffle-buy-sheet__count {
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #ffffff;
+}
+
+.raffle-buy-sheet__steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.raffle-buy-sheet__step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 44px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 80ms,
+    background-color 80ms;
+}
+
+.raffle-buy-sheet__step:active:not(:disabled) {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.raffle-buy-sheet__step-icon {
+  display: none;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-buy-sheet.is-share .raffle-buy-sheet__step-glyph,
+.raffle-buy-sheet.is-draw .raffle-buy-sheet__step-glyph {
+  display: none;
+}
+
+.raffle-buy-sheet.is-share .raffle-buy-sheet__step-icon,
+.raffle-buy-sheet.is-draw .raffle-buy-sheet__step-icon {
+  display: block;
+}
+
+.raffle-buy-sheet__step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.raffle-buy-sheet__buy,
+.raffle-buy-sheet__earn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 56px;
+  margin-top: 16px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 16px;
+  background: #ffdd2d;
+  color: #333333;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 22px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.raffle-buy-sheet__buy {
+  transition:
+    background-color 400ms cubic-bezier(0.2, 0, 0.4, 0.9),
+    color 400ms cubic-bezier(0.2, 0, 0.4, 0.9);
+}
+
+.raffle-buy-sheet__buy:active:not(:disabled),
+.raffle-buy-sheet__earn:active {
+  background: #ffcd33;
+}
+
+.raffle-buy-sheet__buy:active:not(:disabled) {
+  transition-duration: 80ms;
+}
+
+.raffle-buy-sheet__buy:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
+  cursor: default;
+}
+
+.raffle-buy-sheet__buy:disabled .raffle-buy-sheet__buy-icon {
+  opacity: 0.45;
+}
+
+.raffle-buy-sheet__disabled-buy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 56px;
+  margin-top: 20px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 22px;
+  pointer-events: none;
+}
+
+.raffle-buy-sheet__disabled-buy img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.raffle-buy-sheet__counter[hidden],
+.raffle-buy-sheet__buy[hidden],
+.raffle-buy-sheet__earn[hidden],
+.raffle-buy-sheet__disabled-buy[hidden] {
+  display: none;
+}
+
+.raffle-buy-sheet__buy-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity 400ms cubic-bezier(0.2, 0, 0.4, 0.9);
+}
+
+.raffle-buy-sheet__buy-icon[hidden] {
+  display: none;
+}
+
+.raffle-buy-confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.raffle-buy-confetti__burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.raffle-buy-toasts {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  z-index: 160;
+  display: grid;
+  pointer-events: none;
+}
+
+.raffle-buy-toast {
+  grid-area: 1 / 1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 64px;
+  padding: 12px 16px 12px 12px;
+  border-radius: 24px;
+  background: #ffffff;
+  transform-origin: top center;
+  pointer-events: none;
+}
+
+.raffle-buy-toast.is-in {
+  animation: raffle-buy-toast-in 500ms cubic-bezier(0.35, 1.3, 0.25, 1) forwards;
+}
+
+.raffle-buy-toast.is-out {
+  animation: raffle-buy-toast-out 300ms cubic-bezier(0.2, 0, 0.4, 0.9) forwards;
+}
+
+@keyframes raffle-buy-toast-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes raffle-buy-toast-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+.raffle-buy-toast__icon {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-buy-toast__text {
+  margin: 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #333333;
+}
+
+.raffle-buy-sheet__terms {
+  display: block;
+  margin: 16px auto 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.raffle-tickets-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 220;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.raffle-tickets-sheet[hidden] {
+  display: none !important;
+}
+
+.raffle-tickets-sheet.is-open,
+.raffle-tickets-sheet.is-closing {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.raffle-tickets-sheet__panel {
+  position: absolute;
+  top: 108px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: #2c2c2e;
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 500ms cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+
+.raffle-tickets-sheet.is-open:not(.is-closing) .raffle-tickets-sheet__panel {
+  transform: translateY(0);
+}
+
+.raffle-tickets-sheet.is-closing .raffle-tickets-sheet__panel {
+  transform: translateY(100%);
+  transition: transform 300ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.raffle-tickets-sheet__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.raffle-tickets-sheet__close img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.raffle-tickets-sheet__scroll {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.raffle-tickets-sheet__title {
+  margin: 48px 16px 0;
+  text-align: center;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #f6f7f8;
+}
+
+.raffle-tickets-sheet__subtitle {
+  margin: 12px 16px 0;
+  text-align: center;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.raffle-tickets-sheet__list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 24px;
+  padding: 0 16px 24px;
+}
+
+.raffle-tickets-sheet__ticket {
+  position: relative;
+  box-sizing: border-box;
+  height: 68px;
+  padding: 16px 20px 14px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.raffle-tickets-sheet__number {
+  margin: 0;
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 20px;
+  color: #f6f7f8;
+}
+
+.raffle-tickets-sheet__when {
+  margin: 4px 0 0;
+  font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 14px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.raffle-tickets-sheet__image {
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+  width: 84px;
+  height: 72px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }

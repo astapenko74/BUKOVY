@@ -188,6 +188,7 @@
   const onboardingPrizesTooltipEl = document.getElementById(
     "onboarding-prizes-tooltip"
   );
+  const partnerRaffleTooltipEl = document.getElementById("partner-raffle-tooltip");
   const taskExecuteStubEl = document.getElementById("task-execute-stub");
   const scenarioSelectEl = document.getElementById("scenario-select");
   const thematicWordSwitchEl = document.getElementById("thematic-word-switch");
@@ -205,6 +206,8 @@
   );
   const energyBadgeValueEl = energyBadgeEl?.querySelector(".energy-badge__value");
   const raffleResetProgressBtnEl = document.getElementById("raffle-reset-progress-btn");
+  const raffleAddCoinsBtnEl = document.getElementById("raffle-add-coins-btn");
+  const raffleRemoveCoinsBtnEl = document.getElementById("raffle-remove-coins-btn");
   const startOnboardingBtnEl = document.getElementById("start-onboarding-btn");
   const onboardingEl = document.getElementById("onboarding");
   const onboardingCloseBtnEl = document.getElementById("onboarding-close-btn");
@@ -353,9 +356,12 @@
   const RAFFLE_CARD_GAP = 20;
   const RAFFLE_SLIDE_STEP = RAFFLE_CARD_WIDTH + RAFFLE_CARD_GAP;
   const RAFFLE_CARD_SRC = "assets/raffle-event-card-inactive.svg";
+  const RAFFLE_SHARE_BG_SRC = "assets/raffle-share-bg.svg";
+  const RAFFLE_GARANT_BG_SRC = "assets/raffle-garant-bg.svg";
+  const RAFFLE_PARTNER_BG_SRC = "assets/raffle-partner-bg.svg";
   const RAFFLE_TOKEN_SRC = "assets/Монетка активная.png";
   const RAFFLE_TOKEN_INACTIVE_SRC = "assets/Монетка неактивная.png";
-  const INITIAL_COIN_BALANCE = 0;
+  const INITIAL_COIN_BALANCE = 17500;
   const RAFFLE_BTN_TRANSITION_MS = 400;
   const TASK_REWARD_READY_TEXT = "Заберите до 25 ноября";
   const TASK_CLAIM_BUTTON_TEXT = "Забрать награду";
@@ -406,9 +412,20 @@
     {
       badge: "Делим деньги",
       title: "5 000 000₽",
-      subtitle: "Получите долю от суммы",
+      subtitle: "Для участия купите долю",
       buttonCost: 200,
-      visualSrc: "assets/raffle-visual-money.png",
+      buttonLabel: "Доля за 2 000",
+      buyUnit: 2000,
+      buySuffix: "",
+      legal: "До 28 ноября",
+      sheetKind: "share",
+      sheetTitle: "Делим 5 000 000 ₽",
+      sheetHint: "Для участия купите долю",
+      sheetDescHtml:
+        "Разделим 5 000 000 между участниками.<br />Больше долей – больше выигрыш",
+      sheetImage: "assets/raffle-share-sheet.png?v=2",
+      sheetIcon: "assets/raffle-share-quarter.svg",
+      visualSrc: "assets/raffle-visual-share.png",
       activeBaseSrc: "assets/raffle-event-card-1-active.svg",
       participatedSubtitle: "Делят 155 456 игроков",
       backTitle: "Делим деньги",
@@ -416,11 +433,26 @@
         "Разделим 5 000 000 рублей между всеми игроками, принявшими участие в розыгрыше этого приза",
     },
     {
-      badge: "Розыгрыш",
-      title: "Кэшбэк 50%<br>в шопинге",
-      subtitle: "Разыграем 1 000 призов",
+      badge: "Гарантированный приз",
+      title: "5 000 ₽",
+      subtitle: "Для участия купите приз",
       buttonCost: 50,
-      visualSrc: "assets/raffle-visual-cashback.png",
+      buttonLabel: "Приз за 2 000",
+      buyUnit: 2000,
+      buySuffix: "",
+      legal: "До 30 ноября",
+      sheetKind: "garant",
+      sheetTitleHtml: "Гарантированный<br />приз 5 000 ₽",
+      sheetHint: "Осталось призов: 2 754",
+      sheetBoughtHint: "У вас 1 приз",
+      sheetDescHtml:
+        "Подарок для первых 3 000 участников.<br />Купить приз можно только 1 раз",
+      sheetBoughtDescHtml:
+        "Купить приз можно только 1 раз. Выдадим его в течении N дней после подведения итогов",
+      sheetBoughtDate: "Итоги 1 декабря",
+      sheetImage: "assets/raffle-garant-sheet.png?v=1",
+      sheetIcon: "assets/raffle-garant-gift.svg",
+      visualSrc: "assets/raffle-visual-garant.png",
       activeBaseSrc: "assets/raffle-event-card-2-active.svg",
       participatedSubtitle: "Участвуют 564 238 игроков",
       backTitle: "Розыгрыш",
@@ -428,10 +460,25 @@
         "Разыграем 1 000 призов с кэшбэком 50% в шопинге между всеми игроками, принявшими участие в этом розыгрыше",
     },
     {
-      badge: "Розыгрыш",
+      badge: "Розыгрыш 1 приза",
       title: "Аааавтомобиль<br>от Fresh Auto",
-      subtitle: "Разыграем 1 приз",
+      subtitle: "Для участия получите билет",
       buttonCost: 500,
+      buttonLabel: "Билет за задание",
+      buttonCoin: false,
+      buyUnit: null,
+      buySuffix: "",
+      buyLabel: "задание",
+      legal: "До 7 декабря",
+      sheetKind: "partner",
+      sheetTitleHtml: "Розыгрыш автомобиля<br />от Fresh Auto",
+      sheetHint: "Для участия получите билет",
+      sheetJoinedHint: "У вас 1 билет",
+      sheetDescHtml:
+        "Чтобы получить билеты на розыгрыш,<br />выполняйте задания от Fresh Auto",
+      sheetActionLabel: "К заданиям",
+      sheetImage: "assets/raffle-partner-sheet.png?v=1",
+      sheetIcon: "assets/raffle-partner-coupon.svg",
       visualSrc: "assets/raffle-visual-car.png",
       activeBaseSrc: "assets/raffle-event-card-3-active.svg",
       participatedSubtitle: "Участвуют 37 174 игрока",
@@ -453,6 +500,8 @@
   let removedOnboardingTaskListItem = null;
   let onboardingPrizesHintTimer = null;
   let onboardingPrizesHintHiding = false;
+  let partnerRaffleTooltipTimer = null;
+  let partnerRaffleTooltipHiding = false;
   let onboardingPrizesFirstVisitDone = false;
   let onboardingTask1TitleOriginalHtml = null;
   let setPrizesSegmentActive = null;
@@ -699,6 +748,8 @@
 
     if (cardsEl) cardsEl.hidden = !active;
     if (stubEl) stubEl.hidden = active;
+    const drawsEl = document.getElementById("raffle-draws");
+    if (drawsEl) drawsEl.hidden = !active;
     availableEl?.classList.toggle("is-stage-inactive", !active);
 
     if (!active) {
@@ -739,6 +790,7 @@
       skipRaffleParticipateAnimation();
       cancelRaffleIntro(false);
       cancelRaffleIntroPresentation();
+      closeRaffleBuySheet({ animateClose: false });
     }
 
     Object.entries(TAB_SCREENS).forEach(([id, getScreen]) => {
@@ -754,6 +806,7 @@
 
     if (tabId === "prizes") {
       setPrizesTabDot(false);
+      hidePartnerRaffleTooltip({ animate: false });
       if (isOnboardingSession()) {
         const app = document.querySelector(".app");
         if (!onboardingPrizesFirstVisitDone) {
@@ -1710,7 +1763,7 @@
     const partnerLabel = cardEl.querySelector(".raffle-task-card__partner-label");
     if (partnerLabel) {
       partnerLabel.textContent =
-        cardEl.dataset.taskPartnerReadyLabel ?? "Награда от Магнита";
+        cardEl.dataset.taskPartnerReadyLabel ?? "Fresh Auto";
     }
 
     const claimBtn = cardEl.querySelector(".raffle-task-card__claim");
@@ -1732,7 +1785,7 @@
     const partnerLabel = cardEl.querySelector(".raffle-task-card__partner-label");
     if (partnerLabel) {
       partnerLabel.textContent =
-        cardEl.dataset.taskPartnerLabel ?? "Задание от Магнита";
+        cardEl.dataset.taskPartnerLabel ?? "Fresh Auto";
     }
 
     const date = cardEl.querySelector(".raffle-task-card__date");
@@ -1774,6 +1827,10 @@
     return RAFFLE_CARDS[cardIndex]?.buttonCost ?? 0;
   }
 
+  function formatCoinBadgeValue(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  }
+
   function syncCoinBadgeValue() {
     // Во время результата онбординга бейджи не из игры — не перезаписывать.
     if (
@@ -1784,10 +1841,10 @@
       return;
     }
     if (coinBadgeValueEl) {
-      coinBadgeValueEl.textContent = String(coinBalance);
+      coinBadgeValueEl.textContent = formatCoinBadgeValue(coinBalance);
     }
     if (winSplashTasksCoinValueEl) {
-      winSplashTasksCoinValueEl.textContent = String(coinBalance);
+      winSplashTasksCoinValueEl.textContent = formatCoinBadgeValue(coinBalance);
     }
   }
 
@@ -1797,40 +1854,38 @@
     updateRaffleParticipateButtonsState();
   }
 
-  function updateRaffleParticipateButtonsState(displayBalance) {
-    const balance = displayBalance ?? coinBalance;
+  function raffleParticipateButtonHtml(card) {
+    const icon =
+      card.buttonCoin === false
+        ? ""
+        : '<img class="raffle-event-card__btn-icon" src="' +
+          RAFFLE_TOKEN_SRC +
+          '" data-state-src="' +
+          RAFFLE_TOKEN_SRC +
+          '" width="24" height="24" alt="" draggable="false" />';
+    return (
+      '<span class="raffle-event-card__btn-text">' +
+      card.buttonLabel +
+      "</span>" +
+      icon
+    );
+  }
 
+  function updateRaffleParticipateButtonsState() {
     document.querySelectorAll(".raffle-event-card__btn").forEach((btn) => {
       if (btn.classList.contains("is-participated")) return;
 
       const wrap = btn.closest(".raffle-event-card-wrap");
       if (wrap?.dataset.participating === "true") return;
 
-      const card = btn.closest(".raffle-event-card");
-      const cardIndex = Number(card?.dataset.cardIndex);
-      if (Number.isNaN(cardIndex)) return;
+      btn.disabled = false;
+      btn.classList.remove("is-insufficient");
 
-      const cost =
-        Number(btn.dataset.participateCost) || getRaffleCardButtonCost(cardIndex);
-      const canAfford = balance >= cost;
       const icon = btn.querySelector(".raffle-event-card__btn-icon");
-      const nextSrc = canAfford ? RAFFLE_TOKEN_SRC : RAFFLE_TOKEN_INACTIVE_SRC;
-
-      btn.disabled = !canAfford;
-      btn.classList.toggle("is-insufficient", !canAfford);
-
-      if (icon && icon.dataset.stateSrc !== nextSrc) {
-        if (icon.dataset.stateSrc) {
-          icon.style.opacity = "0";
-          window.setTimeout(() => {
-            icon.src = nextSrc;
-            icon.dataset.stateSrc = nextSrc;
-            icon.style.opacity = "1";
-          }, RAFFLE_BTN_TRANSITION_MS / 2);
-        } else {
-          icon.src = nextSrc;
-          icon.dataset.stateSrc = nextSrc;
-        }
+      if (icon && icon.dataset.stateSrc !== RAFFLE_TOKEN_SRC) {
+        icon.src = RAFFLE_TOKEN_SRC;
+        icon.dataset.stateSrc = RAFFLE_TOKEN_SRC;
+        icon.style.opacity = "1";
       }
     });
   }
@@ -1853,8 +1908,8 @@
         const t = Math.min(1, (now - startTime) / duration);
         const eased = 1 - Math.pow(1 - t, 3);
         const current = Math.round(start + (end - start) * eased);
-        if (valueEl) valueEl.textContent = String(current);
-        if (splashValueEl) splashValueEl.textContent = String(current);
+        if (valueEl) valueEl.textContent = formatCoinBadgeValue(current);
+        if (splashValueEl) splashValueEl.textContent = formatCoinBadgeValue(current);
         updateRaffleParticipateButtonsState(current);
         if (current !== lastHapticValue) {
           lastHapticValue = current;
@@ -1864,8 +1919,8 @@
         if (t < 1) {
           requestAnimationFrame(tick);
         } else {
-          if (valueEl) valueEl.textContent = String(end);
-          if (splashValueEl) splashValueEl.textContent = String(end);
+          if (valueEl) valueEl.textContent = formatCoinBadgeValue(end);
+          if (splashValueEl) splashValueEl.textContent = formatCoinBadgeValue(end);
           updateRaffleParticipateButtonsState(end);
           resolve();
         }
@@ -2248,18 +2303,41 @@
     }
 
     const rewardIcon = getTaskCardRewardIcon(cardEl);
+    const ticketIcon = cardEl.querySelector(
+      '.raffle-task-card__reward-item[data-reward="ticket"] .raffle-task-card__reward-icon'
+    );
     const coinFly = rewardIcon ? runCoinsToBadgeAnimation(rewardIcon) : null;
+    const ticketFly = ticketIcon
+      ? runCoinsToBadgeAnimation(ticketIcon, {
+          targetIcon: getGiftIconEl(),
+          src: ticketIcon.getAttribute("src") || "assets/Ticet_Alt.png",
+          count: 1,
+        })
+      : null;
 
     await (coinFly?.halfway ?? Promise.resolve());
 
     isTask2RewardClaimed = true;
+
+    const ticketDone = (ticketFly?.firstArrival ?? Promise.resolve()).then(() => {
+      rafflePartnerOwned = true;
+      if (rafflePartnerTickets.length === 0) {
+        rafflePartnerTickets.push(createRaffleTicketRecord());
+      }
+      setRafflePartnerCardSubtitle(true);
+      setRafflePartnerCardBackground();
+      setPrizesTabDot(true);
+    });
 
     await Promise.all([
       animateTaskCardRemove(cardEl),
       (coinFly?.firstArrival ?? Promise.resolve()).then(() =>
         animateCoinBadgeCounter(TASK_REWARD_COIN_AMOUNT)
       ),
+      ticketDone,
     ]);
+
+    startPartnerRaffleTooltip();
 
     isTask2ClaimAnimating = false;
   }
@@ -2482,8 +2560,93 @@
   }
 
   function handlePrizesHintPointerDown() {
+    if (!partnerRaffleTooltipEl?.hidden) {
+      void hidePartnerRaffleTooltip();
+    }
     if (!isOnboardingPrizesHintActive()) return;
     void hideOnboardingPrizesHint();
+  }
+
+  function layoutPartnerRaffleTooltip() {
+    const tooltip = partnerRaffleTooltipEl;
+    const tail = tooltip?.querySelector(".onboarding-prizes-tooltip__tail");
+    const body = tooltip?.querySelector(".onboarding-prizes-tooltip__body");
+    if (!tooltip || !tail || tooltip.hidden || !prizesTabEl || !frameEl) return;
+
+    const frameRect = frameEl.getBoundingClientRect();
+    const tabRect = prizesTabEl.getBoundingClientRect();
+    const tailWidth = tail.offsetWidth || 30;
+    const tailHeight = tail.offsetHeight || 12;
+    tooltip.style.bottom = `${frameRect.bottom - tabRect.top + 8}px`;
+    tail.style.left = `${
+      tabRect.left + tabRect.width / 2 - frameRect.left - tailWidth / 2
+    }px`;
+
+    if (body) {
+      const bodyWidth = body.offsetWidth;
+      const bodyHeight = body.offsetHeight;
+      const frameWidth = frameRect.width;
+      const tailCenter = tabRect.left + tabRect.width / 2 - frameRect.left;
+      let bodyLeft = tailCenter - bodyWidth / 2;
+      bodyLeft = Math.max(16, Math.min(bodyLeft, frameWidth - 16 - bodyWidth));
+      body.style.left = `${bodyLeft}px`;
+      body.style.right = "auto";
+      body.style.transform = "none";
+
+      const tailLeft = parseFloat(tail.style.left) || 0;
+      const minX = Math.min(bodyLeft, tailLeft);
+      const maxX = Math.max(bodyLeft + bodyWidth, tailLeft + tailWidth);
+      tooltip.style.transformOrigin = `${(minX + maxX) / 2}px ${
+        -(bodyHeight + tailHeight) / 2
+      }px`;
+    }
+  }
+
+  function revealPartnerRaffleTooltip() {
+    if (!partnerRaffleTooltipEl) return;
+    partnerRaffleTooltipEl.classList.remove("is-visible");
+    partnerRaffleTooltipEl.hidden = false;
+    partnerRaffleTooltipEl.setAttribute("aria-hidden", "false");
+    layoutPartnerRaffleTooltip();
+    requestAnimationFrame(() => {
+      layoutPartnerRaffleTooltip();
+      requestAnimationFrame(() => {
+        if (!partnerRaffleTooltipEl || partnerRaffleTooltipEl.hidden) return;
+        partnerRaffleTooltipEl.classList.add("is-visible");
+      });
+    });
+  }
+
+  function startPartnerRaffleTooltip() {
+    window.clearTimeout(partnerRaffleTooltipTimer);
+    partnerRaffleTooltipTimer = window.setTimeout(() => {
+      partnerRaffleTooltipTimer = null;
+      revealPartnerRaffleTooltip();
+    }, ONBOARDING_PRIZES_HINT_DELAY_MS);
+  }
+
+  async function hidePartnerRaffleTooltip(options = {}) {
+    const animate = options.animate !== false;
+    const tooltip = partnerRaffleTooltipEl;
+    window.clearTimeout(partnerRaffleTooltipTimer);
+    partnerRaffleTooltipTimer = null;
+    if (!tooltip || tooltip.hidden) return;
+    if (partnerRaffleTooltipHiding && animate) return;
+
+    if (!animate) {
+      partnerRaffleTooltipHiding = false;
+      tooltip.classList.remove("is-visible");
+      tooltip.hidden = true;
+      tooltip.setAttribute("aria-hidden", "true");
+      return;
+    }
+
+    partnerRaffleTooltipHiding = true;
+    tooltip.classList.remove("is-visible");
+    await waitRaffleDelay(ONBOARDING_PRIZES_TOOLTIP_MS);
+    tooltip.hidden = true;
+    tooltip.setAttribute("aria-hidden", "true");
+    partnerRaffleTooltipHiding = false;
   }
 
   async function claimOnboardingTrainingReward(source) {
@@ -4220,17 +4383,10 @@
       '<p class="raffle-event-card__subtitle">' +
       card.subtitle +
       "</p>" +
-      '<button class="raffle-event-card__btn is-insufficient" type="button" disabled data-participate-cost="' +
+      '<button class="raffle-event-card__btn" type="button" data-participate-cost="' +
       card.buttonCost +
       '">' +
-      '<span class="raffle-event-card__btn-text">Участвовать за ' +
-      card.buttonCost +
-      "</span>" +
-      '<img class="raffle-event-card__btn-icon" src="' +
-      RAFFLE_TOKEN_INACTIVE_SRC +
-      '" data-state-src="' +
-      RAFFLE_TOKEN_INACTIVE_SRC +
-      '" width="24" height="24" alt="" draggable="false" />' +
+      raffleParticipateButtonHtml(card) +
       "</button></div>" +
       '<img class="raffle-event-card__visual" src="' +
       card.visualSrc +
@@ -5893,19 +6049,10 @@
         subtitle.classList.remove("is-participated");
       }
       if (btn) {
-        btn.classList.remove("is-participated");
-        btn.classList.add("is-insufficient");
-        btn.disabled = true;
+        btn.classList.remove("is-participated", "is-insufficient");
+        btn.disabled = false;
         btn.dataset.participateCost = String(data.buttonCost);
-        btn.innerHTML =
-          '<span class="raffle-event-card__btn-text">Участвовать за ' +
-          data.buttonCost +
-          "</span>" +
-          '<img class="raffle-event-card__btn-icon" src="' +
-          RAFFLE_TOKEN_INACTIVE_SRC +
-          '" data-state-src="' +
-          RAFFLE_TOKEN_INACTIVE_SRC +
-          '" width="24" height="24" alt="" draggable="false" />';
+        btn.innerHTML = raffleParticipateButtonHtml(data);
       }
     }
 
@@ -5931,6 +6078,33 @@
     resetTask2RewardReady();
 
     raffleParticipatedIndices.clear();
+    raffleShareOwned = 0;
+    raffleGarantOwned = false;
+    rafflePartnerOwned = false;
+    raffleDrawOwned = [0, 0, 0, 0];
+    raffleDrawTickets = [[], [], [], []];
+    rafflePartnerTickets = [];
+    raffleDrawActivated = [false, false, false, false];
+    raffleDrawActivatePending = false;
+    raffleBuyDrawIndex = -1;
+    closeRaffleTicketsSheet({ animateClose: false });
+    document.getElementById("raffle-buy-sheet")?.classList.remove(
+      "is-hero-bought",
+      "is-garant-bought",
+      "is-partner-bought",
+      "is-draw",
+      "is-draw-bought"
+    );
+    for (let drawIndex = 0; drawIndex < 4; drawIndex += 1) {
+      updateRaffleDrawCard(drawIndex);
+    }
+    hidePartnerRaffleTooltip({ animate: false });
+    setPrizesTabDot(false);
+    raffleShareFlipPending = false;
+    raffleShareFlipDone = false;
+    raffleGarantFlipPending = false;
+    raffleGarantFlipDone = false;
+    raffleBuySpentOut = false;
     clearRaffleIntroSeen();
 
     if (raffleIntroLayerEl) {
@@ -6261,8 +6435,9 @@
           ) {
             return;
           }
+          if (getRaffleWrapProgress(wrap, carousel) > 0.08) return;
           const cardIndex = Number(card.dataset.cardIndex);
-          runRaffleParticipate(wrap, cardIndex);
+          openRaffleBuySheet(cardIndex);
         });
       });
 
@@ -6270,13 +6445,1297 @@
         face.addEventListener("click", (event) => {
           if (wrap.dataset.participating === "true") return;
           if (getRaffleWrapProgress(wrap, carousel) > 0.08) return;
-          if (face.classList.contains("raffle-event-card__face--front")) {
-            if (isRaffleButtonSafeZone(event, card)) return;
-            if (event.target.closest(".raffle-event-card__btn")) return;
-          }
-
-          toggleRaffleCardFlip(flip);
+          if (event.target.closest(".raffle-event-card__btn")) return;
+          const cardIndex = Number(card.dataset.cardIndex);
+          openRaffleBuySheet(cardIndex);
         });
+      });
+    });
+  }
+
+  let raffleBuyCount = 1;
+  let raffleBuyCardIndex = 0;
+  let raffleBuyDrawIndex = -1;
+  let raffleBuySpentOut = false;
+  let raffleShareOwned = 0;
+  let raffleShareFlipPending = false;
+  let raffleShareFlipDone = false;
+  let raffleGarantOwned = false;
+  let raffleGarantFlipPending = false;
+  let raffleGarantFlipDone = false;
+  let rafflePartnerOwned = false;
+  let raffleDrawOwned = [0, 0, 0, 0];
+  let raffleDrawTickets = [[], [], [], []];
+  let rafflePartnerTickets = [];
+  let raffleDrawActivated = [false, false, false, false];
+  let raffleDrawActivatePending = false;
+
+  const RAFFLE_DRAWS = [
+    {
+      sheetKind: "draw",
+      buyUnit: 200,
+      color: "#f59201",
+      toastDate: "итоги 30 ноября",
+      legal: "До 29 ноября",
+      sheetTitle: "Розыгрыш 100 000 ₽",
+      sheetHint: "Для участия купите билет",
+      sheetDescHtml:
+        "Разыграем 10 призов по 100 000 ₽.<br />Больше билетов – выше шансы",
+      sheetImage: "assets/raffle-draw-100k-sheet.png",
+      sheetIcon: "assets/raffle-partner-coupon.svg",
+    },
+    {
+      sheetKind: "draw",
+      buyUnit: 500,
+      color: "#07c2af",
+      toastDate: "итоги 1 декабря",
+      legal: "До 30 ноября",
+      sheetTitle: "Розыгрыш 1 000 000 ₽",
+      sheetHint: "Для участия купите билет",
+      sheetDescHtml:
+        "Разыграем 1 приз размером 1 000 000 ₽.<br />Больше билетов – выше шансы",
+      sheetImage: "assets/raffle-draw-1m-sheet.png",
+      sheetIcon: "assets/raffle-partner-coupon.svg",
+    },
+    {
+      sheetKind: "draw",
+      buyUnit: 150,
+      color: "#fe3360",
+      toastDate: "итоги 2 декабря",
+      legal: "До 1 декабря",
+      sheetTitleHtml: "Розыгрыш 50 000 ₽<br />на покупку техники",
+      sheetHint: "Для участия купите билет",
+      sheetDescHtml:
+        "Разыграем 10 призов по 50 000 ₽ на покупку техники.<br />Больше билетов – выше шансы",
+      sheetImage: "assets/raffle-draw-tech-sheet.png",
+      sheetIcon: "assets/raffle-partner-coupon.svg",
+    },
+    {
+      sheetKind: "draw",
+      buyUnit: 150,
+      color: "#62c366",
+      toastDate: "итоги 11 декабря",
+      legal: "До 10 декабря",
+      sheetTitleHtml: "Розыгрыш кэшбэка<br />50% в «Пятёрочке»",
+      sheetHint: "Для участия купите билет",
+      sheetDescHtml:
+        "Разыграем 1 000 кэшбэков размером в 50% на покупки в «Пятёрочке».<br />Больше билетов – выше шансы",
+      sheetImage: "assets/raffle-draw-shop-sheet.png",
+      sheetIcon: "assets/raffle-partner-coupon.svg",
+    },
+  ];
+
+  function currentRaffleBuyCard() {
+    if (raffleBuyDrawIndex >= 0) return RAFFLE_DRAWS[raffleBuyDrawIndex];
+    return RAFFLE_CARDS[raffleBuyCardIndex];
+  }
+
+  function updateRaffleDrawCard(index) {
+    const el = document.querySelector(
+      '.raffle-draw-card[data-draw="' + index + '"]'
+    );
+    if (!el) return;
+    el.classList.toggle("is-bought", Boolean(raffleDrawActivated[index]));
+    const text = el.querySelector(".raffle-draw-card__tickets-text");
+    if (text) text.textContent = "У вас " + (raffleDrawOwned[index] || 0);
+  }
+
+  function formatRaffleBuyNumber(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  }
+
+  function raffleBuyUnitWord(count, one, few, many) {
+    const mod10 = count % 10;
+    const mod100 = count % 100;
+    if (mod10 === 1 && mod100 !== 11) return one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+    return many;
+  }
+
+  const RAFFLE_TICKET_MONTHS = [
+    "января",
+    "февраля",
+    "марта",
+    "апреля",
+    "мая",
+    "июня",
+    "июля",
+    "августа",
+    "сентября",
+    "октября",
+    "ноября",
+    "декабря",
+  ];
+
+  function createRaffleTicketRecord() {
+    return {
+      number: 1 + Math.floor(Math.random() * 99999999),
+      purchasedAt: Date.now(),
+    };
+  }
+
+  function raffleLegalDayMonth(legal) {
+    const match = String(legal || "").match(/(\d{1,2})\s+([а-яё]+)/i);
+    if (!match) return null;
+    const monthIndex = RAFFLE_TICKET_MONTHS.indexOf(match[2].toLowerCase());
+    if (monthIndex < 0) return null;
+    return { day: Number(match[1]), monthIndex };
+  }
+
+  function raffleNextDayLabel(legal) {
+    const parsed = raffleLegalDayMonth(legal);
+    if (!parsed) return "";
+    const date = new Date(2026, parsed.monthIndex, parsed.day);
+    date.setDate(date.getDate() + 1);
+    return date.getDate() + " " + RAFFLE_TICKET_MONTHS[date.getMonth()];
+  }
+
+  function formatRaffleTicketWhen(timestamp) {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/Moscow",
+      day: "numeric",
+      month: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(new Date(timestamp));
+    const value = (type) => parts.find((part) => part.type === type)?.value || "";
+    const monthIndex = Number(value("month")) - 1;
+    return (
+      Number(value("day")) +
+      " " +
+      (RAFFLE_TICKET_MONTHS[monthIndex] || "") +
+      " в " +
+      value("hour") +
+      ":" +
+      value("minute") +
+      " по мск"
+    );
+  }
+
+  function renderRaffleTicketsSheet(tickets, legal) {
+    const title = document.getElementById("raffle-tickets-sheet-title");
+    const subtitle = document.getElementById("raffle-tickets-sheet-subtitle");
+    const list = document.getElementById("raffle-tickets-sheet-list");
+    const count = tickets.length;
+    const parsed = raffleLegalDayMonth(legal);
+    if (title) {
+      title.textContent =
+        "У вас " +
+        count +
+        " " +
+        raffleBuyUnitWord(count, "билет", "билета", "билетов");
+    }
+    if (subtitle) {
+      subtitle.replaceChildren(
+        document.createTextNode(
+          "Покупайте билеты до " +
+            (parsed ? parsed.day + " " + RAFFLE_TICKET_MONTHS[parsed.monthIndex] : "") +
+            "."
+        ),
+        document.createElement("br"),
+        document.createTextNode("Розыгрыш пройдет " + raffleNextDayLabel(legal))
+      );
+    }
+    if (!list) return;
+    list.replaceChildren();
+    tickets.forEach((ticket) => {
+      const row = document.createElement("div");
+      row.className = "raffle-tickets-sheet__ticket";
+
+      const number = document.createElement("p");
+      number.className = "raffle-tickets-sheet__number";
+      number.textContent = "№ " + formatRaffleBuyNumber(ticket.number);
+
+      const when = document.createElement("p");
+      when.className = "raffle-tickets-sheet__when";
+      when.textContent = formatRaffleTicketWhen(ticket.purchasedAt);
+
+      const image = document.createElement("img");
+      image.className = "raffle-tickets-sheet__image";
+      image.src = "assets/raffle-ticket-card.png";
+      image.width = 84;
+      image.height = 72;
+      image.alt = "";
+      image.draggable = false;
+
+      row.append(number, when, image);
+      list.appendChild(row);
+    });
+  }
+
+  function openRaffleTicketsSheet(tickets, legal) {
+    const sheet = document.getElementById("raffle-tickets-sheet");
+    const panel = document.getElementById("raffle-tickets-sheet-panel");
+    if (!sheet || !panel) return;
+    if (sheet.classList.contains("is-open") || sheet.classList.contains("is-closing")) return;
+
+    renderRaffleTicketsSheet(tickets, legal);
+    const scroll = document.getElementById("raffle-tickets-sheet-scroll");
+    if (scroll) scroll.scrollTop = 0;
+
+    sheet.hidden = false;
+    sheet.classList.remove("is-closing");
+    sheet.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+      sheet.classList.add("is-open");
+    });
+  }
+
+  function closeRaffleTicketsSheet(options = {}) {
+    const sheet = document.getElementById("raffle-tickets-sheet");
+    if (!sheet || sheet.hidden) return;
+    if (!sheet.classList.contains("is-open") && !sheet.classList.contains("is-closing")) return;
+
+    const animateClose = options.animateClose !== false;
+    if (!animateClose) {
+      sheet.classList.remove("is-open", "is-closing");
+      sheet.hidden = true;
+      sheet.setAttribute("aria-hidden", "true");
+      return;
+    }
+    if (sheet.classList.contains("is-closing")) return;
+    sheet.classList.add("is-closing");
+    sheet.classList.remove("is-open");
+    window.setTimeout(() => {
+      if (!sheet.classList.contains("is-closing")) return;
+      sheet.classList.remove("is-closing");
+      sheet.hidden = true;
+      sheet.setAttribute("aria-hidden", "true");
+    }, RESULT_SHEET_CLOSE_MS);
+  }
+
+  function openRaffleTicketsFromHint() {
+    const buySheet = document.getElementById("raffle-buy-sheet");
+    if (!buySheet) return;
+    if (
+      buySheet.classList.contains("is-draw") &&
+      buySheet.classList.contains("is-draw-bought")
+    ) {
+      const card = RAFFLE_DRAWS[raffleBuyDrawIndex];
+      if (!card) return;
+      openRaffleTicketsSheet(raffleDrawTickets[raffleBuyDrawIndex] || [], card.legal);
+      return;
+    }
+    if (
+      buySheet.classList.contains("is-partner") &&
+      buySheet.classList.contains("is-partner-bought")
+    ) {
+      openRaffleTicketsSheet(rafflePartnerTickets, RAFFLE_CARDS[2]?.legal || "");
+    }
+  }
+
+  function raffleBuyPriceText(card, count) {
+    if (!card || card.buyUnit == null) {
+      return "Купить за " + (card?.buyLabel || "");
+    }
+    return (
+      "Купить за " +
+      formatRaffleBuyNumber(card.buyUnit * count) +
+      (card.buySuffix || "")
+    );
+  }
+
+  function raffleShareOwnedPhrase(count) {
+    return (
+      "У вас " +
+      count +
+      " " +
+      raffleBuyUnitWord(count, "доля", "доли", "долей")
+    );
+  }
+
+  function setRaffleShareCardSubtitle(count) {
+    const text =
+      count > 0 ? raffleShareOwnedPhrase(count) : RAFFLE_CARDS[0]?.subtitle;
+    if (!text) return;
+    document
+      .querySelectorAll(
+        '.raffle-event-card[data-card-index="0"] .raffle-event-card__face--front .raffle-event-card__subtitle'
+      )
+      .forEach((subtitle) => {
+        subtitle.textContent = text;
+        subtitle.classList.toggle("is-participated", count > 0);
+      });
+  }
+
+  function setRaffleShareCardBackground(face) {
+    const faceSelector =
+      face === "front" || face === "back"
+        ? '.raffle-event-card__face--' + face + " "
+        : "";
+    document
+      .querySelectorAll(
+        '.raffle-event-card[data-card-index="0"] ' +
+          faceSelector +
+          ".raffle-event-card__base"
+      )
+      .forEach((base) => {
+        base.src = RAFFLE_SHARE_BG_SRC;
+      });
+  }
+
+  function setRaffleGarantCardSubtitle(owned) {
+    const text = owned
+      ? "У вас 1 приз"
+      : RAFFLE_CARDS[1]?.subtitle;
+    if (!text) return;
+    document
+      .querySelectorAll(
+        '.raffle-event-card[data-card-index="1"] .raffle-event-card__face--front .raffle-event-card__subtitle'
+      )
+      .forEach((subtitle) => {
+        subtitle.textContent = text;
+        subtitle.classList.toggle("is-participated", Boolean(owned));
+      });
+  }
+
+  function setRaffleGarantCardBackground(face) {
+    const faceSelector =
+      face === "front" || face === "back"
+        ? '.raffle-event-card__face--' + face + " "
+        : "";
+    document
+      .querySelectorAll(
+        '.raffle-event-card[data-card-index="1"] ' +
+          faceSelector +
+          ".raffle-event-card__base"
+      )
+      .forEach((base) => {
+        base.src = RAFFLE_GARANT_BG_SRC;
+      });
+  }
+
+  function setRafflePartnerCardSubtitle(owned) {
+    const text = owned ? "У вас 1 билет" : RAFFLE_CARDS[2]?.subtitle;
+    if (!text) return;
+    document
+      .querySelectorAll(
+        '.raffle-event-card[data-card-index="2"] .raffle-event-card__face--front .raffle-event-card__subtitle'
+      )
+      .forEach((subtitle) => {
+        subtitle.textContent = text;
+        subtitle.classList.toggle("is-participated", Boolean(owned));
+      });
+  }
+
+  function setRafflePartnerCardBackground(face) {
+    const faceSelector =
+      face === "front" || face === "back"
+        ? '.raffle-event-card__face--' + face + " "
+        : "";
+    document
+      .querySelectorAll(
+        '.raffle-event-card[data-card-index="2"] ' +
+          faceSelector +
+          ".raffle-event-card__base"
+      )
+      .forEach((base) => {
+        base.src = RAFFLE_PARTNER_BG_SRC;
+      });
+  }
+
+  function renderRaffleBuySheet() {
+    const card = currentRaffleBuyCard();
+    const sheet = document.getElementById("raffle-buy-sheet");
+    const countEl = document.getElementById("raffle-buy-sheet-count");
+    const textEl = document.getElementById("raffle-buy-sheet-buy-text");
+    const iconEl = document.getElementById("raffle-buy-sheet-buy-icon");
+    const minusEl = document.getElementById("raffle-buy-sheet-minus");
+    const plusEl = document.getElementById("raffle-buy-sheet-plus");
+    const counterEl = document.querySelector(".raffle-buy-sheet__counter");
+    const buyEl = document.getElementById("raffle-buy-sheet-buy");
+    const disabledBuyEl = document.getElementById("raffle-buy-sheet-disabled-buy");
+    const disabledTextEl = document.getElementById("raffle-buy-sheet-disabled-text");
+    const earnEl = document.getElementById("raffle-buy-sheet-earn");
+    const titleEl = document.querySelector(".raffle-buy-sheet__title");
+    const hintEl = document.querySelector(".raffle-buy-sheet__hint-text");
+    const hintIconEl = document.querySelector(".raffle-buy-sheet__hint-icon");
+    const descEl = document.querySelector(".raffle-buy-sheet__desc");
+    const dateEl = document.querySelector(".raffle-buy-sheet__date");
+    const heroEl = document.querySelector(".raffle-buy-sheet__hero-image");
+    const isShare = card?.sheetKind === "share";
+    const isGarant = card?.sheetKind === "garant";
+    const isPartner = card?.sheetKind === "partner";
+    const isDraw = card?.sheetKind === "draw";
+    const drawOwned = isDraw ? raffleDrawOwned[raffleBuyDrawIndex] || 0 : 0;
+    const canAffordUnit = card?.buyUnit != null && coinBalance >= card.buyUnit;
+    const showBought = isGarant && raffleGarantOwned;
+    const showBroke =
+      ((isShare || isDraw) && !canAffordUnit && !raffleBuySpentOut) ||
+      (isGarant && !showBought && !canAffordUnit);
+
+    sheet?.classList.toggle("is-share", isShare);
+    sheet?.classList.toggle("is-garant", isGarant);
+    sheet?.classList.toggle("is-partner", isPartner);
+    sheet?.classList.toggle("is-draw", isDraw);
+    sheet?.classList.toggle("is-draw-bought", isDraw && drawOwned > 0);
+    if (isDraw && card?.color) sheet?.style.setProperty("--draw-color", card.color);
+    if (isShare) sheet?.classList.toggle("is-hero-bought", raffleShareOwned > 0);
+    if (isGarant) sheet?.classList.toggle("is-garant-bought", raffleGarantOwned);
+    if (isPartner) sheet?.classList.toggle("is-partner-bought", rafflePartnerOwned);
+    sheet?.classList.toggle("is-broke", showBroke);
+
+    if (titleEl) {
+      if (card?.sheetTitleHtml) titleEl.innerHTML = card.sheetTitleHtml;
+      else titleEl.textContent = card?.sheetTitle || "Розыгрыш 100 000 ₽";
+    }
+    if (descEl) {
+      descEl.innerHTML =
+        (showBought && card?.sheetBoughtDescHtml) ||
+        card?.sheetDescHtml ||
+        "Разыграем 10 призов по 100 000.<br />Больше билетов – выше шансы выиграть";
+    }
+    if (dateEl && card?.legal) dateEl.textContent = card.legal;
+    if (dateEl && showBought && card?.sheetBoughtDate) {
+      dateEl.textContent = card.sheetBoughtDate;
+    }
+    if (heroEl && card?.sheetImage) heroEl.src = card.sheetImage;
+    else if (heroEl && !card?.sheetImage) heroEl.src = "assets/raffle-visual-money.png";
+    if (hintIconEl) {
+      hintIconEl.src = card?.sheetIcon || "assets/coupon.svg";
+    }
+    if (hintEl) {
+      hintEl.textContent =
+        isDraw && drawOwned > 0
+          ? "У вас " +
+            drawOwned +
+            " " +
+            raffleBuyUnitWord(drawOwned, "билет", "билета", "билетов")
+          : isPartner && rafflePartnerOwned
+            ? card.sheetJoinedHint || "У вас 1 билет"
+            : isShare && raffleShareOwned > 0
+              ? raffleShareOwnedPhrase(raffleShareOwned)
+              : showBought && card?.sheetBoughtHint
+                ? card.sheetBoughtHint
+                : card?.sheetHint || "Для участия купите билет";
+    }
+
+    if (countEl) {
+      const word = isShare
+        ? raffleBuyUnitWord(raffleBuyCount, "доля", "доли", "долей")
+        : raffleBuyUnitWord(raffleBuyCount, "билет", "билета", "билетов");
+      countEl.textContent = raffleBuyCount + " " + word;
+    }
+    if (textEl) {
+      textEl.textContent = isPartner
+        ? card.sheetActionLabel || "К заданиям"
+        : raffleBuyPriceText(card, raffleBuyCount);
+    }
+    if (disabledTextEl) disabledTextEl.textContent = raffleBuyPriceText(card, 1);
+    if (iconEl) {
+      iconEl.hidden = card?.buttonCoin === false;
+      iconEl.src = raffleBuySpentOut ? RAFFLE_TOKEN_INACTIVE_SRC : RAFFLE_TOKEN_SRC;
+    }
+    if (minusEl) minusEl.disabled = raffleBuySpentOut || raffleBuyCount <= 1;
+    if (plusEl) {
+      if (raffleBuySpentOut) {
+        plusEl.disabled = true;
+      } else if ((isShare || isDraw) && card?.buyUnit != null) {
+        plusEl.disabled = coinBalance < card.buyUnit * (raffleBuyCount + 1);
+      } else {
+        plusEl.disabled = raffleBuyCount >= 99;
+      }
+    }
+    if (counterEl) counterEl.hidden = showBroke || isGarant || isPartner;
+    if (disabledBuyEl) disabledBuyEl.hidden = !showBroke;
+    if (buyEl) {
+      buyEl.hidden = showBroke || showBought;
+      buyEl.disabled = Boolean(raffleBuySpentOut) && !isPartner;
+    }
+    if (earnEl) earnEl.hidden = !showBroke;
+    if (!document.getElementById("raffle-buy-sheet")?.hidden) {
+      syncRaffleBuySheetScrollFade();
+    }
+  }
+
+  function syncRaffleBuySheetScrollFade() {
+    const sheet = document.getElementById("raffle-buy-sheet");
+    const panel = document.getElementById("raffle-buy-sheet-panel");
+    const scroll = sheet?.querySelector(".raffle-buy-sheet__scroll");
+    const fade = sheet?.querySelector(".raffle-buy-sheet__fade");
+    if (!sheet || !panel || !scroll || !fade) return;
+
+    scroll.style.paddingBottom = "";
+    sheet.classList.remove("is-overflow");
+    const buttons = [
+      document.getElementById("raffle-buy-sheet-buy"),
+      document.getElementById("raffle-buy-sheet-earn"),
+      document.getElementById("raffle-buy-sheet-disabled-buy"),
+    ].filter((el) => el && !el.hidden);
+    const overflows = scroll.scrollHeight > scroll.clientHeight + 1;
+    if (!overflows || buttons.length === 0) {
+      fade.style.height = "";
+      return;
+    }
+
+    sheet.classList.add("is-overflow");
+    const panelRect = panel.getBoundingClientRect();
+    const button = buttons.reduce((topmost, el) =>
+      el.getBoundingClientRect().top < topmost.getBoundingClientRect().top ? el : topmost
+    );
+    const buttonRect = button.getBoundingClientRect();
+    const fadeHeight = Math.max(0, Math.round(panelRect.bottom - buttonRect.top));
+    const gap = Math.min(32, parseFloat(getComputedStyle(button).marginTop) || 0);
+    fade.style.height = fadeHeight + "px";
+    scroll.style.paddingBottom = fadeHeight + gap + "px";
+  }
+
+  function isRaffleBuySheetOpen() {
+    const sheet = document.getElementById("raffle-buy-sheet");
+    return Boolean(
+      sheet?.classList.contains("is-open") || sheet?.classList.contains("is-closing")
+    );
+  }
+
+  function finishRaffleBuySheetClose() {
+    const sheet = document.getElementById("raffle-buy-sheet");
+    const backdrop = document.getElementById("raffle-buy-sheet-backdrop");
+    const panel = document.getElementById("raffle-buy-sheet-panel");
+    sheet?.classList.remove("is-closing");
+    backdrop?.classList.remove("is-closing");
+    panel?.classList.remove("is-dragging");
+    if (panel) panel.style.transform = "";
+    if (sheet) {
+      sheet.hidden = true;
+      sheet.setAttribute("aria-hidden", "true");
+    }
+    if (backdrop) {
+      backdrop.hidden = true;
+      backdrop.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function openRaffleBuySheet(cardIndex) {
+    const sheet = document.getElementById("raffle-buy-sheet");
+    const backdrop = document.getElementById("raffle-buy-sheet-backdrop");
+    const panel = document.getElementById("raffle-buy-sheet-panel");
+    if (!sheet || !backdrop || !panel || !RAFFLE_CARDS[cardIndex] || isRaffleBuySheetOpen()) {
+      return;
+    }
+
+    raffleBuyDrawIndex = -1;
+    raffleBuyCardIndex = cardIndex;
+    raffleBuyCount = 1;
+    raffleBuySpentOut = false;
+    renderRaffleBuySheet();
+    const scroll = sheet.querySelector(".raffle-buy-sheet__scroll");
+    if (scroll) scroll.scrollTop = 0;
+
+    sheet.hidden = false;
+    backdrop.hidden = false;
+    sheet.classList.remove("is-closing");
+    backdrop.classList.remove("is-closing");
+    panel.classList.remove("is-dragging");
+    panel.style.transform = "";
+    sheet.setAttribute("aria-hidden", "false");
+    backdrop.setAttribute("aria-hidden", "false");
+    prizesPageEl?.classList.add("raffle-buy-sheet-open");
+    document.querySelector(".app")?.classList.add("is-raffle-sheet-open");
+    setAppSheetChrome(true);
+
+    requestAnimationFrame(() => {
+      sheet.classList.add("is-open");
+      backdrop.classList.add("is-visible");
+      syncRaffleBuySheetScrollFade();
+    });
+  }
+
+  function openRaffleDrawSheet(drawIndex) {
+    const sheet = document.getElementById("raffle-buy-sheet");
+    const backdrop = document.getElementById("raffle-buy-sheet-backdrop");
+    const panel = document.getElementById("raffle-buy-sheet-panel");
+    if (!sheet || !backdrop || !panel || !RAFFLE_DRAWS[drawIndex] || isRaffleBuySheetOpen()) {
+      return;
+    }
+
+    raffleBuyDrawIndex = drawIndex;
+    raffleBuyCount = 1;
+    raffleBuySpentOut = false;
+    renderRaffleBuySheet();
+    const scroll = sheet.querySelector(".raffle-buy-sheet__scroll");
+    if (scroll) scroll.scrollTop = 0;
+
+    sheet.hidden = false;
+    backdrop.hidden = false;
+    sheet.classList.remove("is-closing");
+    backdrop.classList.remove("is-closing");
+    panel.classList.remove("is-dragging");
+    panel.style.transform = "";
+    sheet.setAttribute("aria-hidden", "false");
+    backdrop.setAttribute("aria-hidden", "false");
+    prizesPageEl?.classList.add("raffle-buy-sheet-open");
+    document.querySelector(".app")?.classList.add("is-raffle-sheet-open");
+    setAppSheetChrome(true);
+
+    requestAnimationFrame(() => {
+      sheet.classList.add("is-open");
+      backdrop.classList.add("is-visible");
+      syncRaffleBuySheetScrollFade();
+    });
+  }
+
+  function closeRaffleBuySheet(options = {}) {
+    const sheet = document.getElementById("raffle-buy-sheet");
+    const backdrop = document.getElementById("raffle-buy-sheet-backdrop");
+    const panel = document.getElementById("raffle-buy-sheet-panel");
+    if (!sheet || !backdrop) return;
+    if (!sheet.classList.contains("is-open") && !sheet.classList.contains("is-closing")) {
+      return;
+    }
+
+    const animateClose = options.animateClose !== false;
+    const shouldFlipShare = raffleShareFlipPending && sheet.classList.contains("is-open");
+    const shouldFlipGarant = raffleGarantFlipPending && sheet.classList.contains("is-open");
+    if (!options.keepToasts) dismissRaffleBuyToasts();
+    prizesPageEl?.classList.remove("raffle-buy-sheet-open");
+    document.querySelector(".app")?.classList.remove("is-raffle-sheet-open");
+    backdrop.classList.remove("is-visible");
+    setAppSheetChrome(false, animateClose);
+
+    if (shouldFlipShare) {
+      raffleShareFlipPending = false;
+      raffleShareFlipDone = true;
+      window.setTimeout(() => {
+        void playRaffleSharePurchaseFlip();
+      }, animateClose ? RESULT_SHEET_CLOSE_MS : 0);
+    }
+
+    if (shouldFlipGarant) {
+      raffleGarantFlipPending = false;
+      raffleGarantFlipDone = true;
+      window.setTimeout(() => {
+        void playRaffleGarantPurchaseFlip();
+      }, animateClose ? RESULT_SHEET_CLOSE_MS : 0);
+    }
+
+    const shouldActivateDraw =
+      raffleDrawActivatePending &&
+      raffleBuyDrawIndex >= 0 &&
+      sheet.classList.contains("is-open");
+    if (shouldActivateDraw) {
+      const drawIndex = raffleBuyDrawIndex;
+      raffleDrawActivatePending = false;
+      raffleDrawActivated[drawIndex] = true;
+      window.setTimeout(() => {
+        updateRaffleDrawCard(drawIndex);
+      }, animateClose ? RESULT_SHEET_CLOSE_MS : 0);
+    }
+
+    if (animateClose) {
+      sheet.classList.add("is-closing");
+      sheet.classList.remove("is-open");
+      backdrop.classList.add("is-closing");
+      panel?.classList.remove("is-dragging");
+      if (panel) panel.style.transform = "";
+      window.setTimeout(finishRaffleBuySheetClose, RESULT_SHEET_CLOSE_MS);
+      return;
+    }
+
+    sheet.classList.remove("is-open", "is-closing");
+    backdrop.classList.remove("is-visible", "is-closing");
+    finishRaffleBuySheetClose();
+  }
+
+  function playRaffleBuyEdgeConfetti() {
+    const container = document.getElementById("raffle-buy-confetti");
+    if (!container) return;
+    const burst = document.createElement("div");
+    burst.className = "raffle-buy-confetti__burst";
+    container.appendChild(burst);
+    playConfettiInContainer(burst, {
+      onDone() {
+        burst.remove();
+      },
+    });
+    if (!burst.querySelector("canvas")) burst.remove();
+  }
+
+  const RAFFLE_BUY_TOAST_IN_MS = 500;
+  const RAFFLE_BUY_TOAST_HOLD_MS = 3000;
+  const RAFFLE_BUY_TOAST_OUT_MS = 300;
+  let raffleBuyToastLayer = 0;
+
+  function placeRaffleBuyToasts() {
+    const app = document.querySelector(".app");
+    const nav = document.querySelector(".app > .header .nav-row");
+    const host = document.getElementById("raffle-buy-toasts");
+    if (!app || !nav || !host) return;
+    const top = nav.getBoundingClientRect().bottom - app.getBoundingClientRect().top;
+    host.style.top = top + "px";
+  }
+
+  function dismissRaffleBuyToast(toast) {
+    if (!toast || toast.classList.contains("is-out")) return;
+    if (toast._holdTimer != null) {
+      window.clearTimeout(toast._holdTimer);
+      toast._holdTimer = null;
+    }
+    toast.classList.remove("is-in");
+    toast.classList.add("is-out");
+    window.setTimeout(() => {
+      toast.remove();
+    }, RAFFLE_BUY_TOAST_OUT_MS);
+  }
+
+  function dismissRaffleBuyToasts() {
+    document.querySelectorAll(".raffle-buy-toast").forEach((toast) => {
+      dismissRaffleBuyToast(toast);
+    });
+  }
+
+  function showRaffleBuyToast(count, options = {}) {
+    const host = document.getElementById("raffle-buy-toasts");
+    if (!host) return;
+    placeRaffleBuyToasts();
+    host.querySelectorAll(".raffle-buy-toast:not(.is-out)").forEach((toast) => {
+      dismissRaffleBuyToast(toast);
+    });
+
+    const toast = document.createElement("div");
+    toast.className = "raffle-buy-toast is-in";
+    raffleBuyToastLayer += 1;
+    toast.style.zIndex = String(raffleBuyToastLayer);
+
+    const icon = document.createElement("img");
+    icon.className = "raffle-buy-toast__icon";
+    icon.src = options.iconSrc || "assets/raffle-share-dolia.png?v=1";
+    icon.width = 40;
+    icon.height = 40;
+    icon.alt = "";
+    icon.draggable = false;
+
+    const text = document.createElement("p");
+    text.className = "raffle-buy-toast__text";
+    const word = raffleBuyUnitWord(count, "долю", "доли", "долей");
+    text.append(
+      document.createTextNode(
+        options.line1 || "Купили " + count + " " + word + " от суммы,"
+      ),
+      document.createElement("br"),
+      document.createTextNode(options.line2 || "итоги 29 ноября")
+    );
+
+    toast.append(icon, text);
+    host.appendChild(toast);
+    toast._holdTimer = window.setTimeout(() => {
+      dismissRaffleBuyToast(toast);
+    }, RAFFLE_BUY_TOAST_IN_MS + RAFFLE_BUY_TOAST_HOLD_MS);
+  }
+
+  async function playRaffleCardPurchaseFlip(cardIndex, setSubtitle, setBackground) {
+    const card = document.querySelector(
+      '#raffle-cards-track .raffle-event-card[data-card-index="' + cardIndex + '"]'
+    );
+    const wrap = card?.closest(".raffle-event-card-wrap");
+    const flip = card?.querySelector(".raffle-event-card__flip");
+    if (!card || !wrap || !flip || wrap.dataset.participating === "true") {
+      setSubtitle();
+      setBackground();
+      return;
+    }
+
+    const centerRotate = RAFFLE_CENTER_ROTATIONS[cardIndex] ?? 0;
+    const flipStart = Number(flip.dataset.rotation || 0);
+
+    wrap.dataset.participating = "true";
+    setRaffleScrollLocked(true);
+    document.querySelector(".raffle-cards-block")?.classList.add("is-participate-active");
+    setRaffleTurnoverBackToAll(cardIndex, true);
+
+    flip.style.transition = "none";
+    flip.style.transform = "rotateY(" + flipStart + "deg)";
+    void flip.offsetWidth;
+    flip.style.transition = "";
+
+    try {
+      await waitRaffleDelay(RAFFLE_PARTICIPATE_SCALE_DELAY_MS);
+
+      wrap.style.transition =
+        "transform " +
+        RAFFLE_PARTICIPATE_SCALE_MS +
+        "ms cubic-bezier(0, 0, 0.4, 0.9), filter " +
+        RAFFLE_PARTICIPATE_SCALE_MS +
+        "ms ease";
+      wrap.style.filter = "none";
+      wrap.style.transform =
+        "translateY(0px) rotate(0deg) scale(" + RAFFLE_PARTICIPATE_SCALE + ")";
+      await waitRaffleTransition(wrap, "transform", RAFFLE_PARTICIPATE_SCALE_MS);
+
+      flip.style.transition =
+        "transform " +
+        RAFFLE_PARTICIPATE_FLIP_SLOW_MS +
+        "ms cubic-bezier(0.4, 0, 1, 1)";
+      flip.dataset.flipAnimating = "true";
+      armRaffleFlipMid(flip, RAFFLE_PARTICIPATE_FLIP_SLOW_MS, true);
+      flip.style.transform = "rotateY(" + (flipStart + 180) + "deg)";
+      await waitRaffleTransition(flip, "transform", RAFFLE_PARTICIPATE_FLIP_SLOW_MS);
+      clearRaffleFlipMid(flip);
+      delete flip.dataset.flipAnimating;
+
+      setSubtitle();
+      setBackground("front");
+
+      flip.style.transition =
+        "transform " +
+        RAFFLE_PARTICIPATE_FLIP_FAST_MS +
+        "ms cubic-bezier(0.4, 0.1, 0.2, 1)";
+      flip.dataset.flipAnimating = "true";
+      armRaffleFlipMid(flip, RAFFLE_PARTICIPATE_FLIP_FAST_MS, false);
+      flip.style.transform = "rotateY(" + (flipStart + 360) + "deg)";
+      await waitRaffleTransition(flip, "transform", RAFFLE_PARTICIPATE_FLIP_FAST_MS);
+      clearRaffleFlipMid(flip);
+      delete flip.dataset.flipAnimating;
+
+      flip.dataset.rotation = String(flipStart + 360);
+      normalizeRaffleFlipRotation(flip);
+
+      await waitRaffleDelay(RAFFLE_PARTICIPATE_PAUSE_MS);
+
+      wrap.style.transition =
+        "transform " +
+        RAFFLE_PARTICIPATE_RETURN_MS +
+        "ms cubic-bezier(0.45, 1.45, 0.48, 1)";
+      wrap.style.transform =
+        "translateY(0px) rotate(" + centerRotate + "deg) scale(1)";
+
+      window.setTimeout(() => {
+        spawnRaffleImpactSparks(wrap);
+      }, RAFFLE_PARTICIPATE_SPARKS_AT_MS);
+
+      await waitRaffleTransition(wrap, "transform", RAFFLE_PARTICIPATE_RETURN_MS);
+      setBackground("back");
+      setRaffleTurnoverBackToAll(cardIndex, false);
+    } finally {
+      setRaffleTurnoverBackToAll(cardIndex, false);
+      clearRaffleFlipMid(flip);
+      delete flip.dataset.flipAnimating;
+      wrap.style.transition = "";
+      flip.style.transition = "";
+      delete wrap.dataset.participating;
+      document.querySelector(".raffle-cards-block")?.classList.remove("is-participate-active");
+      setRaffleScrollLocked(false);
+      raffleCarouselRefs?.updateCardTransforms();
+    }
+  }
+
+  function playRaffleSharePurchaseFlip() {
+    return playRaffleCardPurchaseFlip(
+      0,
+      () => setRaffleShareCardSubtitle(raffleShareOwned),
+      setRaffleShareCardBackground
+    );
+  }
+
+  function playRaffleGarantPurchaseFlip() {
+    return playRaffleCardPurchaseFlip(
+      1,
+      () => setRaffleGarantCardSubtitle(true),
+      setRaffleGarantCardBackground
+    );
+  }
+
+  function purchaseRaffleDraw() {
+    const card = currentRaffleBuyCard();
+    const drawIndex = raffleBuyDrawIndex;
+    if (raffleBuySpentOut) return;
+    if (!card || card.sheetKind !== "draw" || card.buyUnit == null) return;
+    if (drawIndex < 0) return;
+    const cost = card.buyUnit * raffleBuyCount;
+    if (coinBalance < cost || isRaffleBuySheetOpen() === false) return;
+    if (document.getElementById("raffle-buy-sheet")?.classList.contains("is-closing")) return;
+
+    const startBalance = coinBalance;
+    const endBalance = startBalance - cost;
+    coinBalance = endBalance;
+    void animateCoinBadgeValue(startBalance, endBalance);
+    const boughtCount = raffleBuyCount;
+    raffleDrawOwned[drawIndex] = (raffleDrawOwned[drawIndex] || 0) + boughtCount;
+    for (let ticketIndex = 0; ticketIndex < boughtCount; ticketIndex += 1) {
+      raffleDrawTickets[drawIndex].push(createRaffleTicketRecord());
+    }
+    if (!raffleDrawActivated[drawIndex]) raffleDrawActivatePending = true;
+    updateRaffleDrawCard(drawIndex);
+    raffleBuyCount = 1;
+    raffleBuySpentOut = coinBalance < card.buyUnit;
+    playRaffleBuyEdgeConfetti();
+    showRaffleBuyToast(boughtCount, {
+      iconSrc: "assets/raffle-draw-toast.png",
+      line1:
+        "Купили " +
+        boughtCount +
+        " " +
+        raffleBuyUnitWord(boughtCount, "билет", "билета", "билетов") +
+        " на розыгрыш,",
+      line2: card.toastDate,
+    });
+    renderRaffleBuySheet();
+  }
+
+  function purchaseRaffleShare() {
+    const card = currentRaffleBuyCard();
+    if (raffleBuySpentOut) return;
+    if (!card || card.sheetKind !== "share" || card.buyUnit == null) return;
+    const cost = card.buyUnit * raffleBuyCount;
+    if (coinBalance < cost || isRaffleBuySheetOpen() === false) return;
+    if (document.getElementById("raffle-buy-sheet")?.classList.contains("is-closing")) return;
+
+    const startBalance = coinBalance;
+    const endBalance = startBalance - cost;
+    coinBalance = endBalance;
+    void animateCoinBadgeValue(startBalance, endBalance);
+    raffleShareOwned += raffleBuyCount;
+    if (!raffleShareFlipDone) {
+      raffleShareFlipPending = true;
+    } else {
+      setRaffleShareCardSubtitle(raffleShareOwned);
+    }
+    const boughtCount = raffleBuyCount;
+    raffleBuyCount = 1;
+    raffleBuySpentOut = coinBalance < card.buyUnit;
+    playRaffleBuyEdgeConfetti();
+    showRaffleBuyToast(boughtCount);
+    renderRaffleBuySheet();
+  }
+
+  function purchaseRaffleGarant() {
+    const card = currentRaffleBuyCard();
+    if (!card || card.sheetKind !== "garant" || card.buyUnit == null) return;
+    if (raffleGarantOwned) return;
+    if (coinBalance < card.buyUnit || isRaffleBuySheetOpen() === false) return;
+    if (document.getElementById("raffle-buy-sheet")?.classList.contains("is-closing")) {
+      return;
+    }
+
+    const startBalance = coinBalance;
+    const endBalance = startBalance - card.buyUnit;
+    coinBalance = endBalance;
+    void animateCoinBadgeValue(startBalance, endBalance);
+    raffleGarantOwned = true;
+    if (!raffleGarantFlipDone) raffleGarantFlipPending = true;
+    const garantLegalLabel =
+      raffleCardsPaginationLabelEl ??
+      document.getElementById("raffle-cards-pagination-label");
+    if (garantLegalLabel && card.sheetBoughtDate) {
+      garantLegalLabel.textContent = card.sheetBoughtDate;
+    }
+    document.getElementById("raffle-buy-sheet")?.classList.add("is-garant-bought");
+    playRaffleBuyEdgeConfetti();
+    showRaffleBuyToast(1, {
+      iconSrc: "assets/raffle-garant-dolia.png?v=1",
+      line1: "Купили 1 гарантированный приз,",
+      line2: "итоги 1 декабря",
+    });
+    closeRaffleBuySheet({ animateClose: true, keepToasts: true });
+  }
+
+  function openRaffleTasksFromBuySheet() {
+    activateTab("raffle");
+    showAppScreen("raffle");
+  }
+
+  function initRaffleBuySheet() {
+    const backdrop = document.getElementById("raffle-buy-sheet-backdrop");
+    const panel = document.getElementById("raffle-buy-sheet-panel");
+    const hero = document.getElementById("raffle-buy-sheet-hero");
+    const closeEl = document.getElementById("raffle-buy-sheet-close");
+    const minusEl = document.getElementById("raffle-buy-sheet-minus");
+    const plusEl = document.getElementById("raffle-buy-sheet-plus");
+    if (!panel) return;
+
+    let dragStartY = 0;
+    let isDragging = false;
+    let pendingSheetDrag = false;
+    let activePointerId = null;
+
+    const finishDrag = (clientY) => {
+      if (!isDragging) return;
+      isDragging = false;
+      activePointerId = null;
+      panel.classList.remove("is-dragging");
+      const delta = Math.max(0, clientY - dragStartY);
+      if (delta > panel.offsetHeight * 0.25) {
+        panel.style.transform = "";
+        closeRaffleBuySheet({ animateClose: true });
+        return;
+      }
+      panel.style.transform = "";
+    };
+
+    const raffleStepPressMs = 80;
+    const raffleStepHoldGuardMs = 1000;
+    const raffleStepRepeatStartMs = raffleStepPressMs * 3;
+    const raffleStepRepeatMinMs = 50;
+    let raffleStepPressLock = false;
+    let raffleStepHoldTimer = null;
+    let raffleStepHoldDelay = raffleStepRepeatStartMs;
+    let raffleStepHolding = false;
+    let raffleStepFromPointer = false;
+
+    const raffleStepCanChange = (direction) => {
+      if (raffleBuySpentOut || raffleStepPressLock) return false;
+      if (direction === "minus") return raffleBuyCount > 1;
+      const card = currentRaffleBuyCard();
+      if (
+        (card?.sheetKind === "share" || card?.sheetKind === "draw") &&
+        card.buyUnit != null
+      ) {
+        return coinBalance >= card.buyUnit * (raffleBuyCount + 1);
+      }
+      return raffleBuyCount < 99;
+    };
+
+    const raffleStepPressDisables = (direction) => {
+      if (!raffleStepCanChange(direction)) return false;
+      if (direction === "minus") return raffleBuyCount === 2;
+      const card = currentRaffleBuyCard();
+      const nextCount = raffleBuyCount + 1;
+      if (
+        (card?.sheetKind === "share" || card?.sheetKind === "draw") &&
+        card.buyUnit != null
+      ) {
+        return coinBalance < card.buyUnit * (nextCount + 1);
+      }
+      return nextCount >= 99;
+    };
+
+    const applyRaffleStep = (direction) => {
+      if (direction === "minus") raffleBuyCount -= 1;
+      else raffleBuyCount += 1;
+      renderRaffleBuySheet();
+    };
+
+    const releaseRaffleStepPress = (button) => {
+      if (!button) return;
+      button.style.transition = "";
+      button.style.transform = "";
+      button.style.backgroundColor = "";
+    };
+
+    const stopRaffleStepHold = () => {
+      raffleStepHolding = false;
+      if (raffleStepHoldTimer != null) {
+        window.clearTimeout(raffleStepHoldTimer);
+        raffleStepHoldTimer = null;
+      }
+    };
+
+    const playRaffleDisablingStepPress = (button, applyChange) => {
+      if (!button || raffleStepPressLock) return;
+      stopRaffleStepHold();
+      raffleStepPressLock = true;
+      button.style.transition = "none";
+      button.style.transform = "scale(1)";
+      button.style.backgroundColor = "";
+      void button.offsetWidth;
+      button.style.transition =
+        "transform " + raffleStepPressMs + "ms, background-color " + raffleStepPressMs + "ms";
+      button.style.transform = "scale(0.9)";
+      button.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
+      window.setTimeout(() => {
+        applyChange();
+        renderRaffleBuySheet();
+        button.style.backgroundColor = "";
+        button.style.transform = "scale(1)";
+        window.setTimeout(() => {
+          releaseRaffleStepPress(button);
+          raffleStepPressLock = false;
+        }, raffleStepPressMs);
+      }, raffleStepPressMs);
+    };
+
+    const finishRaffleStepHoldAtLimit = (button, direction) => {
+      stopRaffleStepHold();
+      applyRaffleStep(direction);
+      releaseRaffleStepPress(button);
+    };
+
+    const scheduleRaffleStepHold = (button, direction) => {
+      raffleStepHoldTimer = window.setTimeout(() => {
+        raffleStepHoldTimer = null;
+        if (!raffleStepHolding || button.disabled || raffleStepPressLock) return;
+        if (!raffleStepCanChange(direction)) {
+          stopRaffleStepHold();
+          return;
+        }
+        if (raffleStepPressDisables(direction)) {
+          finishRaffleStepHoldAtLimit(button, direction);
+          return;
+        }
+        applyRaffleStep(direction);
+        raffleStepHoldDelay = Math.max(
+          raffleStepRepeatMinMs,
+          Math.round(raffleStepHoldDelay * 0.94)
+        );
+        scheduleRaffleStepHold(button, direction);
+      }, raffleStepHoldDelay);
+    };
+
+    const handleRaffleStepClick = (button, direction) => {
+      if (raffleStepFromPointer) {
+        raffleStepFromPointer = false;
+        return;
+      }
+      if (!raffleStepCanChange(direction)) return;
+      if (raffleStepPressDisables(direction)) {
+        playRaffleDisablingStepPress(button, () => applyRaffleStep(direction));
+        return;
+      }
+      applyRaffleStep(direction);
+    };
+
+    const armRaffleStepHold = (button, direction) => {
+      if (!button) return;
+
+      button.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || button.disabled || raffleStepPressLock) return;
+        if (!raffleStepCanChange(direction)) return;
+        raffleStepFromPointer = true;
+        try {
+          button.setPointerCapture(event.pointerId);
+        } catch {
+          /* ignore */
+        }
+        if (raffleStepPressDisables(direction)) {
+          playRaffleDisablingStepPress(button, () => applyRaffleStep(direction));
+          return;
+        }
+        applyRaffleStep(direction);
+        raffleStepHolding = true;
+        raffleStepHoldDelay = raffleStepRepeatStartMs;
+        raffleStepHoldTimer = window.setTimeout(() => {
+          raffleStepHoldTimer = null;
+          if (!raffleStepHolding || button.disabled || raffleStepPressLock) return;
+          if (!raffleStepCanChange(direction)) {
+            stopRaffleStepHold();
+            return;
+          }
+          if (raffleStepPressDisables(direction)) {
+            finishRaffleStepHoldAtLimit(button, direction);
+            return;
+          }
+          applyRaffleStep(direction);
+          scheduleRaffleStepHold(button, direction);
+        }, raffleStepHoldGuardMs);
+      });
+
+      const endHold = () => {
+        stopRaffleStepHold();
+      };
+      button.addEventListener("pointerup", endHold);
+      button.addEventListener("pointercancel", endHold);
+    };
+
+    closeEl?.addEventListener("click", () => {
+      closeRaffleBuySheet({ animateClose: true });
+    });
+
+    backdrop?.addEventListener("click", () => {
+      closeRaffleBuySheet({ animateClose: true });
+    });
+
+    minusEl?.addEventListener("click", () => {
+      handleRaffleStepClick(minusEl, "minus");
+    });
+
+    plusEl?.addEventListener("click", () => {
+      handleRaffleStepClick(plusEl, "plus");
+    });
+
+    armRaffleStepHold(minusEl, "minus");
+    armRaffleStepHold(plusEl, "plus");
+
+    document.getElementById("raffle-buy-sheet-buy")?.addEventListener("click", () => {
+      const card = currentRaffleBuyCard();
+      if (card?.sheetKind === "partner") openRaffleTasksFromBuySheet();
+      else if (card?.sheetKind === "garant") purchaseRaffleGarant();
+      else if (card?.sheetKind === "draw") purchaseRaffleDraw();
+      else purchaseRaffleShare();
+    });
+
+    document.getElementById("raffle-buy-sheet-earn")?.addEventListener("click", () => {
+      openRaffleTasksFromBuySheet();
+    });
+
+    const raffleSheetScroll = () => panel.querySelector(".raffle-buy-sheet__scroll");
+
+    hero?.addEventListener("pointerdown", (event) => {
+      if (!isRaffleBuySheetOpen() || event.target.closest(".raffle-buy-sheet__close")) return;
+      dragStartY = event.clientY;
+      activePointerId = event.pointerId;
+      const scroll = raffleSheetScroll();
+      const overflows = Boolean(scroll && scroll.scrollHeight > scroll.clientHeight + 1);
+      if (overflows) {
+        isDragging = false;
+        pendingSheetDrag = true;
+        return;
+      }
+      pendingSheetDrag = false;
+      isDragging = true;
+      panel.classList.add("is-dragging");
+      hero.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    hero?.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== activePointerId) return;
+      if (pendingSheetDrag && !isDragging) {
+        const delta = event.clientY - dragStartY;
+        if (Math.abs(delta) < 6) return;
+        const scroll = raffleSheetScroll();
+        const atTop = !scroll || scroll.scrollTop <= 0;
+        if (delta > 0 && atTop) {
+          pendingSheetDrag = false;
+          isDragging = true;
+          panel.classList.add("is-dragging");
+          if (scroll) scroll.scrollTop = 0;
+          hero.setPointerCapture(event.pointerId);
+        } else {
+          pendingSheetDrag = false;
+          activePointerId = null;
+          return;
+        }
+      }
+      if (!isDragging) return;
+      const offset = Math.max(0, event.clientY - dragStartY);
+      panel.style.transform = "translateY(" + offset + "px)";
+    });
+
+    hero?.addEventListener("pointerup", (event) => {
+      if (event.pointerId !== activePointerId) {
+        pendingSheetDrag = false;
+        return;
+      }
+      pendingSheetDrag = false;
+      finishDrag(event.clientY);
+    });
+
+    hero?.addEventListener("pointercancel", (event) => {
+      if (event.pointerId !== activePointerId) {
+        pendingSheetDrag = false;
+        return;
+      }
+      pendingSheetDrag = false;
+      finishDrag(event.clientY);
+    });
+
+    window.addEventListener("resize", () => {
+      if (!document.getElementById("raffle-buy-sheet")?.hidden) {
+        syncRaffleBuySheetScrollFade();
+      }
+    });
+
+    document.querySelector(".raffle-buy-sheet__hint")?.addEventListener("click", () => {
+      openRaffleTicketsFromHint();
+    });
+
+    document.getElementById("raffle-tickets-sheet-close")?.addEventListener("click", () => {
+      closeRaffleTicketsSheet({ animateClose: true });
+    });
+
+    document.querySelectorAll(".raffle-draw-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        openRaffleDrawSheet(Number(card.dataset.draw));
       });
     });
   }
@@ -6869,6 +8328,17 @@
       }
 
       const scrollProgress = track.scrollLeft / RAFFLE_SLIDE_STEP;
+      const nearest = Math.max(
+        0,
+        Math.min(RAFFLE_SLIDE_INDICES.length - 1, Math.round(scrollProgress))
+      );
+      const legalCard = RAFFLE_CARDS[RAFFLE_SLIDE_INDICES[nearest]];
+      const legal =
+        legalCard?.sheetKind === "garant" && raffleGarantOwned
+          ? legalCard.sheetBoughtDate
+          : legalCard?.legal;
+      if (legal) label.textContent = legal;
+
       const distanceFromSnap = Math.abs(scrollProgress - Math.round(scrollProgress));
       const opacity = 1 - Math.min(1, distanceFromSnap * 2);
 
@@ -8052,7 +9522,7 @@
 
   function syncTasksSplashCoinBadge() {
     if (winSplashTasksCoinValueEl) {
-      winSplashTasksCoinValueEl.textContent = String(coinBalance);
+      winSplashTasksCoinValueEl.textContent = formatCoinBadgeValue(coinBalance);
     }
   }
 
@@ -8424,8 +9894,13 @@
     winSplashTasksCtaEl?.addEventListener("click", onClaim);
 
     try {
-      requestAnimationFrame(() => {
-        winSplashEl.classList.add("is-content-in");
+      await new Promise((resolve) => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            winSplashEl?.classList.add("is-content-in");
+            resolve();
+          });
+        });
       });
 
       const progressAtMs = Math.round(
@@ -9196,6 +10671,12 @@
     applyRaffleSectionVisibility();
   });
   raffleResetProgressBtnEl?.addEventListener("click", resetRaffleProgress);
+  raffleAddCoinsBtnEl?.addEventListener("click", () => {
+    setCoinBalance(coinBalance + 5000);
+  });
+  raffleRemoveCoinsBtnEl?.addEventListener("click", () => {
+    setCoinBalance(Math.max(0, coinBalance - 5000));
+  });
   startOnboardingBtnEl?.addEventListener("click", () => {
     void startOnboarding();
   });
@@ -9242,6 +10723,7 @@
   initRaffleCarousel();
   initResultSheet();
   initTaskSheet();
+  initRaffleBuySheet();
   initOnboardingRulesSheet();
   winProgressStageEl?.addEventListener("click", handlePrizeColumnClick);
   frameEl?.addEventListener("pointerdown", handlePrizesHintPointerDown, true);

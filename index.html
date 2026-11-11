@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>5 букв</title>
-    <link rel="stylesheet" href="styles.css?v=293" />
+    <link rel="stylesheet" href="styles.css?v=320" />
   </head>
   <body>
     <div class="viewport-gate" id="viewport-gate">
@@ -31,16 +31,6 @@
             <img class="logo" src="assets/logo 6.0.png" alt="5 букв" height="26" />
 
             <div class="nav-row__badges">
-              <button class="energy-badge coin-badge" id="coin-badge" type="button">
-                <img
-                  class="energy-badge__icon"
-                  src="assets/badge-coin.png?v=2"
-                  alt=""
-                  width="16"
-                  height="16"
-                />
-                <span class="energy-badge__value">0</span>
-              </button>
               <button class="energy-badge" type="button">
                 <img
                   class="energy-badge__icon"
@@ -50,6 +40,16 @@
                   height="16"
                 />
                 <span class="energy-badge__value">17</span>
+              </button>
+              <button class="energy-badge coin-badge" id="coin-badge" type="button">
+                <img
+                  class="energy-badge__icon"
+                  src="assets/badge-coin.png?v=2"
+                  alt=""
+                  width="16"
+                  height="16"
+                />
+                <span class="energy-badge__value">17 500</span>
               </button>
             </div>
           </div>
@@ -185,6 +185,16 @@
           >
             <div class="nav-row win-splash__tasks-nav">
               <div class="nav-row__badges">
+                <button class="energy-badge" type="button">
+                  <img
+                    class="energy-badge__icon"
+                    src="assets/Лого энергии для бейджа.png"
+                    alt=""
+                    width="16"
+                    height="16"
+                  />
+                  <span class="energy-badge__value">17</span>
+                </button>
                 <button
                   class="energy-badge coin-badge"
                   id="win-splash-tasks-coin-badge"
@@ -198,18 +208,8 @@
                     height="16"
                   />
                   <span class="energy-badge__value" id="win-splash-tasks-coin-value"
-                    >0</span
+                    >17 500</span
                   >
-                </button>
-                <button class="energy-badge" type="button">
-                  <img
-                    class="energy-badge__icon"
-                    src="assets/Лого энергии для бейджа.png"
-                    alt=""
-                    width="16"
-                    height="16"
-                  />
-                  <span class="energy-badge__value">17</span>
                 </button>
               </div>
             </div>
@@ -667,20 +667,20 @@
                       data-task-sheet-subtitle="Подойдет оплата на любую сумму"
                       data-task-sheet-action="true"
                       data-task-deadline="До 25 ноя"
-                      data-task-partner-label="Задание от Магнита"
-                      data-task-partner-ready-label="Награда от Магнита"
+                      data-task-partner-label="Fresh Auto"
+                      data-task-partner-ready-label="Fresh Auto"
                     >
                       <div class="raffle-task-card__info">
                         <div class="raffle-task-card__partner">
                           <img
                             class="raffle-task-card__partner-logo"
-                            src="assets/Лого партнёра.png"
+                            src="assets/raffle-partner-icon.jpg"
                             width="24"
                             height="24"
                             alt=""
                             draggable="false"
                           />
-                          <span class="raffle-task-card__partner-label">Задание от Магнита</span>
+                          <span class="raffle-task-card__partner-label">Fresh Auto</span>
                         </div>
                         <p class="raffle-task-card__claim-until" hidden>Заберите до 25 ноября</p>
                         <p class="raffle-task-card__title">
@@ -692,17 +692,6 @@
                         </button>
                       </div>
                       <div class="raffle-task-card__rewards">
-                        <div class="raffle-task-card__reward-item" data-reward="ticket">
-                          <img
-                            class="raffle-task-card__reward-icon"
-                            src="assets/Ticet_Alt.png"
-                            width="36"
-                            height="36"
-                            alt=""
-                            draggable="false"
-                          />
-                          <span class="raffle-task-card__reward-value">+1</span>
-                        </div>
                         <div class="raffle-task-card__reward-item" data-reward="coin">
                           <img
                             class="raffle-task-card__reward-icon"
@@ -713,6 +702,17 @@
                             draggable="false"
                           />
                           <span class="raffle-task-card__reward-value">+250</span>
+                        </div>
+                        <div class="raffle-task-card__reward-item" data-reward="ticket">
+                          <img
+                            class="raffle-task-card__reward-icon"
+                            src="assets/Ticet_Alt.png"
+                            width="36"
+                            height="36"
+                            alt=""
+                            draggable="false"
+                          />
+                          <span class="raffle-task-card__reward-value">+1</span>
                         </div>
                       </div>
                     </article>
@@ -848,13 +848,80 @@
                         <div class="raffle-cards-track" id="raffle-cards-track"></div>
                       </div>
                       <p class="raffle-cards-pagination-label" id="raffle-cards-pagination-label">
-                        Подведём итоги 1 декабря
+                        До 28 ноября
                       </p>
                       <div
                         class="raffle-cards-pagination"
                         id="raffle-cards-pagination"
                         aria-hidden="true"
                       ></div>
+                    </div>
+
+                    <div class="raffle-draws" id="raffle-draws">
+                      <button class="raffle-draw-card" type="button" data-draw="0">
+                        <span class="raffle-draw-card__frame">
+                          <img class="raffle-draw-card__image" src="assets/raffle-draw-100k.png" alt="" draggable="false" />
+                          <span class="raffle-draw-card__badge">До 29 ноября</span>
+                          <span class="raffle-draw-card__tickets">
+                            <span class="raffle-draw-card__tickets-text">У вас 1</span>
+                            <img class="raffle-draw-card__ticket-icon" src="assets/raffle-draw-ticket.svg" width="12" height="12" alt="" draggable="false" />
+                          </span>
+                        </span>
+                        <span class="raffle-draw-card__title">100 000 ₽</span>
+                        <span class="raffle-draw-card__price">
+                          <span>Билет за 200</span>
+                          <img src="assets/Монетка активная.png" width="18" height="18" alt="" draggable="false" />
+                        </span>
+                        <span class="raffle-draw-card__desc">Розыгрыш 10 призов</span>
+                      </button>
+                      <button class="raffle-draw-card" type="button" data-draw="1">
+                        <span class="raffle-draw-card__frame">
+                          <img class="raffle-draw-card__image" src="assets/raffle-draw-1m.png" alt="" draggable="false" />
+                          <span class="raffle-draw-card__badge">До 30 ноября</span>
+                          <span class="raffle-draw-card__tickets">
+                            <span class="raffle-draw-card__tickets-text">У вас 1</span>
+                            <img class="raffle-draw-card__ticket-icon" src="assets/raffle-draw-ticket.svg" width="12" height="12" alt="" draggable="false" />
+                          </span>
+                        </span>
+                        <span class="raffle-draw-card__title">1 000 000 ₽</span>
+                        <span class="raffle-draw-card__price">
+                          <span>Билет за 500</span>
+                          <img src="assets/Монетка активная.png" width="18" height="18" alt="" draggable="false" />
+                        </span>
+                        <span class="raffle-draw-card__desc">Розыгрыш 1 приза</span>
+                      </button>
+                      <button class="raffle-draw-card" type="button" data-draw="2">
+                        <span class="raffle-draw-card__frame">
+                          <img class="raffle-draw-card__image" src="assets/raffle-draw-tech.png" alt="" draggable="false" />
+                          <span class="raffle-draw-card__badge">До 1 декабря</span>
+                          <span class="raffle-draw-card__tickets">
+                            <span class="raffle-draw-card__tickets-text">У вас 1</span>
+                            <img class="raffle-draw-card__ticket-icon" src="assets/raffle-draw-ticket.svg" width="12" height="12" alt="" draggable="false" />
+                          </span>
+                        </span>
+                        <span class="raffle-draw-card__title">50 000 ₽ на покупку техники</span>
+                        <span class="raffle-draw-card__price">
+                          <span>Билет за 150</span>
+                          <img src="assets/Монетка активная.png" width="18" height="18" alt="" draggable="false" />
+                        </span>
+                        <span class="raffle-draw-card__desc">Розыгрыш 10 призов</span>
+                      </button>
+                      <button class="raffle-draw-card" type="button" data-draw="3">
+                        <span class="raffle-draw-card__frame">
+                          <img class="raffle-draw-card__image" src="assets/raffle-draw-shop.png" alt="" draggable="false" />
+                          <span class="raffle-draw-card__badge">До 10 декабря</span>
+                          <span class="raffle-draw-card__tickets">
+                            <span class="raffle-draw-card__tickets-text">У вас 1</span>
+                            <img class="raffle-draw-card__ticket-icon" src="assets/raffle-draw-ticket.svg" width="12" height="12" alt="" draggable="false" />
+                          </span>
+                        </span>
+                        <span class="raffle-draw-card__title">Кэшбэк 50% в «Пятёрочке»</span>
+                        <span class="raffle-draw-card__price">
+                          <span>Билет за 150</span>
+                          <img src="assets/Монетка активная.png" width="18" height="18" alt="" draggable="false" />
+                        </span>
+                        <span class="raffle-draw-card__desc">Розыгрыш 1 000 призов</span>
+                      </button>
                     </div>
 
                     <div class="prizes-stage-stub" id="prizes-stage-stub" hidden>
@@ -1074,6 +1141,7 @@
                           type="checkbox"
                           role="switch"
                           aria-label="Монеты за слова"
+                          checked
                         />
                         <span class="win-switch__track" aria-hidden="true"></span>
                       </label>
@@ -1113,6 +1181,7 @@
                           type="checkbox"
                           role="switch"
                           aria-label="Прогресс заданий"
+                          checked
                         />
                         <span class="win-switch__track" aria-hidden="true"></span>
                       </label>
@@ -1144,6 +1213,12 @@
                         <span class="win-switch__track" aria-hidden="true"></span>
                       </label>
                     </div>
+                    <button class="profile-reset-btn" id="raffle-add-coins-btn" type="button">
+                      + 5 000 монет
+                    </button>
+                    <button class="profile-reset-btn" id="raffle-remove-coins-btn" type="button">
+                      - 5 000 монет
+                    </button>
                     <button
                       class="profile-reset-btn"
                       id="raffle-reset-progress-btn"
@@ -1332,6 +1407,35 @@
       </div>
 
       <div
+        class="onboarding-prizes-tooltip"
+        id="partner-raffle-tooltip"
+        hidden
+        aria-hidden="true"
+      >
+        <div class="onboarding-prizes-tooltip__body">
+          <img
+            class="onboarding-prizes-tooltip__image"
+            src="assets/Ticet_Alt.png"
+            width="40"
+            height="40"
+            alt=""
+            draggable="false"
+          />
+          <p class="onboarding-prizes-tooltip__text">
+            Вы стали участником<br />розыгрыша
+          </p>
+        </div>
+        <img
+          class="onboarding-prizes-tooltip__tail"
+          src="assets/tail_2.svg"
+          width="30"
+          height="12"
+          alt=""
+          draggable="false"
+        />
+      </div>
+
+      <div
         class="result-sheet-backdrop"
         id="task-sheet-backdrop"
         hidden
@@ -1416,7 +1520,7 @@
                   <div class="task-sheet__reward-text">
                     <p class="task-sheet__reward-label">Участие в розыгрыше</p>
                     <p class="task-sheet__reward-note">
-                      Обновим статус участия в&nbsp;течение суток
+                      Автомобиль от Fresh Auto
                     </p>
                   </div>
                 </div>
@@ -1443,6 +1547,152 @@
               Выполнить
             </button>
           </div>
+        </div>
+      </div>
+
+      <div
+        class="result-sheet-backdrop"
+        id="raffle-buy-sheet-backdrop"
+        hidden
+        aria-hidden="true"
+      ></div>
+
+      <div class="result-sheet raffle-buy-sheet" id="raffle-buy-sheet" hidden aria-hidden="true">
+        <div class="result-sheet__panel" id="raffle-buy-sheet-panel">
+          <button
+            class="raffle-buy-sheet__close"
+            id="raffle-buy-sheet-close"
+            type="button"
+            aria-label="Закрыть"
+          >
+            <img src="assets/tui-button-close.svg" width="24" height="24" alt="" draggable="false" />
+          </button>
+          <div class="raffle-buy-sheet__scroll">
+          <div class="raffle-buy-sheet__hero" id="raffle-buy-sheet-hero">
+            <img
+              class="raffle-buy-sheet__hero-image"
+              src="assets/raffle-visual-money.png"
+              width="375"
+              height="240"
+              alt=""
+              draggable="false"
+            />
+            <span class="raffle-buy-sheet__date">До 29 ноября</span>
+          </div>
+          <div class="raffle-buy-sheet__body">
+            <h2 class="raffle-buy-sheet__title">Розыгрыш 100 000 ₽</h2>
+            <div class="raffle-buy-sheet__hint">
+              <img
+                class="raffle-buy-sheet__hint-icon"
+                src="assets/coupon.svg"
+                width="20"
+                height="20"
+                alt=""
+                draggable="false"
+              />
+              <span class="raffle-buy-sheet__hint-text">Для участия купите билет</span>
+              <img
+                class="raffle-buy-sheet__hint-chevron"
+                src="assets/raffle-partner-chevron.svg"
+                width="16"
+                height="16"
+                alt=""
+                draggable="false"
+              />
+            </div>
+            <p class="raffle-buy-sheet__desc">
+              Разыграем 10 призов по 100 000.<br />Больше билетов – выше шансы выиграть
+            </p>
+            <div class="raffle-buy-sheet__counter">
+              <span class="raffle-buy-sheet__count" id="raffle-buy-sheet-count">1 билет</span>
+              <div class="raffle-buy-sheet__steps">
+                <button
+                  class="raffle-buy-sheet__step"
+                  id="raffle-buy-sheet-minus"
+                  type="button"
+                  aria-label="Уменьшить"
+                >
+                  <span class="raffle-buy-sheet__step-glyph">−</span>
+                  <img
+                    class="raffle-buy-sheet__step-icon"
+                    src="assets/raffle-share-minus.svg"
+                    width="24"
+                    height="24"
+                    alt=""
+                    draggable="false"
+                  />
+                </button>
+                <button
+                  class="raffle-buy-sheet__step"
+                  id="raffle-buy-sheet-plus"
+                  type="button"
+                  aria-label="Увеличить"
+                >
+                  <span class="raffle-buy-sheet__step-glyph">+</span>
+                  <img
+                    class="raffle-buy-sheet__step-icon"
+                    src="assets/raffle-share-plus.svg"
+                    width="24"
+                    height="24"
+                    alt=""
+                    draggable="false"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+          </div>
+          <div class="raffle-buy-sheet__fade" aria-hidden="true"></div>
+          <div class="raffle-buy-sheet__footer">
+            <button
+              class="raffle-buy-sheet__disabled-buy"
+              id="raffle-buy-sheet-disabled-buy"
+              type="button"
+              disabled
+              hidden
+            >
+              <span id="raffle-buy-sheet-disabled-text">Купить за 2 000</span>
+              <img
+                src="assets/Монетка неактивная.png"
+                width="24"
+                height="24"
+                alt=""
+                draggable="false"
+              />
+            </button>
+            <button class="raffle-buy-sheet__buy" id="raffle-buy-sheet-buy" type="button">
+              <span id="raffle-buy-sheet-buy-text">Купить за 2 000</span>
+              <img
+                class="raffle-buy-sheet__buy-icon"
+                id="raffle-buy-sheet-buy-icon"
+                src="assets/Монетка активная.png"
+                width="24"
+                height="24"
+                alt=""
+                draggable="false"
+              />
+            </button>
+            <button class="raffle-buy-sheet__earn" id="raffle-buy-sheet-earn" type="button" hidden>
+              Заработать монеты
+            </button>
+            <button class="raffle-buy-sheet__terms" type="button">Условия акции</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="raffle-buy-confetti" id="raffle-buy-confetti" aria-hidden="true"></div>
+      <div class="raffle-buy-toasts" id="raffle-buy-toasts" aria-live="polite"></div>
+
+      <div class="raffle-tickets-sheet" id="raffle-tickets-sheet" hidden aria-hidden="true">
+        <div class="raffle-tickets-sheet__panel" id="raffle-tickets-sheet-panel">
+          <div class="raffle-tickets-sheet__scroll" id="raffle-tickets-sheet-scroll">
+            <h2 class="raffle-tickets-sheet__title" id="raffle-tickets-sheet-title"></h2>
+            <p class="raffle-tickets-sheet__subtitle" id="raffle-tickets-sheet-subtitle"></p>
+            <div class="raffle-tickets-sheet__list" id="raffle-tickets-sheet-list"></div>
+          </div>
+          <button class="raffle-tickets-sheet__close" id="raffle-tickets-sheet-close" type="button" aria-label="Закрыть">
+            <img src="assets/tui-button-close.svg" width="24" height="24" alt="" draggable="false" />
+          </button>
         </div>
       </div>
 
@@ -1513,16 +1763,6 @@
               <img src="assets/info.svg?v=4" width="22" height="22" alt="" draggable="false" />
             </button>
             <div class="nav-row__badges onboarding-nav-badges" id="onboarding-nav-badges">
-              <button class="energy-badge coin-badge" type="button" tabindex="-1">
-                <img
-                  class="energy-badge__icon"
-                  src="assets/badge-coin.png?v=2"
-                  alt=""
-                  width="16"
-                  height="16"
-                />
-                <span class="energy-badge__value">0</span>
-              </button>
               <button class="energy-badge" type="button" tabindex="-1">
                 <img
                   class="energy-badge__icon"
@@ -1532,6 +1772,16 @@
                   height="16"
                 />
                 <span class="energy-badge__value">9</span>
+              </button>
+              <button class="energy-badge coin-badge" type="button" tabindex="-1">
+                <img
+                  class="energy-badge__icon"
+                  src="assets/badge-coin.png?v=2"
+                  alt=""
+                  width="16"
+                  height="16"
+                />
+                <span class="energy-badge__value">0</span>
               </button>
             </div>
           </div>
@@ -1867,6 +2117,6 @@
       </div>
     </div>
 
-    <script src="app.js?v=251"></script>
+    <script src="app.js?v=282"></script>
   </body>
 </html>
