@@ -6522,6 +6522,7 @@
         "Разыграем 1 000 кэшбэков размером в 50% на покупки в «Пятёрочке».<br />Больше билетов – выше шансы",
       sheetImage: "assets/raffle-draw-shop-sheet.webp",
       sheetIcon: "assets/raffle-partner-coupon.svg?v=2",
+      confettiSprite: "assets/pyaterochka.svg",
     },
   ];
 
@@ -7137,18 +7138,26 @@
     finishRaffleBuySheetClose();
   }
 
-  function playRaffleBuyEdgeConfetti() {
+  function playRaffleBuyEdgeConfetti(options = {}) {
     const container = document.getElementById("raffle-buy-confetti");
     if (!container) return;
     const burst = document.createElement("div");
     burst.className = "raffle-buy-confetti__burst";
     container.appendChild(burst);
+    const spriteSrc = options.spriteSrc || "";
     playConfettiInContainer(burst, {
+      spriteSrc,
+      spriteSizeMin: spriteSrc ? 16 : 0,
+      spriteSizeMax: spriteSrc ? 40 : 0,
+      count: spriteSrc ? Math.round(CONFETTI_COUNT * 0.6) : undefined,
       onDone() {
         burst.remove();
       },
     });
-    if (!burst.querySelector("canvas")) burst.remove();
+    const spawned = spriteSrc
+      ? burst.querySelector(".raffle-buy-confetti__logo")
+      : burst.querySelector("canvas");
+    if (!spawned) burst.remove();
   }
 
   const RAFFLE_BUY_TOAST_IN_MS = 500;
@@ -7358,7 +7367,9 @@
     updateRaffleDrawCard(drawIndex);
     raffleBuyCount = 1;
     raffleBuySpentOut = coinBalance < card.buyUnit;
-    playRaffleBuyEdgeConfetti();
+    playRaffleBuyEdgeConfetti(
+      card.confettiSprite ? { spriteSrc: card.confettiSprite } : undefined
+    );
     showRaffleBuyToast(boughtCount, {
       iconSrc: "assets/raffle-draw-toast.webp",
       line1:
@@ -7624,6 +7635,9 @@
       };
       button.addEventListener("pointerup", endHold);
       button.addEventListener("pointercancel", endHold);
+      button.addEventListener("selectstart", (event) => {
+        event.preventDefault();
+      });
     };
 
     closeEl?.addEventListener("click", () => {
@@ -7632,6 +7646,10 @@
 
     backdrop?.addEventListener("click", () => {
       closeRaffleBuySheet({ animateClose: true });
+    });
+
+    document.getElementById("raffle-buy-sheet-count")?.addEventListener("selectstart", (event) => {
+      event.preventDefault();
     });
 
     minusEl?.addEventListener("click", () => {
@@ -8843,12 +8861,15 @@
       burstY = originRect.top + originRect.height / 2 - containerRect.top;
     }
 
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    containerEl.appendChild(canvas);
+    const spriteSrc = options.spriteSrc || "";
+    const canvas = spriteSrc ? null : document.createElement("canvas");
+    if (canvas) {
+      canvas.width = width;
+      canvas.height = height;
+      containerEl.appendChild(canvas);
+    }
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas ? canvas.getContext("2d") : null;
     const particles = [];
     let lastFrameTime = performance.now();
     let localRafId = null;
@@ -8858,11 +8879,29 @@
       if (options.onRaf) options.onRaf(id);
     }
 
+    function attachConfettiSprite(particle) {
+      if (!spriteSrc) return;
+      const size =
+        options.spriteSizeMin +
+        Math.random() * (options.spriteSizeMax - options.spriteSizeMin);
+      particle.w = size;
+      particle.h = size;
+      const img = document.createElement("img");
+      img.className = "raffle-buy-confetti__logo";
+      img.src = spriteSrc;
+      img.alt = "";
+      img.draggable = false;
+      img.style.width = size + "px";
+      img.style.height = size + "px";
+      containerEl.appendChild(img);
+      particle.node = img;
+    }
+
     function spawnParticle(side) {
       if (radialBurst) {
         const angle = Math.random() * Math.PI * 2;
         const speed = (11 + Math.random() * 9) / 1.5;
-        particles.push({
+        const particle = {
           x: burstX,
           y: burstY,
           vx: Math.cos(angle) * speed,
@@ -8877,7 +8916,9 @@
             CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
           life: 1,
           decay: 0.003 + Math.random() * 0.0025,
-        });
+        };
+        attachConfettiSprite(particle);
+        particles.push(particle);
         return;
       }
 
@@ -8889,7 +8930,7 @@
         : -Math.PI / 2 - Math.random() * (Math.PI / 3.5);
       const speed = CONFETTI_SPEED_MIN + Math.random() * CONFETTI_SPEED_RANGE;
 
-      particles.push({
+      const particle = {
         x,
         y,
         vx: Math.cos(angle) * speed,
@@ -8903,14 +8944,29 @@
         color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
         life: 1,
         decay: CONFETTI_DECAY_MIN + Math.random() * CONFETTI_DECAY_RANGE,
-      });
+      };
+      attachConfettiSprite(particle);
+      particles.push(particle);
     }
 
-    for (let i = 0; i < CONFETTI_COUNT; i += 1) {
+    const particleCount = options.count ?? CONFETTI_COUNT;
+    for (let i = 0; i < particleCount; i += 1) {
       spawnParticle(i % 2 === 0 ? "left" : "right");
     }
 
     function drawParticle(p) {
+      if (p.node) {
+        p.node.style.transform =
+          "translate3d(" +
+          (p.x - p.w / 2) +
+          "px," +
+          (p.y - p.h / 2) +
+          "px,0) rotate(" +
+          p.rotation +
+          "rad)";
+        p.node.style.opacity = String(Math.min(1, p.life * 1.4));
+        return;
+      }
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rotation);
@@ -8924,7 +8980,7 @@
       const dt = Math.min((now - lastFrameTime) / (1000 / 60), 2.5);
       lastFrameTime = now;
 
-      ctx.clearRect(0, 0, width, height);
+      if (ctx) ctx.clearRect(0, 0, width, height);
 
       for (let i = particles.length - 1; i >= 0; i -= 1) {
         const p = particles[i];
@@ -8939,7 +8995,9 @@
         p.rotation += p.spin * dt;
         p.life -= p.decay * dt;
 
-        if (p.life <= 0 || p.y > height + 24 || p.x < -24 || p.x > width + 24) {
+        const edge = p.node ? p.w : 24;
+        if (p.life <= 0 || p.y > height + edge || p.x < -edge || p.x > width + edge) {
+          p.node?.remove();
           particles.splice(i, 1);
           continue;
         }
