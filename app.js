@@ -8382,6 +8382,43 @@
     );
   }
 
+  const RAFFLE_CARD_PRESS_MS = 80;
+
+  function releaseRaffleCardPress(card, token, startedAt) {
+    const wait = Math.max(0, RAFFLE_CARD_PRESS_MS - (performance.now() - startedAt));
+    window.setTimeout(() => {
+      if (card._pressToken !== token) return;
+      card.classList.remove("is-pressed");
+    }, wait);
+  }
+
+  function armRaffleCardPress(card, pointerId) {
+    const token = (card._pressToken || 0) + 1;
+    card._pressToken = token;
+    card.classList.add("is-pressed");
+    const startedAt = performance.now();
+    const finish = (event) => {
+      if (event.pointerId !== pointerId) return;
+      document.removeEventListener("pointerup", finish);
+      document.removeEventListener("pointercancel", finish);
+      releaseRaffleCardPress(card, token, startedAt);
+    };
+    document.addEventListener("pointerup", finish);
+    document.addEventListener("pointercancel", finish);
+  }
+
+  function initRaffleCardPress() {
+    document.addEventListener("pointerdown", (event) => {
+      if (event.button != null && event.button !== 0) return;
+      const drawCard = event.target.closest(".raffle-draw-card");
+      const eventCard = event.target.closest(".raffle-event-card-wrap")
+        ?.querySelector(".raffle-event-card");
+      const card = drawCard || eventCard;
+      if (!card) return;
+      armRaffleCardPress(card, event.pointerId);
+    });
+  }
+
   function initRaffleCarousel() {
     const track = document.getElementById("raffle-cards-track");
     const carousel = document.getElementById("raffle-cards-carousel");
@@ -10925,6 +10962,7 @@
   mountPrizeForPanel(winProgressPanelEl, { hidden: false });
   syncActivePrizePosition();
   initRaffleCarousel();
+  initRaffleCardPress();
   initResultSheet();
   initTaskSheet();
   initRaffleBuySheet();

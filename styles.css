@@ -959,7 +959,7 @@ button {
   transition: transform 80ms;
 }
 
-.raffle-draw-card:active {
+.raffle-draw-card.is-pressed {
   transform: scale(0.95);
 }
 
@@ -1838,7 +1838,7 @@ button {
   transition: transform 80ms;
 }
 
-.raffle-event-card-wrap:active .raffle-event-card {
+.raffle-event-card.is-pressed {
   transform: scale(0.95);
 }
 
