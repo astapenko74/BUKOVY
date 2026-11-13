@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>5 букв</title>
-    <link rel="stylesheet" href="styles.css?v=321" />
+    <link rel="stylesheet" href="styles.css?v=329" />
   </head>
   <body>
     <div class="viewport-gate" id="viewport-gate">
@@ -799,50 +799,10 @@
             </section>
           </div>
 
-          <div class="app-screen" id="prizes-screen" hidden>
-            <section class="prizes-page">
+          <div class="app-screen" id="draws-screen" hidden>
+            <section class="prizes-page draws-page" aria-label="Розыгрыши">
               <div class="main__fade" aria-hidden="true"></div>
-              <div
-                class="prizes-segment"
-                id="prizes-segment"
-                role="tablist"
-                aria-label="Подразделы призов"
-                data-active="available"
-              >
-                <span class="prizes-segment__thumb" aria-hidden="true"></span>
-                <button
-                  class="prizes-segment__btn is-active"
-                  id="prizes-segment-available"
-                  type="button"
-                  role="tab"
-                  aria-selected="true"
-                  aria-controls="prizes-panel-available"
-                  data-prizes-segment="available"
-                >
-                  Можно выиграть
-                </button>
-                <button
-                  class="prizes-segment__btn"
-                  id="prizes-segment-owned"
-                  type="button"
-                  role="tab"
-                  aria-selected="false"
-                  aria-controls="prizes-panel-owned"
-                  data-prizes-segment="owned"
-                >
-                  Уже у вас
-                </button>
-              </div>
-
-              <div class="prizes-panels">
-                <div
-                  class="prizes-panel"
-                  id="prizes-panel-available"
-                  role="tabpanel"
-                  aria-labelledby="prizes-segment-available"
-                  data-prizes-panel="available"
-                >
-                  <div class="prizes-available">
+              <div class="prizes-available">
                     <div class="raffle-cards-block">
                       <div class="raffle-cards-carousel" id="raffle-cards-carousel">
                         <div class="raffle-cards-track" id="raffle-cards-track"></div>
@@ -944,13 +904,13 @@
                     <article class="raffle-info-card raffle-info-card--history">
                       <div class="raffle-info-card__text">
                         <h3 class="raffle-info-card__title">Итоги событий</h3>
-                        <p class="raffle-info-card__subtitle">Победители и призы</p>
+                        <p class="raffle-info-card__subtitle">И разыгранные призы</p>
                       </div>
                       <img
                         class="raffle-info-card__prize"
-                        src="assets/prize-22.png"
-                        width="87"
-                        height="93"
+                        src="assets/Block_itogi.png"
+                        width="80"
+                        height="86"
                         alt=""
                         draggable="false"
                       />
@@ -1038,17 +998,20 @@
                         </li>
                       </ul>
                     </article>
-                  </div>
-                </div>
-                <div
-                  class="prizes-panel"
-                  id="prizes-panel-owned"
-                  role="tabpanel"
-                  aria-labelledby="prizes-segment-owned"
-                  data-prizes-panel="owned"
-                  hidden
-                >
-                  <div class="prizes-owned-list">
+              </div>
+            </section>
+          </div>
+
+          <div class="app-screen" id="prizes-screen" hidden>
+            <section class="prizes-page">
+              <div class="main__fade" aria-hidden="true"></div>
+              <header class="raffle-tasks-header">
+                <h1 class="raffle-tasks-header__title">Призы</h1>
+                <p class="raffle-tasks-header__subtitle">
+                  Отгадывайте слова и получайте призы
+                </p>
+              </header>
+              <div class="prizes-owned-list">
                     <article class="prize-card">
                       <img
                         class="prize-card__image"
@@ -1112,8 +1075,6 @@
                         <button class="prize-card__btn" type="button">Подробнее</button>
                       </div>
                     </article>
-                  </div>
-                </div>
               </div>
             </section>
           </div>
@@ -1281,6 +1242,26 @@
                 </svg>
               </span>
               <span class="tab__label">Задания</span>
+            </button>
+            <button class="tab" type="button" data-tab="draws">
+              <span class="tab__icon">
+                <svg class="tab__icon-svg" width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <mask id="tab-icon-draws-mask" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="3" y="6" width="26" height="20">
+                    <path d="M12.4993 6.66699L3.16602 6.66699L3.16602 13.0837C4.77685 13.0837 6.08268 14.3895 6.08268 16.0003C6.08268 17.6112 4.77685 18.917 3.16602 18.917L3.16602 21.8337C3.16602 23.7667 4.73302 25.3337 6.66602 25.3337H12.4993L12.4993 6.66699Z" fill="url(#tab-icon-draws-gradient)"/>
+                    <path d="M12.5 25.3337L28.8333 25.3337L28.8333 18.9164C27.2233 18.9154 25.9185 17.61 25.9185 15.9998C25.9185 14.3895 27.2233 13.0841 28.8333 13.0831V10.167C28.8333 8.234 27.2663 6.66699 25.3333 6.66699L12.5 6.66699L12.5 25.3337Z" fill="black"/>
+                  </mask>
+                  <g mask="url(#tab-icon-draws-mask)">
+                    <path d="M30 30L2 30L2 2L30 2L30 30Z" fill="currentColor"/>
+                  </g>
+                  <defs>
+                    <linearGradient id="tab-icon-draws-gradient" x1="6.08268" y1="25.3337" x2="21.686" y2="8.28273" gradientUnits="userSpaceOnUse">
+                      <stop stop-opacity="0.65"/>
+                      <stop offset="1" stop-opacity="0.4"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </span>
+              <span class="tab__label">Розыгрыши</span>
             </button>
             <button class="tab" type="button" data-tab="prizes">
               <span class="tab__icon">
@@ -1585,8 +1566,8 @@
               <img
                 class="raffle-buy-sheet__hint-icon"
                 src="assets/coupon.svg?v=2"
-                width="20"
-                height="20"
+                width="18"
+                height="18"
                 alt=""
                 draggable="false"
               />
@@ -2117,6 +2098,6 @@
       </div>
     </div>
 
-    <script src="app.js?v=287"></script>
+    <script src="app.js?v=297"></script>
   </body>
 </html>

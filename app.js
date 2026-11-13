@@ -143,7 +143,9 @@
   const raffleScreenEl = document.getElementById("raffle-screen");
   const rafflePageEl = document.querySelector(".raffle-page");
   const prizesScreenEl = document.getElementById("prizes-screen");
-  const prizesPageEl = document.querySelector(".prizes-page");
+  const prizesPageEl = document.querySelector("#prizes-screen .prizes-page");
+  const drawsScreenEl = document.getElementById("draws-screen");
+  const drawsPageEl = document.querySelector("#draws-screen .prizes-page");
   const profileScreenEl = document.getElementById("profile-screen");
   const winMessageEl = document.getElementById("win-message");
   const winWordEl = document.getElementById("win-word");
@@ -248,6 +250,7 @@
     : [];
   const raffleTabEl = document.querySelector('.tab[data-tab="raffle"]');
   const prizesTabEl = document.querySelector('.tab[data-tab="prizes"]');
+  const drawsTabEl = document.querySelector('.tab[data-tab="draws"]');
 
   let onboardingActive = false;
   let onboardingClosing = false;
@@ -502,6 +505,9 @@
   let onboardingPrizesHintHiding = false;
   let partnerRaffleTooltipTimer = null;
   let partnerRaffleTooltipHiding = false;
+  let rafflePartnerRevealPending = false;
+  let partnerRevealToken = 0;
+  let partnerRevealFlipStarted = false;
   let onboardingPrizesFirstVisitDone = false;
   let onboardingTask1TitleOriginalHtml = null;
   let setPrizesSegmentActive = null;
@@ -661,6 +667,11 @@
     prizesPageEl.classList.toggle("is-scrolled", prizesPageEl.scrollTop > 0);
   }
 
+  function updateDrawsScrollFade() {
+    if (!drawsPageEl) return;
+    drawsPageEl.classList.toggle("is-scrolled", drawsPageEl.scrollTop > 0);
+  }
+
   function setMainScrollable(enabled) {
     if (!mainEl) return;
     mainEl.classList.toggle("main--scrollable", enabled);
@@ -754,12 +765,13 @@
 
     if (!active) {
       skipRaffleParticipateAnimation();
+      cancelPartnerTicketEntryReveal();
       cancelRaffleIntro(false);
       cancelRaffleIntroPresentation();
       return;
     }
 
-    if (prizesScreenEl && !prizesScreenEl.hidden) {
+    if (drawsScreenEl && !drawsScreenEl.hidden) {
       prepareRaffleIntroPresentation();
       void maybePlayRaffleIntro();
     }
@@ -772,11 +784,118 @@
   const TAB_SCREENS = {
     game: () => gameScreenEl,
     raffle: () => raffleScreenEl,
+    draws: () => drawsScreenEl,
     prizes: () => prizesScreenEl,
     profile: () => profileScreenEl,
   };
 
+  function resetDrawsEntryPosition() {
+    if (drawsPageEl) drawsPageEl.scrollTop = 0;
+    updateDrawsScrollFade();
+    raffleCarouselRefs?.scrollToSlide?.(0);
+    raffleCarouselRefs?.updateCardTransforms?.();
+  }
+
+  function setDrawsPageRevealLocked(locked) {
+    drawsPageEl?.classList.toggle("is-partner-reveal", locked);
+  }
+
+  function cancelPartnerTicketEntryReveal() {
+    partnerRevealToken += 1;
+    setDrawsPageRevealLocked(false);
+    if (!partnerRevealFlipStarted && !raffleIntroRunning) {
+      setRaffleScrollLocked(false);
+    }
+  }
+
+  function scrollRaffleCarouselToSlide(slideIndex) {
+    const track = raffleCarouselRefs?.track;
+    if (!track || !raffleCarouselRefs?.scrollToSlide) return Promise.resolve();
+    const maxIndex = Math.max(0, (raffleCarouselRefs.slides?.length || 1) - 1);
+    const clamped = Math.max(0, Math.min(maxIndex, slideIndex));
+    const target = clamped * RAFFLE_SLIDE_STEP;
+    if (Math.abs(track.scrollLeft - target) <= 1) {
+      raffleCarouselRefs.scrollToSlide(clamped, "auto");
+      raffleCarouselRefs.updateCardTransforms?.();
+      return Promise.resolve();
+    }
+
+    const start = track.scrollLeft;
+    const delta = target - start;
+    const duration = Math.round(526 * 1.5);
+    const previousSnap = track.style.scrollSnapType;
+    track.style.scrollSnapType = "none";
+
+    return new Promise((resolve) => {
+      let startedAt = 0;
+      const step = (now) => {
+        if (!startedAt) startedAt = now;
+        const t = Math.min(1, (now - startedAt) / duration);
+        track.scrollLeft = start + delta * (1 - Math.pow(1 - t, 3));
+        if (t < 1) {
+          requestAnimationFrame(step);
+          return;
+        }
+        track.scrollLeft = target;
+        track.style.scrollSnapType = previousSnap;
+        raffleCarouselRefs?.updateCardTransforms?.();
+        resolve();
+      };
+      requestAnimationFrame(step);
+    });
+  }
+
+  async function playPartnerTicketEntryReveal() {
+    const token = ++partnerRevealToken;
+    const alive = () =>
+      token === partnerRevealToken && Boolean(drawsScreenEl && !drawsScreenEl.hidden);
+    partnerRevealFlipStarted = false;
+    setDrawsPageRevealLocked(true);
+    setRaffleScrollLocked(true);
+    let startedFlip = false;
+
+    try {
+      if (!hasSeenRaffleIntro()) {
+        prepareRaffleIntroPresentation();
+        await maybePlayRaffleIntro();
+        if (!alive()) return;
+        setRaffleScrollLocked(true);
+        await waitRaffleDelay(RAFFLE_PARTICIPATE_SCALE_DELAY_MS);
+      } else {
+        await waitRaffleDelay(Math.round(RAFFLE_INTRO_ENTRY_DELAY_MS * 1.5));
+      }
+      if (!alive()) return;
+
+      const partnerSlide = Math.max(0, RAFFLE_SLIDE_INDICES.indexOf(2));
+      await scrollRaffleCarouselToSlide(partnerSlide);
+      if (!alive()) return;
+
+      await waitRaffleDelay(RAFFLE_PARTICIPATE_SCALE_DELAY_MS);
+      if (!alive()) return;
+
+      partnerRevealFlipStarted = true;
+      startedFlip = true;
+      rafflePartnerRevealPending = false;
+      playRaffleBuyEdgeConfetti();
+      await playRaffleCardPurchaseFlip(
+        2,
+        () => setRafflePartnerCardSubtitle(true),
+        setRafflePartnerCardBackground
+      );
+    } finally {
+      if (startedFlip) partnerRevealFlipStarted = false;
+      if (token === partnerRevealToken) {
+        setDrawsPageRevealLocked(false);
+        setRaffleScrollLocked(false);
+      }
+    }
+  }
+
   function showAppScreen(tabId) {
+    const enteringDraws = tabId === "draws" && Boolean(drawsScreenEl?.hidden);
+    const enteringRaffle = tabId === "raffle" && Boolean(raffleScreenEl?.hidden);
+    const enteringPrizes = tabId === "prizes" && Boolean(prizesScreenEl?.hidden);
+
     if (tabId !== "game") {
       stopPrizeIdleAnimation();
       void hidePrizeProgressTooltip();
@@ -786,8 +905,9 @@
       closeTaskSheet({ animateClose: false });
     }
 
-    if (tabId !== "prizes") {
+    if (tabId !== "draws") {
       skipRaffleParticipateAnimation();
+      cancelPartnerTicketEntryReveal();
       cancelRaffleIntro(false);
       cancelRaffleIntroPresentation();
       closeRaffleBuySheet({ animateClose: false });
@@ -800,27 +920,40 @@
     });
 
     if (tabId === "raffle") {
+      if (enteringRaffle) scrollRafflePageToTop();
       syncOnboardingTrainingTask();
       requestAnimationFrame(syncRafflePageOverflow);
     }
 
-    if (tabId === "prizes") {
-      setPrizesTabDot(false);
+    if (tabId === "draws") {
+      if (enteringDraws) resetDrawsEntryPosition();
+      setDrawsTabDot(false);
       hidePartnerRaffleTooltip({ animate: false });
+      if (isRaffleSectionEnabled()) {
+        if (enteringDraws && rafflePartnerRevealPending) {
+          void playPartnerTicketEntryReveal();
+        } else {
+          prepareRaffleIntroPresentation();
+          void maybePlayRaffleIntro();
+        }
+      }
+      requestAnimationFrame(updateDrawsScrollFade);
+    }
+
+    if (tabId === "prizes") {
+      if (enteringPrizes && prizesPageEl) {
+        prizesPageEl.scrollTop = 0;
+        updatePrizesScrollFade();
+      }
+      setPrizesTabDot(false);
       if (isOnboardingSession()) {
         const app = document.querySelector(".app");
         if (!onboardingPrizesFirstVisitDone) {
           onboardingPrizesFirstVisitDone = true;
           app?.classList.add("is-onboarding-owned-preview");
-          setPrizesSegmentActive?.("owned");
         } else {
           app?.classList.remove("is-onboarding-owned-preview");
-          setPrizesSegmentActive?.("available");
         }
-      }
-      if (isRaffleSectionEnabled()) {
-        prepareRaffleIntroPresentation();
-        void maybePlayRaffleIntro();
       }
       requestAnimationFrame(updatePrizesScrollFade);
     }
@@ -2309,7 +2442,7 @@
     const coinFly = rewardIcon ? runCoinsToBadgeAnimation(rewardIcon) : null;
     const ticketFly = ticketIcon
       ? runCoinsToBadgeAnimation(ticketIcon, {
-          targetIcon: getGiftIconEl(),
+          targetIcon: getDrawsTabIconEl(),
           src: ticketIcon.getAttribute("src") || "assets/Ticet_Alt.png",
           count: 1,
         })
@@ -2324,9 +2457,8 @@
       if (rafflePartnerTickets.length === 0) {
         rafflePartnerTickets.push(createRaffleTicketRecord());
       }
-      setRafflePartnerCardSubtitle(true);
-      setRafflePartnerCardBackground();
-      setPrizesTabDot(true);
+      rafflePartnerRevealPending = true;
+      setDrawsTabDot(true);
     });
 
     await Promise.all([
@@ -2345,6 +2477,10 @@
   function setPrizesTabDot(visible) {
     const prizesTab = document.querySelector('.tab[data-tab="prizes"]');
     prizesTab?.classList.toggle("has-prize-dot", Boolean(visible));
+  }
+
+  function setDrawsTabDot(visible) {
+    drawsTabEl?.classList.toggle("has-prize-dot", Boolean(visible));
   }
 
   function animateEnergyBadgeTo(end) {
@@ -2571,10 +2707,10 @@
     const tooltip = partnerRaffleTooltipEl;
     const tail = tooltip?.querySelector(".onboarding-prizes-tooltip__tail");
     const body = tooltip?.querySelector(".onboarding-prizes-tooltip__body");
-    if (!tooltip || !tail || tooltip.hidden || !prizesTabEl || !frameEl) return;
+    if (!tooltip || !tail || tooltip.hidden || !drawsTabEl || !frameEl) return;
 
     const frameRect = frameEl.getBoundingClientRect();
-    const tabRect = prizesTabEl.getBoundingClientRect();
+    const tabRect = drawsTabEl.getBoundingClientRect();
     const tailWidth = tail.offsetWidth || 30;
     const tailHeight = tail.offsetHeight || 12;
     tooltip.style.bottom = `${frameRect.bottom - tabRect.top + 8}px`;
@@ -3261,7 +3397,7 @@
   }
 
   function initTabBar() {
-    const navigableTabs = new Set(["game", "raffle", "prizes", "profile"]);
+    const navigableTabs = new Set(["game", "raffle", "draws", "prizes", "profile"]);
 
     document.querySelectorAll(".tab-bar .tab[data-tab]").forEach((tab) => {
       tab.addEventListener("click", () => {
@@ -4042,6 +4178,10 @@
     requestAnimationFrame(() => {
       requestAnimationFrame(runPhase1);
     });
+  }
+
+  function getDrawsTabIconEl() {
+    return document.querySelector('.tab[data-tab="draws"] .tab__icon-svg');
   }
 
   function getGiftIconEl() {
@@ -6081,6 +6221,10 @@
     raffleShareOwned = 0;
     raffleGarantOwned = false;
     rafflePartnerOwned = false;
+    rafflePartnerRevealPending = false;
+    partnerRevealToken += 1;
+    partnerRevealFlipStarted = false;
+    drawsPageEl?.classList.remove("is-partner-reveal");
     raffleDrawOwned = [0, 0, 0, 0];
     raffleDrawTickets = [[], [], [], []];
     rafflePartnerTickets = [];
@@ -6100,6 +6244,7 @@
     }
     hidePartnerRaffleTooltip({ animate: false });
     setPrizesTabDot(false);
+    setDrawsTabDot(false);
     raffleShareFlipPending = false;
     raffleShareFlipDone = false;
     raffleGarantFlipPending = false;
@@ -7031,7 +7176,7 @@
     panel.style.transform = "";
     sheet.setAttribute("aria-hidden", "false");
     backdrop.setAttribute("aria-hidden", "false");
-    prizesPageEl?.classList.add("raffle-buy-sheet-open");
+    drawsPageEl?.classList.add("raffle-buy-sheet-open");
     document.querySelector(".app")?.classList.add("is-raffle-sheet-open");
     setAppSheetChrome(true);
 
@@ -7065,7 +7210,7 @@
     panel.style.transform = "";
     sheet.setAttribute("aria-hidden", "false");
     backdrop.setAttribute("aria-hidden", "false");
-    prizesPageEl?.classList.add("raffle-buy-sheet-open");
+    drawsPageEl?.classList.add("raffle-buy-sheet-open");
     document.querySelector(".app")?.classList.add("is-raffle-sheet-open");
     setAppSheetChrome(true);
 
@@ -7089,7 +7234,7 @@
     const shouldFlipShare = raffleShareFlipPending && sheet.classList.contains("is-open");
     const shouldFlipGarant = raffleGarantFlipPending && sheet.classList.contains("is-open");
     if (!options.keepToasts) dismissRaffleBuyToasts();
-    prizesPageEl?.classList.remove("raffle-buy-sheet-open");
+    drawsPageEl?.classList.remove("raffle-buy-sheet-open");
     document.querySelector(".app")?.classList.remove("is-raffle-sheet-open");
     backdrop.classList.remove("is-visible");
     setAppSheetChrome(false, animateClose);
@@ -7150,6 +7295,7 @@
       spriteSizeMin: spriteSrc ? 16 : 0,
       spriteSizeMax: spriteSrc ? 40 : 0,
       count: spriteSrc ? Math.round(CONFETTI_COUNT * 0.6) : undefined,
+      spawnYShiftRatio: 0.3,
       onDone() {
         burst.remove();
       },
@@ -10801,7 +10947,11 @@
   prizesPageEl?.addEventListener("scroll", updatePrizesScrollFade, {
     passive: true,
   });
+  drawsPageEl?.addEventListener("scroll", updateDrawsScrollFade, {
+    passive: true,
+  });
   updatePrizesScrollFade();
+  updateDrawsScrollFade();
   document.querySelector(".win-block--yellow")?.addEventListener("click", playAgain);
   window.addEventListener("resize", handleViewportChange);
   window.visualViewport?.addEventListener("resize", handleViewportChange);

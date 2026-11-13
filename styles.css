@@ -956,6 +956,11 @@ button {
   text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: transform 80ms;
+}
+
+.raffle-draw-card:active {
+  transform: scale(0.95);
 }
 
 .raffle-draw-card[data-draw="0"] {
@@ -1123,6 +1128,11 @@ button {
 
 .prizes-panel[hidden] {
   display: none !important;
+}
+
+.prizes-page > .raffle-tasks-header {
+  margin-top: 24px;
+  width: 100%;
 }
 
 .prizes-owned-list {
@@ -1674,15 +1684,15 @@ button {
 .raffle-info-card__text {
   position: relative;
   z-index: 1;
-  max-width: calc(100% - 87px);
+  max-width: calc(100% - 92px);
 }
 
 .raffle-info-card__prize {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 87px;
-  height: 93px;
+  right: 12px;
+  bottom: 4px;
+  width: 80px;
+  height: 86px;
   display: block;
   pointer-events: none;
   user-select: none;
@@ -1825,6 +1835,11 @@ button {
   overflow: visible;
   perspective: 1200px;
   perspective-origin: center center;
+  transition: transform 80ms;
+}
+
+.raffle-event-card-wrap:active .raffle-event-card {
+  transform: scale(0.95);
 }
 
 .raffle-event-card__flip {
@@ -2515,6 +2530,7 @@ button {
   pointer-events: none;
 }
 
+.tab[data-tab="draws"].has-prize-dot .tab__icon::after,
 .tab[data-tab="prizes"].has-prize-dot .tab__icon::after {
   content: "";
   position: absolute;
@@ -6220,6 +6236,12 @@ button {
   overflow: hidden !important;
 }
 
+.prizes-page.is-partner-reveal {
+  overflow: hidden !important;
+  pointer-events: none;
+  touch-action: none;
+}
+
 .raffle-buy-sheet .result-sheet__panel {
   height: auto;
   max-height: calc(100% - 108px);
@@ -6454,8 +6476,8 @@ button {
 
 .raffle-buy-sheet__hint-icon {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
   filter: brightness(0) invert(1);
   pointer-events: none;
@@ -6469,7 +6491,7 @@ button {
 
 .raffle-buy-sheet__hint-text {
   font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 400;
   line-height: 22px;
   color: #ffffff;
@@ -6489,7 +6511,7 @@ button {
   align-items: center;
   justify-content: space-between;
   height: 56px;
-  margin-top: 20px;
+  margin-top: 32px;
   padding: 6px 6px 6px 16px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.1);
@@ -6622,7 +6644,7 @@ button {
   gap: 4px;
   width: 100%;
   height: 56px;
-  margin-top: 20px;
+  margin-top: 32px;
   padding: 0 16px;
   border: none;
   border-radius: 16px;
