@@ -1081,7 +1081,7 @@ button {
 }
 
 .raffle-draw-card__title {
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   color: #f6f7f8;
   font-weight: 400;
   display: -webkit-box;
@@ -1096,6 +1096,7 @@ button {
   gap: 1px;
   margin-top: 4px;
   color: #f6f7f8;
+  font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -1110,7 +1111,7 @@ button {
 }
 
 .raffle-draw-card__desc {
-  margin-top: 6px;
+  margin-top: 4px;
   color: #9299a2;
   font-weight: 400;
   white-space: nowrap;
